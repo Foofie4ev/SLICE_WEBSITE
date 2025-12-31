@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SLICE: The Tennis Card Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- jQuery (required for Mailchimp validation) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- GSAP Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Config provided by environment
+        const firebaseConfig = (typeof __firebase_config !== 'undefined') ? JSON.parse(__firebase_config) : {};
+        
+        let db; 
+        let auth;
+        
+        // Initialize Firebase
+        if (typeof __firebase_config !== 'undefined') {
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                
+                // Authenticate
+                const initAuth = async () => {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        try {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } catch (e) {
+                            console.warn("Custom token failed, falling back to anon:", e);
+                            await signInAnonymously(auth);
+                        }
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                };
+                initAuth().catch(console.error);
+
+            } catch (err) {
+                console.error("Firebase init failed:", err);
+            }
+        }
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'slice-game';
+
+        // Expose function to window for the form to use
+        window.joinWaitlist = async function(event) {
+            event.preventDefault();
+            const emailInput = document.getElementById('email-input');
+            const submitBtn = document.getElementById('submit-btn');
+            const email = emailInput.value;
+
+            if (!email) return;
+
+            // UI Feedback - Loading
+            const originalBtnText = submitBtn.innerText;
+            submitBtn.innerText = "JOINING...";
+            submitBtn.disabled = true;
+
+            try {
+                if (!db || !auth || !auth.currentUser) {
+                    console.warn("Database not initialized or user not auth. Mocking success for preview.");
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                } else {
+                    // Save to Firestore
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'waitlist'), {
+                        email: email,
+                        timestamp: serverTimestamp(),
+                        uid: auth.currentUser.uid
+                    });
+                }
+
+                // Success State
+                submitBtn.innerText = "YOU'RE IN! 🎾";
+                submitBtn.classList.remove('bg-lime-500', 'hover:bg-lime-400', 'text-black');
+                submitBtn.classList.add('bg-green-600', 'text-white');
+                emailInput.value = "";
+                
+                // Reset after 3 seconds
+                setTimeout(() => {
+                    submitBtn.innerText = originalBtnText;
+                    submitBtn.disabled = false;
+                    submitBtn.classList.add('bg-lime-500', 'hover:bg-lime-400', 'text-black');
+                    submitBtn.classList.remove('bg-green-600', 'text-white');
+                }, 3000);
+            } catch (e) {
+                console.error("Error adding document: ", e);
+                submitBtn.innerText = "ERROR 😕";
+                setTimeout(() => {
+                    submitBtn.innerText = originalBtnText;
+                    submitBtn.disabled = false;
+                }, 2000);
+            }
+        }
+    </script>
+    
+    <style>
+        /* Custom Font Setup */
+        .font-comic { font-family: 'Bangers', cursive; letter-spacing: 0.05em; }
+        .font-body { font-family: 'Montserrat', sans-serif; }
+
+        /* The "Hyper-Juicy" Background Animation */
+        .juice-bg {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .juice-blob {
+            position: absolute;
+            filter: blur(80px);
+            opacity: 0.6;
+            animation: float 10s infinite ease-in-out alternate;
+        }
+        /* Responsive Blob Sizes */
+        .blob-lime { background: #84cc16; width: 300px; height: 300px; top: -50px; left: -50px; animation-delay: 0s; }
+        .blob-lemon { background: #facc15; width: 250px; height: 250px; bottom: 20%; right: -20px; animation-delay: 2s; }
+        .blob-grape { background: #9333ea; width: 200px; height: 200px; top: 40%; left: 10%; animation-delay: 4s; }
+        .blob-pink { background: #ec4899; width: 280px; height: 280px; bottom: -50px; left: 10%; animation-delay: 1s; }
+        .blob-orange { background: #f97316; width: 280px; height: 280px; top: -50px; right: -20px; animation-delay: 3s; }
+
+        @media (min-width: 768px) {
+            .blob-lime { width: 500px; height: 500px; top: -100px; left: -100px; }
+            .blob-lemon { width: 400px; height: 400px; bottom: 20%; right: -50px; }
+            .blob-grape { width: 300px; height: 300px; top: 40%; left: 30%; }
+            .blob-pink { width: 450px; height: 450px; bottom: -100px; left: 10%; }
+            .blob-orange { width: 500px; height: 500px; top: -100px; right: 0; }
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(30px, 50px) rotate(10deg); }
+        }
+
+        /* 3D Card Flip & Rotate Animation */
+        .card-scene {
+            perspective: 1000px;
+            width: 240px; 
+            height: 380px; 
+            flex-shrink: 0; 
+            margin-right: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+        @media (min-width: 768px) {
+            .card-scene { width: 315px; height: 495px; margin-right: 4rem; }
+        }
+        
+        /* Carousel control buttons - always on top */
+        #scroll-left, #scroll-right {
+            position: absolute !important;
+            z-index: 9999 !important;
+            pointer-events: auto !important;
+            isolation: isolate;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            animation: slowSpin 8s infinite linear;
+            cursor: grab; 
+            transition: transform 0.3s;
+        }
+        
+        .card-inner:active {
+            cursor: grabbing;
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+
+        .card-face img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scale(1.03);
+            pointer-events: none; 
+        }
+
+        .card-front { background: #222; }
+
+        .card-back {
+            transform: rotateY(180deg);
+            background-color: #333;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: 103%; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-scene:nth-child(odd) .card-back { background-image: url('GREEN_CARD_BACK.png'); }
+        .card-scene:nth-child(even) .card-back { background-image: url('ORANGE_CARD_BACK.png'); }
+        
+        .card-back::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.1);
+            border-radius: 1.5rem;
+        }
+        
+        @keyframes slowSpin {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
+        }
+        
+        /* --- NEW HERO 3D CARD STYLES --- */
+        .hero-card-scene { perspective: 1000px; }
+        .hero-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+        }
+        .hero-card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 0.75rem; 
+            overflow: hidden;
+        }
+        .hero-card-face img { transform: scale(1.03); }
+        .hero-card-front { transform: rotateY(0deg); }
+        .hero-card-back {
+            transform: rotateY(180deg);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* 3D Rotating Logo Animation with Glow */
+        .hero-logo-container {
+            animation: rotate3DLogo 8s ease-in-out infinite;
+            transform-style: preserve-3d;
+        }
+        
+        .hero-logo-container img {
+            filter: drop-shadow(0 0 20px rgba(132, 204, 22, 0.6));
+        }
+
+        @keyframes rotate3DLogo {
+            0% { 
+                transform: perspective(1000px) rotateY(0deg) rotateX(0deg) translateY(0px); 
+            }
+            25% { 
+                transform: perspective(1000px) rotateY(15deg) rotateX(5deg) translateY(-10px); 
+            }
+            50% { 
+                transform: perspective(1000px) rotateY(0deg) rotateX(0deg) translateY(-15px); 
+            }
+            75% { 
+                transform: perspective(1000px) rotateY(-15deg) rotateX(-5deg) translateY(-10px); 
+            }
+            100% { 
+                transform: perspective(1000px) rotateY(0deg) rotateX(0deg) translateY(0px); 
+            }
+        }
+
+        /* 3D SOLID DICE STYLES */
+        .dice-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100px; 
+        }
+        @media (min-width: 768px) { .dice-wrapper { width: 120px; } }
+        
+        .dice-container {
+            width: 60px;
+            height: 60px;
+            perspective: 800px;
+            cursor: grab;
+            margin-bottom: 1.5rem; 
+            touch-action: none;
+        }
+        .dice-container:active { cursor: grabbing; }
+        .dice {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+        
+        .dice.dice-green { --dice-color: #55bd28; }
+        .dice.dice-orange { --dice-color: #f26522; }
+        .dice.dice-yellow { --dice-color: #fff200; }
+        .dice.dice-purple { --dice-color: #8b1ebd; }
+
+        .dice-face {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background-color: var(--dice-color);
+            border: 1px solid rgba(0,0,0,0.3); 
+            border-radius: 4px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            overflow: hidden;
+            backface-visibility: hidden; 
+            box-shadow: inset 0 0 12px rgba(0,0,0,0.15), inset 0 0 2px rgba(255,255,255,0.3);
+            color: black;
+            font-family: 'Bangers', cursive;
+            font-size: 1.5rem;
+        }
+        
+        .dice-core {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background-color: var(--dice-color);
+            transform: translateZ(0);
+            transform-style: preserve-3d; 
+            pointer-events: none;
+        }
+        .dice-core::before, .dice-core::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: var(--dice-color);
+            top: 0;
+            left: 0;
+        }
+        .dice-core::before { transform: rotateX(90deg); }
+        .dice-core::after { transform: rotateY(90deg); }
+
+        .dice-face img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scale(1.05); 
+            pointer-events: none; 
+        }
+        
+        .face-front  { transform: rotateY(0deg) translateZ(30px); }
+        .face-back   { transform: rotateY(180deg) translateZ(30px); }
+        .face-right  { transform: rotateY(90deg) translateZ(30px); }
+        .face-left   { transform: rotateY(-90deg) translateZ(30px); }
+        .face-top    { transform: rotateX(90deg) translateZ(30px); }
+        .face-bottom { transform: rotateX(-90deg) translateZ(30px); }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .glow-text { text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+        .net-pattern {
+            background-image: linear-gradient(#ffffff10 1px, transparent 1px), linear-gradient(90deg, #ffffff10 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .carousel-viewport {
+            overflow: hidden;
+            cursor: grab;
+            width: 100%;
+            position: relative;
+        }
+        .carousel-viewport:active { cursor: grabbing; }
+        .horizontal-track { display: flex; width: max-content; }
+
+        #video-modal { transition: opacity 0.3s ease; }
+        #video-modal.hidden { opacity: 0; pointer-events: none; }
+        #video-modal:not(.hidden) { opacity: 1; pointer-events: auto; }
+        
+        .navbar-logo { height: 32px; width: auto; object-fit: contain; }
+        @media (min-width: 768px) { .navbar-logo { height: 40px; } }
+
+        #tilt-card { perspective: 1500px; transform-style: preserve-3d; }
+        #tilt-inner { transition: transform 0.1s ease-out; transform-style: preserve-3d; transform: translateZ(0); }
+        #tilt-shine {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0) 100%);
+            pointer-events: none;
+            z-index: 20;
+            -webkit-mask-image: url('COMPONENTS%20LOGO.png');
+            mask-image: url('COMPONENTS%20LOGO.png');
+            -webkit-mask-size: contain;
+            mask-size: contain;
+            -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+            -webkit-mask-position: center;
+            mask-position: center;
+        }
+    </style>
+</head>
+<body class="bg-neutral-900 text-white font-body overflow-x-hidden selection:bg-lime-500 selection:text-black">
+
+    <div id="video-modal" class="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl hidden flex items-center justify-center p-4">
+        <div class="relative w-full max-w-5xl aspect-video bg-black rounded-xl overflow-hidden border border-white/20 shadow-2xl">
+            <button onclick="document.getElementById('video-modal').classList.add('hidden')" class="absolute top-4 right-4 z-10 text-white hover:text-lime-400">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <iframe class="w-full h-full" src="https://www.youtube.com/embed/dQw4w9WgXcQ?si=IsJq1Y5TzL9jG_1I" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <div id="flying-balls-container" class="fixed inset-0 w-full h-full pointer-events-none z-[5] overflow-hidden"></div>
+
+    <div class="fixed inset-0 z-0 pointer-events-none">
+        <div class="juice-blob blob-lime"></div>
+        <div class="juice-blob blob-lemon"></div>
+        <div class="juice-blob blob-grape"></div>
+        <div class="juice-blob blob-pink"></div>
+        <div class="juice-blob blob-orange"></div>
+        <div class="absolute inset-0 net-pattern opacity-30"></div>
+    </div>
+
+
+    <nav class="fixed w-full z-50 top-0 transition-all duration-300 bg-black/95" id="navbar" style="backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);">
+        <div class="container mx-auto px-4 md:px-6 py-1.5 md:py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <span class="font-comic text-lg md:text-2xl tracking-wider text-white glow-text whitespace-nowrap">SLICE! - THE TENNIS CARD GAME</span>
+            </div>
+            <div class="hidden md:flex gap-8 font-bold uppercase text-sm tracking-widest">
+                <a href="#gameplay" class="hover:text-lime-400 transition-colors">Gameplay</a>
+                <a href="#cards" class="hover:text-lime-400 transition-colors">The Deck</a>
+                <a href="#rules" class="hover:text-lime-400 transition-colors">Rules</a>
+            </div>
+            
+            <!-- Mobile Menu Button -->
+            <button id="mobile-menu-btn" class="md:hidden text-white p-2" onclick="toggleMobileMenu()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+            
+            <button onclick="document.getElementById('footer-waitlist').scrollIntoView({behavior: 'smooth'})" class="hidden md:block bg-lime-500 hover:bg-lime-400 text-black font-comic text-xl px-4 md:px-6 py-2 rounded-full transform hover:scale-105 transition-all shadow-[0_0_15px_rgba(132,204,22,0.5)] whitespace-nowrap">
+                Join the Team
+            </button>
+        </div>
+        
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden bg-black/95 backdrop-blur-md border-t border-white/10">
+            <div class="container mx-auto px-4 py-4 flex flex-col gap-3">
+                <a href="#gameplay" onclick="toggleMobileMenu()" class="font-bold uppercase text-sm tracking-widest hover:text-lime-400 transition-colors py-2">Gameplay</a>
+                <a href="#cards" onclick="toggleMobileMenu()" class="font-bold uppercase text-sm tracking-widest hover:text-lime-400 transition-colors py-2">The Deck</a>
+                <a href="#rules" onclick="toggleMobileMenu()" class="font-bold uppercase text-sm tracking-widest hover:text-lime-400 transition-colors py-2">Rules</a>
+            </div>
+        </div>
+    </nav>
+
+
+    <!-- Hero Section -->
+    <!-- Properly spaced hero section for mobile with vertical flow -->
+    <header class="relative z-10 min-h-screen flex flex-col justify-start items-center text-center px-4 pt-12 md:pt-0 md:justify-center overflow-visible">
+        
+        <!-- INTRO CARD ANIMATION CONTAINER -->
+        <div class="absolute inset-0 w-full h-full pointer-events-none z-[2] overflow-hidden">
+             <!-- Green Card: Evenly spaced between logo and text -->
+             <div id="intro-card-green" class="hero-card-scene absolute w-[88px] h-[140px] md:w-44 md:h-[280px] opacity-0 z-10" style="left: -300px; top: 40%;">
+                <div class="hero-card-inner">
+                    <div class="hero-card-face hero-card-front drop-shadow-[0_0_20px_rgba(132,204,22,0.5)]">
+                        <img id="green-card-img" src="BACKHAND_TOPSPIN.png" class="w-full h-full object-cover">
+                    </div>
+                    <div class="hero-card-face hero-card-back drop-shadow-[0_0_20px_rgba(132,204,22,0.5)]" style="background-image: url('GREEN_CARD_BACK.png');"></div>
+                </div>
+             </div>
+
+             <!-- Orange Card: Evenly spaced between logo and text -->
+             <div id="intro-card-orange" class="hero-card-scene absolute w-[88px] h-[140px] md:w-44 md:h-[280px] opacity-0 z-10" style="right: -300px; top: 40%;">
+                <div class="hero-card-inner">
+                    <div class="hero-card-face hero-card-front drop-shadow-[0_0_20px_rgba(249,115,22,0.5)]">
+                         <img id="orange-card-img" src="FOREHAND_TOPSPIN.png" class="w-full h-full object-cover">
+                    </div>
+                    <div class="hero-card-face hero-card-back drop-shadow-[0_0_20px_rgba(249,115,22,0.5)]" style="background-image: url('ORANGE_CARD_BACK.png');"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logo Container: 3D rotating animation, 5% larger -->
+        <div class="hero-logo-container relative mb-2 md:mt-0 md:mb-0" style="z-index: 100; isolation: isolate; will-change: transform;">
+             <img src="SLICE_LOGO.png" alt="SLICE Logo" class="w-[277px] md:w-[450px] lg:w-[600px] object-contain" onerror="this.src='https://placehold.co/600x200/transparent/84cc16?text=SLICE+LOGO';">
+        </div>
+        
+        <!-- Card Animation Space - gives room for the cards -->
+        <div class="h-[135px] md:h-0 relative z-[1]"></div>
+        
+        <!-- Text and Buttons Container -->
+        <div class="flex flex-col items-center gap-0.5 w-full relative z-10">
+            <!-- Main Text: TWIST italicized -->
+            <h1 class="font-comic text-3xl md:text-4xl lg:text-6xl mb-0 md:-mt-28 text-transparent bg-clip-text bg-gradient-to-r from-lime-400 via-yellow-300 to-lime-400 glow-text leading-tight px-4 overflow-visible">
+                TENNIS WITH A <span class="italic inline-block" style="padding-right: 12px;">TWIST!</span>
+            </h1>
+            
+            <!-- Description Text -->
+            <p class="font-bold text-xs md:text-lg text-gray-200 max-w-[92%] md:max-w-2xl mx-auto mb-0 md:mb-4 leading-tight text-center">
+                The card game that blends <span class="block">a Tennis match into a fresh</span> <span class="text-lime-400 italic text-sm md:text-xl">simple yet strategic card game!</span>
+                <span class="block text-white mt-0.5">Serve it! Slice it! Spin it! Dice it! Win it!</span>
+            </p>
+            
+            <div class="flex flex-col md:flex-row gap-2 w-full md:w-auto px-4 pb-2 md:pb-24 mt-2">
+                <button onclick="document.getElementById('footer-waitlist').scrollIntoView({behavior: 'smooth'})" class="bg-gradient-to-r from-lime-500 to-lime-600 text-black font-comic text-sm md:text-xl px-6 py-2 md:px-7 md:py-3 rounded-full shadow-lg hover:shadow-[0_0_30px_rgba(132,204,22,0.6)] transform hover:-translate-y-1 transition-all border-2 border-white/20">
+                    Join the Team
+                </button>
+                <button onclick="document.getElementById('video-modal').classList.remove('hidden')" class="bg-black/40 backdrop-blur-md border-2 border-white/20 text-white font-comic text-sm md:text-xl px-6 py-2 md:px-7 md:py-3 rounded-full hover:bg-white/10 transition-all flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4 md:w-6 md:h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg>
+                    Watch Trailer
+                </button>
+            </div>
+        </div>
+        
+        <div class="absolute bottom-4 md:bottom-10 animate-bounce cursor-pointer z-10" onclick="document.getElementById('gameplay').scrollIntoView({behavior: 'smooth'})">
+             <svg class="w-6 h-6 md:w-8 md:h-8 text-lime-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+        </div>
+    </header>
+
+    <section id="gameplay" class="relative z-10 py-12 md:py-20 bg-black/30 backdrop-blur-sm border-y border-white/5">
+        <div class="container mx-auto px-6">
+            <h2 class="font-comic text-4xl md:text-6xl mb-8 md:mb-12 text-center text-white">GAMEPLAY</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-8 text-center">
+                <div class="p-6 rounded-2xl bg-gradient-to-br from-white/5 to-transparent border border-white/10 hover:border-orange-500/50 transition-all group">
+                    <div class="w-16 h-16 mx-auto bg-orange-500/20 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <svg class="w-8 h-8 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <h3 class="font-comic text-2xl md:text-3xl mb-2 text-orange-400">Fast Paced</h3>
+                    <p class="text-gray-400">Rallies move fast! With the unique "Slice" mechanic, momentum can shift in a single card drop!</p>
+                </div>
+                <div class="p-6 rounded-2xl bg-gradient-to-br from-white/5 to-transparent border border-white/10 hover:border-pink-500/50 transition-all group">
+                    <div class="w-16 h-16 mx-auto bg-pink-500/20 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                         <svg class="w-8 h-8 text-pink-400" fill="currentColor" viewBox="0 0 24 24"><path d="M5 3a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2H5zm7 4a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm-5 5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm10 0a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm-5 5a1.5 1.5 0 110 3 1.5 1.5 0 010-3z"/></svg>
+                    </div>
+                    <h3 class="font-comic text-2xl md:text-3xl mb-2 text-pink-400">Risk & Reward</h3>
+                    <p class="text-gray-400" style="text-wrap: balance;">Roll the dice on a Volley or Drop Shot! Will you hit a winner or dump it into the net?!</p>
+                </div>
+                <div class="p-6 rounded-2xl bg-gradient-to-br from-white/5 to-transparent border border-white/10 hover:border-lime-500/50 transition-all group">
+                    <div class="w-16 h-16 mx-auto bg-lime-500/20 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                         <svg class="w-8 h-8 text-lime-400" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M7 8 Q12 12 7 16 M17 8 Q12 12 17 16" stroke="white" stroke-width="1.5" fill="none"/></svg>
+                    </div>
+                    <h3 class="font-comic text-2xl md:text-3xl mb-2 text-lime-400">Real Tactics</h3>
+                    <p class="text-gray-400">Cross-court, down-the-line, Lobs, and Smashes. It's a simulation hidden inside a fast paced card game!</p>
+                </div>
+                <div class="p-6 rounded-2xl bg-gradient-to-br from-white/5 to-transparent border border-white/10 hover:border-yellow-500/50 transition-all group">
+                    <div class="w-16 h-16 mx-auto bg-yellow-500/20 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                         <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    </div>
+                    <h3 class="font-comic text-2xl md:text-3xl mb-2 text-yellow-400">Singles & Doubles</h3>
+                    <p class="text-gray-400">Play head-to-head in intense 1v1 matches or team up for strategic 2v2 doubles action!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="cards" class="relative z-20 bg-gradient-to-b from-transparent to-black/50 overflow-visible pb-12 md:pb-24">
+        <div class="container mx-auto px-6 py-10 text-center">
+            <h2 class="font-comic text-4xl md:text-6xl mb-4 text-white">YOUR TENNIS BAG</h2>
+            <p class="text-gray-400 max-w-xl mx-auto">Swipe to inspect the deck.</p>
+        </div>
+
+        <div class="relative">
+            <button id="scroll-left" class="absolute left-4 md:left-10 z-[100] bg-black/50 text-white p-2 md:p-4 rounded-full backdrop-blur-sm border-2 border-white/20 transition-all duration-300 hover:scale-110 shadow-[0_0_15px_rgba(0,0,0,0.5)] flex items-center justify-center pointer-events-auto" style="top: 50%; transform: translateY(-50%);">
+                <svg class="w-5 h-5 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+            <button id="scroll-right" class="absolute right-4 md:right-10 z-[100] bg-black/50 text-white p-2 md:p-4 rounded-full backdrop-blur-sm border-2 border-white/20 transition-all duration-300 hover:scale-110 shadow-[0_0_15px_rgba(0,0,0,0.5)] flex items-center justify-center pointer-events-auto" style="top: 50%; transform: translateY(-50%);">
+                <svg class="w-5 h-5 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+            <div class="carousel-viewport h-[500px] md:h-[600px] flex items-center relative group" id="dragContainer">
+                <div class="horizontal-track px-8 md:px-20">
+                <div class="card-scene"><div class="card-inner" style="animation-delay: 0s;"><div class="card-face card-front"><img src="FOREHAND_TOPSPIN.png" alt="Forehand" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/315x495/black/84cc16?text=FOREHAND\nTOPSPIN';"></div><div class="card-face card-back"></div></div></div>
+                <div class="card-scene"><div class="card-inner" style="animation-delay: -1.5s;"><div class="card-face card-front"><img src="FOREHAND_SLICE.png" alt="Forehand Slice" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/315x495/black/f26522?text=FOREHAND\nSLICE';"></div><div class="card-face card-back"></div></div></div>
+                <div class="card-scene"><div class="card-inner" style="animation-delay: -3s;"><div class="card-face card-front"><img src="BACKHAND_TOPSPIN.png" alt="Backhand Topspin" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/315x495/black/84cc16?text=BACKHAND\nTOPSPIN';"></div><div class="card-face card-back"></div></div></div>
+                <div class="card-scene"><div class="card-inner" style="animation-delay: -4.5s;"><div class="card-face card-front"><img src="BACKHAND_SLICE.png" alt="Backhand Slice" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/315x495/black/f26522?text=BACKHAND\nSLICE';"></div><div class="card-face card-back"></div></div></div>
+                <div class="card-scene"><div class="card-inner" style="animation-delay: -6s;"><div class="card-face card-front"><img src="VOLLEY.png" alt="Volley" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/315x495/black/84cc16?text=VOLLEY';"></div><div class="card-face card-back"></div></div></div>
+                <div class="card-scene"><div class="card-inner" style="animation-delay: -7.5s;"><div class="card-face card-front"><img src="DROP_SHOT.png" alt="Drop Shot" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/315x495/black/f26522?text=DROP\nSHOT';"></div><div class="card-face card-back"></div></div></div>
+                <div class="card-scene"><div class="card-inner" style="animation-delay: -9s;"><div class="card-face card-front"><img src="LOB.png" alt="Lob" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/315x495/black/84cc16?text=LOB';"></div><div class="card-face card-back"></div></div></div>
+                <div class="card-scene"><div class="card-inner" style="animation-delay: -10.5s;"><div class="card-face card-front"><img src="SMASH.png" alt="Smash" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/315x495/black/f26522?text=SMASH';"></div><div class="card-face card-back"></div></div></div>
+                <div class="card-scene"><div class="card-inner" style="animation-delay: -12s;"><div class="card-face card-front"><img src="WINNER.png" alt="Winner" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/315x495/black/84cc16?text=WINNER';"></div><div class="card-face card-back"></div></div></div>
+                <div class="card-scene"><div class="card-inner" style="animation-delay: -13.5s;"><div class="card-face card-front"><img src="GOOD_GET.png" alt="Good Get" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/315x495/black/f26522?text=GOOD\nGET';"></div><div class="card-face card-back"></div></div></div>
+                <div class="card-scene"><div class="card-inner" style="animation-delay: -15s;"><div class="card-face card-front"><img src="SOFT_TOUCH.png" alt="Soft Touch" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/315x495/black/84cc16?text=SOFT\nTOUCH';"></div><div class="card-face card-back"></div></div></div>
+                <div class="card-scene"><div class="card-inner" style="animation-delay: -16.5s;"><div class="card-face card-front"><img src="ERROR.png" alt="Error" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/315x495/black/f26522?text=ERROR';"></div><div class="card-face card-back"></div></div></div>
+                <div class="card-scene"><div class="card-inner" style="animation-delay: -18s;"><div class="card-face card-front"><img src="EXTRA_SPIN.png" alt="Extra Spin" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/315x495/black/84cc16?text=EXTRA\nSPIN';"></div><div class="card-face card-back"></div></div></div>
+            </div>
+        </div>
+        </div>
+    </section>
+
+    <section id="rules" class="relative z-10 py-12 pb-24 md:py-24 bg-neutral-900/80 border-t border-white/10">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-16">
+                <div class="w-full md:w-1/2 space-y-5 md:space-y-6">
+                    <h2 class="font-comic text-4xl md:text-6xl mb-4 text-center md:text-left">THE RECIPE FOR <br class="md:hidden"><span class="text-lime-400">VICTORY!</span></h2>
+                    
+                    <div class="flex gap-4 items-start p-4 -mx-4 rounded-2xl border border-transparent hover:border-lime-500/30 hover:bg-white/5 active:border-lime-500/30 active:bg-white/5 active:scale-[1.02] active:shadow-[0_0_20px_rgba(132,204,22,0.1)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(132,204,22,0.1)] group">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-lime-500 text-black font-comic text-2xl md:text-3xl flex items-center justify-center shrink-0">1</div>
+                        <div class="w-full">
+                            <h3 class="font-bold text-lg md:text-xl text-white mb-1">Served Fresh!</h3>
+                            <p class="text-sm md:text-base text-gray-400 mb-2">Start the point by rolling the Serve Dice. Your roll sets the initial Pace Value.</p>
+                            <div class="flex flex-wrap gap-4 md:gap-8 justify-start mt-10">
+                                <div class="dice-wrapper">
+                                    <div class="dice-container">
+                                        <div class="dice dice-interactive dice-green" id="dice1">
+                                            <div class="dice-core"></div>
+                                            <div class="dice-face face-front"><img src="1stServe_6.png" alt="6" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-back"><img src="1stServe_3.png" alt="3" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-right"><img src="1stServe_5.png" alt="5" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-left"><img src="1stServe_4.png" alt="4" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-top"><img src="1stServe_FAULT!.png" alt="Fault" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-bottom"><img src="1stServe_LET!.png" alt="Let" onerror="this.style.display='none';"></div>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs md:text-sm text-lime-400 font-comic text-center uppercase">1st Serve</p>
+                                </div>
+                                <div class="dice-wrapper">
+                                    <div class="dice-container">
+                                        <div class="dice dice-interactive dice-orange" id="dice2">
+                                            <div class="dice-core"></div>
+                                            <div class="dice-face face-front"><img src="2ndServe_1.png" alt="1" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-back"><img src="2ndServe_2.png" alt="2" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-right"><img src="2ndServe_3.png" alt="3" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-left"><img src="2ndServe_4.png" alt="4" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-top"><img src="2ndServe_FAULT!.png" alt="Fault" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-bottom"><img src="2ndServe_LET!.png" alt="Let" onerror="this.style.display='none';"></div>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs md:text-sm text-orange-400 font-comic text-center uppercase">2nd Serve</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-4 items-start p-4 -mx-4 rounded-2xl border border-transparent hover:border-orange-500/30 hover:bg-white/5 active:border-orange-500/30 active:bg-white/5 active:scale-[1.02] active:shadow-[0_0_20px_rgba(249,115,22,0.1)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(249,115,22,0.1)] group">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-orange-500 text-black font-comic text-2xl md:text-3xl flex items-center justify-center shrink-0">2</div>
+                        <div>
+                            <h3 class="font-bold text-lg md:text-xl text-white mb-1">Delicious Rallies!</h3>
+                            <p class="text-sm md:text-base text-gray-400">Play <span class="text-lime-400 font-bold">Cross-Court</span> (same Shot Type, higher Pace) or <span class="text-orange-400 font-bold">Down-the-Line</span> (switch Shot Type, equal Pace).</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 items-start p-4 -mx-4 rounded-2xl border border-transparent hover:border-yellow-400/30 hover:bg-white/5 active:border-yellow-400/30 active:bg-white/5 active:scale-[1.02] active:shadow-[0_0_20px_rgba(250,204,21,0.1)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(250,204,21,0.1)] group">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-yellow-400 text-black font-comic text-2xl md:text-3xl flex items-center justify-center shrink-0">3</div>
+                        <div>
+                            <h3 class="font-bold text-lg md:text-xl text-white mb-1">Slice It Up!</h3>
+                            <p class="text-sm md:text-base text-gray-400">Play a SLICE card to reverse the momentum. Opponent must play a LOWER Pace card. It's a rhythm breaker!</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 items-start p-4 -mx-4 rounded-2xl border border-transparent hover:border-purple-500/30 hover:bg-white/5 active:border-purple-500/30 active:bg-white/5 active:scale-[1.02] active:shadow-[0_0_20px_rgba(168,85,247,0.1)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(168,85,247,0.1)] group">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-purple-500 text-black font-comic text-2xl md:text-3xl flex items-center justify-center shrink-0">4</div>
+                        <div class="w-full">
+                            <h3 class="font-bold text-lg md:text-xl text-white mb-1">Risk it All!</h3>
+                            <p class="text-sm md:text-base text-gray-400 mb-2">Attack the net with a risky Volley or Drop-Shot card and roll the dice for your Pace, just don't hit it out!</p>
+                            <div class="flex flex-wrap gap-4 md:gap-8 justify-start mt-10">
+                                <div class="dice-wrapper">
+                                    <div class="dice-container">
+                                        <div class="dice dice-interactive dice-yellow" id="dice3">
+                                            <div class="dice-core"></div>
+                                            <div class="dice-face face-front"><img src="DROP_SHOT_1.png" alt="1" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-back"><img src="DROP_SHOT_2.png" alt="2" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-right"><img src="DROP_SHOT_NET!.png" alt="Net" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-left"><img src="DROP_SHOT_OUT!.png" alt="Out" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-top"><img src="DROP_SHOT_1.png" alt="1" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-bottom"><img src="DROP_SHOT_2.png" alt="2" onerror="this.style.display='none';"></div>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs md:text-sm text-yellow-400 font-comic text-center uppercase">Drop-Shot</p>
+                                </div>
+                                <div class="dice-wrapper">
+                                    <div class="dice-container">
+                                        <div class="dice dice-interactive dice-purple" id="dice4">
+                                            <div class="dice-core"></div>
+                                            <div class="dice-face face-front"><img src="VOLLEY_6.png" alt="6" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-back"><img src="VOLLEY_7!.png" alt="7" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-right"><img src="VOLLEY_NET!.png" alt="Net" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-left"><img src="VOLLEY_OUT!.png" alt="Out" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-top"><img src="VOLLEY_6.png" alt="6" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-bottom"><img src="VOLLEY_7!.png" alt="7" onerror="this.style.display='none';"></div>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs md:text-sm text-purple-400 font-comic text-center uppercase">Volley</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 items-start p-4 -mx-4 rounded-2xl border border-transparent hover:border-red-500/30 hover:bg-white/5 active:border-red-500/30 active:bg-white/5 active:scale-[1.02] active:shadow-[0_0_20px_rgba(239,68,68,0.1)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(239,68,68,0.1)] group">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-red-500 text-black font-comic text-2xl md:text-3xl flex items-center justify-center shrink-0">5</div>
+                        <div>
+                            <h3 class="font-bold text-lg md:text-xl text-white mb-1">Smash it Down!</h3>
+                            <p class="text-sm md:text-base text-gray-400">Punish a weak shot with a Smash card or defend against an aggressive attack with a Lob card.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 items-start p-4 -mx-4 rounded-2xl border border-transparent hover:border-pink-500/30 hover:bg-white/5 active:border-pink-500/30 active:bg-white/5 active:scale-[1.02] active:shadow-[0_0_20px_rgba(236,72,153,0.1)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(236,72,153,0.1)] group">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-pink-500 text-black font-comic text-2xl md:text-3xl flex items-center justify-center shrink-0">6</div>
+                        <div>
+                            <h3 class="font-bold text-lg md:text-xl text-white mb-1">Highs and Lows!</h3>
+                            <p class="text-sm md:text-base text-gray-400">Play a Winner to win a critical rally and avoid playing Error cards during big match moments!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full md:w-1/2 relative mt-0 md:mt-0 flex justify-center items-center md:sticky md:top-24 md:-mt-16 self-center md:self-start">
+                    <div id="tilt-card" class="relative w-full md:w-full aspect-square cursor-pointer group">
+                        <div id="tilt-inner" class="relative w-full h-full">
+                             <img src="COMPONENTS LOGO.png" onerror="this.onerror=null;this.src='https://placehold.co/800x800/222/84cc16?text=3D+GAME+BOX+MOCKUP';" class="w-full h-full object-contain drop-shadow-[0_50px_70px_rgba(0,0,0,0.7)] scale-150" alt="SLICE Components">
+                            <div id="tilt-shine"></div>
+                            <div class="absolute bottom-[-8%] left-[30%] -translate-x-0 md:left-auto md:translate-x-0 md:bottom-[0.5%] md:right-[21.5%] bg-neutral-900 px-3 py-2 md:px-4 md:py-3 rounded-lg md:rounded-xl border-2 md:border-4 border-lime-500 shadow-[0_20px_40px_rgba(0,0,0,0.8)] rotate-[1.5deg] md:rotate-[4.5deg] max-w-[160px] md:max-w-[200px] text-left" style="transform: translateZ(50px);">
+                                <p class="font-comic text-sm md:text-base text-lime-400 mb-1 text-center">IN THE BOX:</p>
+                                <ul class="text-xs md:text-sm text-gray-300 list-disc list-inside space-y-0.5">
+                                    <li>Two 70 Card Decks</li>
+                                    <li>4 Custom Dice</li>
+                                    <li>1 Rulebook</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-lime-500/10 blur-3xl -z-10 rounded-full"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Media Section -->
+    <section class="relative z-10 py-16 md:py-20 bg-gradient-to-b from-neutral-900/80 to-neutral-900 border-t border-white/10">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="font-comic text-4xl md:text-5xl mb-4 text-white">STAY IN THE <span class="text-lime-400">GAME!</span></h2>
+            <p class="text-gray-400 text-lg md:text-xl mb-10 max-w-2xl mx-auto">
+                Follow us for updates, behind-the-scenes content, and join our growing community of players!
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-6 justify-center items-center max-w-2xl mx-auto">
+                <!-- Instagram -->
+                <a href="https://www.instagram.com/slice_thetenniscardgame" target="_blank" class="group w-full sm:w-auto bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 hover:from-purple-700 hover:via-pink-600 hover:to-orange-500 text-white font-bold py-5 px-10 rounded-2xl flex items-center justify-center gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-[0_0_30px_rgba(236,72,153,0.6)] border-2 border-white/20">
+                    <svg class="w-8 h-8 md:w-10 md:h-10 group-hover:rotate-12 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                    </svg>
+                    <span class="text-xl md:text-2xl font-comic">Follow on Instagram</span>
+                </a>
+                
+                <!-- Discord -->
+                <a href="https://discord.gg/rs7NV8xy" target="_blank" class="group w-full sm:w-auto bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold py-5 px-10 rounded-2xl flex items-center justify-center gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-[0_0_30px_rgba(88,101,242,0.6)] border-2 border-white/20">
+                    <svg class="w-8 h-8 md:w-10 md:h-10 group-hover:rotate-12 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037 13.496 13.496 0 0 0-2.294 4.463 12.775 12.775 0 0 0-4.447 0 13.487 13.487 0 0 0-2.305-4.462.078.078 0 0 0-.081-.038 19.666 19.666 0 0 0-4.885 1.515.074.074 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.074.074 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.418 2.157-2.418 1.21 0 2.176 1.095 2.157 2.418 0 1.334-.956 2.42-2.157 2.42zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.418 2.157-2.418 1.21 0 2.176 1.095 2.157 2.418 0 1.334-.946 2.42-2.157 2.42z"/>
+                    </svg>
+                    <span class="text-xl md:text-2xl font-comic">Join Discord</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="relative z-10 py-20 bg-neutral-900 border-t border-white/10 text-center overflow-hidden">
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 pointer-events-none"></div>
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="max-w-4xl mx-auto bg-gradient-to-b from-neutral-800 to-neutral-900 rounded-3xl p-8 md:p-12 border border-white/10 shadow-2xl">
+                <span class="text-lime-400 font-comic text-xl uppercase tracking-widest mb-2 block">Digital Prototype</span>
+                <h2 class="font-comic text-4xl md:text-5xl mb-6 text-white">PLAY IT NOW ON TABLETOP SIMULATOR</h2>
+                <p class="text-gray-400 text-lg mb-8 max-w-2xl mx-auto">
+                    Can't wait for the physical release? Jump into the virtual court. We have a fully scripted mod available for free on Steam Workshop.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="#" onclick="showToast('Link to Steam Workshop coming soon!')" class="bg-[#1b2838] hover:bg-[#2a475e] text-white font-bold py-4 px-8 rounded-xl flex items-center justify-center gap-3 transition-all border border-white/10 group">
+                        <svg class="w-8 h-8 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor"><path d="M11.979 0C5.678 0 .511 4.86.022 11.035l6.29 2.594c.57-.467 1.302-.75 2.103-.75.28 0 .55.035.81.1l2.52-3.663C11.65 9.16 11.81 9.12 11.98 9.12c2.58 0 4.67 2.09 4.67 4.67 0 2.58-2.09 4.67-4.67 4.67-2.58 0-4.67-2.09-4.67-4.67 0-.33.04-.65.12-.96L1.17 10.16C2.87 17.92 9.67 23.67 17.84 23.16 24.58 22.74 30 16.76 29.03 9.79 28.35 4.6 24.23.45 19.06.05 16.66-.14 14.26-.16 11.98 0zm0 11.39c1.34 0 2.42 1.08 2.42 2.42 0 1.34-1.08 2.42-2.42 2.42-1.34 0-2.42-1.08-2.42-2.42 0-1.34 1.08-2.42 2.42-2.42z"/></svg>
+                        <span>Get the Mod</span>
+                    </a>
+                    <a href="https://discord.com" target="_blank" class="bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold py-4 px-8 rounded-xl flex items-center justify-center gap-3 transition-all">
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037 13.496 13.496 0 0 0-2.294 4.463 12.775 12.775 0 0 0-4.447 0 13.487 13.487 0 0 0-2.305-4.462.078.078 0 0 0-.081-.038 19.666 19.666 0 0 0-4.885 1.515.074.074 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.074.074 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.418 2.157-2.418 1.21 0 2.176 1.095 2.157 2.418 0 1.334-.956 2.42-2.157 2.42zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.418 2.157-2.418 1.21 0 2.176 1.095 2.157 2.418 0 1.334-.946 2.42-2.157 2.42z"/></svg>
+                        <span>Find Players</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer id="footer-waitlist" class="relative z-10 py-12 md:py-20 bg-neutral-900 border-t border-white/10">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="font-comic text-4xl md:text-5xl mb-6 text-white">JOIN THE <span class="text-lime-400">TEAM!</span></h2>
+            <p class="text-gray-400 text-lg mb-8 max-w-2xl mx-auto">
+                Be the first to know when SLICE drops. Get exclusive updates, behind-the-scenes content, and early access when we launch!
+            </p>
+            
+            <!-- Mailchimp Form Container with Custom Styling -->
+            <div class="mailchimp-wrapper max-w-md mx-auto">
+                <div id="mc_embed_signup">
+                    <form action="https://gmail.us12.list-manage.com/subscribe/post?u=09da8aa663e81dbe6e6b6d27d&amp;id=174a3a8095&amp;f_id=003068e9f0" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank">
+                        <div id="mc_embed_signup_scroll">
+                            <div class="mc-field-group">
+                                <input type="email" name="EMAIL" class="required email" id="mce-EMAIL" required="" value="" placeholder="Enter your email">
+                            </div>
+                            <div id="mce-responses" class="clear foot">
+                                <div class="response" id="mce-error-response" style="display: none;"></div>
+                                <div class="response" id="mce-success-response" style="display: none;"></div>
+                            </div>
+                            <div aria-hidden="true" style="position: absolute; left: -5000px;">
+                                <input type="text" name="b_09da8aa663e81dbe6e6b6d27d_174a3a8095" tabindex="-1" value="">
+                            </div>
+                            <div class="clear foot">
+                                <input type="submit" name="subscribe" id="mc-embedded-subscribe" class="button" value="SIGN UP">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="mt-12 text-gray-500 text-sm">
+                &copy; 2024 SLICE Card Game. All rights reserved.
+            </div>
+        </div>
+    </footer>
+    
+    <style>
+        /* Mailchimp Custom Styling to Match SLICE Website */
+        .mailchimp-wrapper #mc_embed_signup {
+            background: transparent !important;
+            width: 100% !important;
+            clear: none !important;
+            font: inherit !important;
+        }
+        
+        .mailchimp-wrapper #mc_embed_signup form {
+            padding: 0 !important;
+            text-align: center !important;
+        }
+        
+        .mailchimp-wrapper #mc_embed_signup_scroll {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 1rem !important;
+        }
+        
+        @media (min-width: 768px) {
+            .mailchimp-wrapper #mc_embed_signup_scroll {
+                flex-direction: row !important;
+            }
+        }
+        
+        /* Hide labels and unwanted elements */
+        .mailchimp-wrapper .indicates-required,
+        .mailchimp-wrapper label,
+        .mailchimp-wrapper h2 {
+            display: none !important;
+        }
+        
+        .mailchimp-wrapper .mc-field-group {
+            flex: 1 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            min-height: auto !important;
+        }
+        
+        /* Email Input Styling */
+        .mailchimp-wrapper #mce-EMAIL {
+            width: 100% !important;
+            background: rgba(255, 255, 255, 0.1) !important;
+            border: 2px solid rgba(132, 204, 22, 0.4) !important;
+            border-radius: 9999px !important;
+            padding: 1rem 1.5rem !important;
+            color: white !important;
+            font-size: 1.125rem !important;
+            font-family: inherit !important;
+            transition: all 0.3s ease !important;
+            box-sizing: border-box !important;
+            min-width: 280px !important;
+        }
+        
+        .mailchimp-wrapper #mce-EMAIL:focus {
+            outline: none !important;
+            border-color: #84cc16 !important;
+            box-shadow: 0 0 20px rgba(132, 204, 22, 0.3) !important;
+            background: rgba(255, 255, 255, 0.15) !important;
+        }
+        
+        .mailchimp-wrapper #mce-EMAIL::placeholder {
+            color: #9ca3af !important;
+            font-size: 1rem !important;
+        }
+        
+        /* Submit Button Styling */
+        .mailchimp-wrapper #mc-embedded-subscribe {
+            background: linear-gradient(to right, #84cc16, #a3e635) !important;
+            color: black !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif !important;
+            font-weight: 900 !important;
+            font-size: 1.25rem !important;
+            padding: 1rem 2.5rem !important;
+            border-radius: 9999px !important;
+            border: none !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
+            width: 100% !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.08em !important;
+        }
+        
+        @media (min-width: 768px) {
+            .mailchimp-wrapper #mc-embedded-subscribe {
+                width: auto !important;
+            }
+        }
+        
+        .mailchimp-wrapper #mc-embedded-subscribe:hover {
+            background: #a3e635 !important;
+            box-shadow: 0 0 20px rgba(132, 204, 22, 0.6) !important;
+            transform: translateY(-2px) !important;
+        }
+        
+        .mailchimp-wrapper .foot {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        /* Success/Error Messages */
+        .mailchimp-wrapper #mce-success-response {
+            background: rgba(132, 204, 22, 0.2) !important;
+            border: 2px solid #84cc16 !important;
+            border-radius: 12px !important;
+            color: #84cc16 !important;
+            padding: 1rem !important;
+            font-weight: bold !important;
+            margin-top: 1rem !important;
+        }
+        
+        .mailchimp-wrapper #mce-error-response {
+            background: rgba(239, 68, 68, 0.2) !important;
+            border: 2px solid #ef4444 !important;
+            border-radius: 12px !important;
+            color: #ef4444 !important;
+            padding: 1rem !important;
+            margin-top: 1rem !important;
+        }
+        
+        .mailchimp-wrapper .response {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+    </style>
+    
+    <script type="text/javascript" src="//s3.amazonaws.com/downloads.mailchimp.com/js/mc-validate.js"></script>
+    <script type="text/javascript">
+        (function($) {
+            window.fnames = new Array(); 
+            window.ftypes = new Array();
+            fnames[0]='EMAIL';
+            ftypes[0]='email';
+        }(jQuery));
+        var $mcj = jQuery.noConflict(true);
+    </script>
+
+    <script>
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('bg-black/80', 'backdrop-blur-lg', 'shadow-lg');
+            } else {
+                navbar.classList.remove('bg-black/80', 'backdrop-blur-lg', 'shadow-lg');
+            }
+        });
+
+        window.showToast = function(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-lime-500 text-black px-6 py-3 rounded-full font-comic text-xl shadow-lg z-[100] transition-opacity duration-300';
+            toast.innerText = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        gsap.registerPlugin(ScrollTrigger, Draggable);
+        
+        const track = document.querySelector('.horizontal-track');
+        const dragContainer = document.querySelector('#dragContainer');
+        
+        if (track && dragContainer) {
+            const cards = gsap.utils.toArray('.card-scene');
+            const cardWidth = 315 + 64; // card width + gap (4rem = 64px)
+            const totalWidth = cards.length * cardWidth;
+            
+            // Clone cards for seamless loop
+            cards.forEach(card => {
+                const clone = card.cloneNode(true);
+                track.appendChild(clone);
+            });
+            
+            let scrollDirection = -1; // -1 = right to left (default), 1 = left to right
+            let autoScrollTween;
+            const btnLeft = document.getElementById('scroll-left');
+            const btnRight = document.getElementById('scroll-right');
+            
+            function updateButtonStates() {
+                if (!btnLeft || !btnRight) return;
+                
+                // Remove active state from both
+                btnLeft.classList.remove('bg-white/30', 'border-white/60');
+                btnRight.classList.remove('bg-white/30', 'border-white/60');
+                btnLeft.classList.add('bg-black/50', 'border-white/20');
+                btnRight.classList.add('bg-black/50', 'border-white/20');
+                
+                // Highlight the active button with white/transparent
+                if (scrollDirection === -1) {
+                    btnLeft.classList.remove('bg-black/50', 'border-white/20');
+                    btnLeft.classList.add('bg-white/30', 'border-white/60');
+                } else if (scrollDirection === 1) {
+                    btnRight.classList.remove('bg-black/50', 'border-white/20');
+                    btnRight.classList.add('bg-white/30', 'border-white/60');
+                }
+            }
+            
+            function startAutoScroll() {
+                if (autoScrollTween) autoScrollTween.kill();
+                
+                const speed = 40; // seconds per full loop
+                
+                function animate() {
+                    const currentX = gsap.getProperty(track, "x");
+                    
+                    if (scrollDirection === -1) {
+                        // Right to left: continue from current position
+                        const distanceToEnd = currentX % -totalWidth; // How far into current loop
+                        const remainingDistance = -totalWidth - distanceToEnd;
+                        const remainingTime = (Math.abs(remainingDistance) / totalWidth) * speed;
+                        
+                        autoScrollTween = gsap.to(track, {
+                            x: currentX + remainingDistance,
+                            duration: remainingTime,
+                            ease: "none",
+                            onComplete: function() {
+                                gsap.set(track, { x: 0 });
+                                animate();
+                            }
+                        });
+                    } else if (scrollDirection === 1) {
+                        // Left to right: continue from current position
+                        const distanceToStart = currentX % -totalWidth; // How far into current loop
+                        const remainingDistance = -distanceToStart;
+                        const remainingTime = (Math.abs(remainingDistance) / totalWidth) * speed;
+                        
+                        autoScrollTween = gsap.to(track, {
+                            x: currentX + remainingDistance,
+                            duration: remainingTime,
+                            ease: "none",
+                            onComplete: function() {
+                                gsap.set(track, { x: -totalWidth });
+                                animate();
+                            }
+                        });
+                    }
+                }
+                
+                animate();
+                updateButtonStates();
+            }
+            
+            startAutoScroll();
+
+            const draggableInstance = Draggable.create(track, {
+                type: "x",
+                inertia: true,
+                onPress: function() {
+                    if (autoScrollTween) autoScrollTween.kill();
+                    scrollDirection = 0;
+                    updateButtonStates();
+                },
+                onDrag: function() {
+                    const x = this.x;
+                    if (x > 0) {
+                        gsap.set(track, { x: x - totalWidth });
+                        this.update();
+                    } else if (x < -totalWidth) {
+                        gsap.set(track, { x: x + totalWidth });
+                        this.update();
+                    }
+                }
+            })[0];
+
+            if (btnLeft && btnRight) {
+                btnLeft.addEventListener('click', () => {
+                    scrollDirection = -1;
+                    startAutoScroll();
+                });
+                btnRight.addEventListener('click', () => {
+                    scrollDirection = 1;
+                    startAutoScroll();
+                });
+            }
+        }
+
+        gsap.utils.toArray('#gameplay .group').forEach((item, i) => {
+            gsap.from(item, {
+                scrollTrigger: {
+                    trigger: item,
+                    start: "top 85%",
+                },
+                y: 30,
+                opacity: 0,
+                duration: 0.4,
+                delay: i * 0.1,
+                ease: "power2.out"
+            });
+        });
+        
+        gsap.utils.toArray('#rules .group').forEach((step, i) => {
+            const number = step.children[0]; 
+            const content = step.children[1]; 
+
+            const tl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: step,
+                    start: "top 85%",
+                }
+            });
+
+            tl.from(number, {
+                y: 50,
+                opacity: 0,
+                duration: 0.5,
+                ease: "back.out(1.7)"
+            })
+            .from(content, {
+                y: 30,
+                opacity: 0,
+                duration: 0.5,
+                ease: "power2.out"
+            }, "-=0.3");
+        });
+
+        document.querySelectorAll('.dice-interactive').forEach((dice, index) => {
+            let duration = 15;
+            let direction = 1;
+            let axisX = 360;
+            let axisY = 360;
+
+            if (index === 1) { duration = 10; direction = -1; }
+            if (index === 2) { duration = 12; axisX = -360; }
+            if (index === 3) { duration = 20; axisY = -360; }
+
+            const idleAnim = gsap.to(dice, {
+                rotationX: axisX * direction,
+                rotationY: axisY * direction,
+                duration: duration,
+                repeat: -1,
+                ease: "none"
+            });
+
+            let isDragging = false;
+            let startX, startY;
+
+            function updateRotation(dx, dy) {
+                const currentRotX = gsap.getProperty(dice, "rotationX");
+                const currentRotY = gsap.getProperty(dice, "rotationY");
+                gsap.set(dice, {
+                    rotationX: currentRotX - dy * 0.5,
+                    rotationY: currentRotY + dx * 0.5
+                });
+            }
+
+            dice.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                idleAnim.pause();
+                dice.style.cursor = 'grabbing';
+            });
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const deltaX = e.clientX - startX;
+                const deltaY = e.clientY - startY;
+                updateRotation(deltaX, deltaY);
+                startX = e.clientX;
+                startY = e.clientY;
+            });
+            window.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    dice.style.cursor = 'grab';
+                    idleAnim.resume();
+                }
+            });
+            dice.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                idleAnim.pause();
+            });
+            window.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                e.preventDefault();
+                const deltaX = e.touches[0].clientX - startX;
+                const deltaY = e.touches[0].clientY - startY;
+                updateRotation(deltaX, deltaY);
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+            });
+            window.addEventListener('touchend', () => {
+                isDragging = false;
+                idleAnim.resume();
+            });
+        });
+
+        const tiltCard = document.querySelector("#tilt-card");
+        if (tiltCard) {
+            const tiltInner = tiltCard.querySelector("#tilt-inner");
+            const tiltShine = tiltCard.querySelector("#tilt-shine");
+
+            if(tiltInner) {
+                let isHovering = false;
+                let animationFrameId;
+
+                function applyTilt(rotateX, rotateY, shineOpacity = 0.15) {
+                    tiltInner.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+                    if (!isHovering) {
+                        const shineX = 50 + (rotateY * 2);
+                        const shineY = 50 - (rotateX * 2);
+                        tiltShine.style.background = `radial-gradient(circle at ${shineX}% ${shineY}%, rgba(255,255,255,${shineOpacity}) 0%, rgba(255,255,255,0) 60%)`;
+                    }
+                }
+
+                function idleLoop() {
+                    if (isHovering) return;
+                    const time = Date.now() * 0.001; 
+                    const rotateY = Math.sin(time) * 5;
+                    const rotateX = Math.cos(time * 0.8) * 4;
+                    applyTilt(rotateX, rotateY, 0.2);
+                    animationFrameId = requestAnimationFrame(idleLoop);
+                }
+
+                idleLoop();
+                tiltCard.addEventListener("mouseenter", () => {
+                    isHovering = true;
+                    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                });
+                tiltCard.addEventListener("mousemove", (e) => {
+                    const rect = tiltCard.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = ((y - centerY) / centerY) * -10; 
+                    const rotateY = ((x - centerX) / centerX) * 10;
+                    tiltInner.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+                    const shineOpacity = 1 - (y / rect.height);
+                    tiltShine.style.background = `linear-gradient(135deg, rgba(255,255,255,${shineOpacity * 0.15}) 0%, rgba(255,255,255,0) 60%)`;
+                });
+                tiltCard.addEventListener("mouseleave", () => {
+                    isHovering = false;
+                    idleLoop();
+                });
+            }
+        }
+
+        const ballState = {
+            limeDir: 'left',
+            orangeDir: 'right'
+        };
+        function playBallAnimation() {
+            const container = document.getElementById('flying-balls-container');
+            const winWidth = window.innerWidth;
+            const winHeight = window.innerHeight;
+
+            const spawnBall = (src, type) => {
+                const el = document.createElement('img');
+                el.src = src;
+                el.className = "absolute top-0 left-0 object-cover rounded-full blur-[2px] pointer-events-none opacity-0";
+                if (type === 'lime') {
+                    el.classList.add('w-36', 'h-36', 'md:w-72', 'md:h-72', 'drop-shadow-[0_0_30px_rgba(132,204,22,0.8)]');
+                } else {
+                    el.classList.add('w-48', 'h-48', 'md:w-96', 'md:h-96', 'drop-shadow-[0_0_30px_rgba(249,115,22,0.8)]');
+                }
+                container.appendChild(el);
+                return el;
+            };
+
+            const random = (min, max) => Math.random() * (max - min) + min;
+            const lime = spawnBall('LIME_1.png', 'lime');
+            const lBaseY = winHeight * 0.4;
+            const lStartY = lBaseY + random(-100, 100);
+            const lEndY = lBaseY + random(-100, 100);
+            
+            let lStartX, lEndX, lRotStart, lRotEnd;
+            if (ballState.limeDir === 'left') {
+                lStartX = -400;
+                lEndX = winWidth + 400;
+                lRotStart = -360; lRotEnd = 0;
+            } else {
+                lStartX = winWidth + 400;
+                lEndX = -400;
+                lRotStart = 360; lRotEnd = 0;
+            }
+
+            gsap.fromTo(lime, 
+                { x: lStartX, y: lStartY, rotation: lRotStart, opacity: 1 }, 
+                { 
+                    x: lEndX, 
+                    y: lEndY, 
+                    rotation: lRotEnd, 
+                    duration: random(1.3, 1.6), 
+                    ease: "power1.inOut",
+                    onComplete: () => { lime.remove(); }
+                }
+            );
+            ballState.limeDir = (ballState.limeDir === 'left') ? 'right' : 'left';
+
+            const orange = spawnBall('ORANGE_1.png', 'orange');
+            const oBaseY = winHeight * 0.25;
+            const oStartY = oBaseY + random(-100, 100);
+            const oEndY = oBaseY + random(-100, 100);
+            let oStartX, oEndX, oRotStart, oRotEnd;
+            if (ballState.orangeDir === 'left') {
+                oStartX = -400;
+                oEndX = winWidth + 400;
+                oRotStart = -360; oRotEnd = 0;
+            } else {
+                oStartX = winWidth + 400;
+                oEndX = -400;
+                oRotStart = 360; oRotEnd = 0;
+            }
+
+             gsap.fromTo(orange, 
+                { x: oStartX, y: oStartY, rotation: oRotStart, opacity: 1 }, 
+                { 
+                    x: oEndX, 
+                    y: oEndY, 
+                    rotation: oRotEnd, 
+                    duration: random(1.5, 1.8), 
+                    ease: "power1.inOut", 
+                    delay: random(0.1, 0.3),
+                    onComplete: () => { orange.remove(); }
+                }
+            );
+            ballState.orangeDir = (ballState.orangeDir === 'left') ? 'right' : 'left';
+        }
+
+        window.addEventListener('load', () => {
+            setTimeout(playBallAnimation, 100);
+            const sections = gsap.utils.toArray("section");
+            sections.forEach((section) => {
+                ScrollTrigger.create({
+                    trigger: section,
+                    start: "top 75%",
+                    onEnter: () => playBallAnimation(),
+                    onEnterBack: () => playBallAnimation()
+                });
+            });
+            
+            ScrollTrigger.create({
+                trigger: "footer",
+                start: "top 80%",
+                onEnter: () => playBallAnimation(),
+                onEnterBack: () => playBallAnimation()
+            });
+            
+            const cardSequence = [
+                { 
+                    left: { src: 'BACKHAND_TOPSPIN.png', glow: 'rgba(249, 115, 22, 0.8)' }, 
+                    right: { src: 'FOREHAND_TOPSPIN.png', glow: 'rgba(132, 204, 22, 0.8)' } 
+                },
+                { 
+                    left: { src: 'VOLLEY.png', glow: 'rgba(168, 85, 247, 0.8)' },
+                    right: { src: 'DROP_SHOT.png', glow: 'rgba(250, 204, 21, 0.8)' } 
+                },
+                { 
+                    left: { src: 'LOB.png', glow: 'rgba(236, 72, 153, 0.8)' },
+                    right: { src: 'SMASH.png', glow: 'rgba(239, 68, 68, 0.8)' } 
+                },
+                { 
+                    left: { src: 'ERROR.png', glow: 'rgba(239, 68, 68, 0.8)' },
+                    right: { src: 'WINNER.png', glow: 'rgba(255, 255, 255, 0.8)' } 
+                },
+                { 
+                    left: { src: 'SOFT_TOUCH.png', glow: 'rgba(156, 163, 175, 0.8)' },
+                    right: { src: 'EXTRA_SPIN.png', glow: 'rgba(156, 163, 175, 0.8)' } 
+                }
+            ];
+
+            function playCardCycle(index) {
+                const i = index % cardSequence.length;
+                const pair = cardSequence[i];
+
+                document.querySelector("#green-card-img").src = pair.left.src;
+                document.querySelector("#orange-card-img").src = pair.right.src;
+
+                document.querySelectorAll("#intro-card-green .hero-card-face").forEach(el => {
+                    el.style.filter = `drop-shadow(0 0 20px ${pair.left.glow})`;
+                });
+                document.querySelectorAll("#intro-card-orange .hero-card-face").forEach(el => {
+                    el.style.filter = `drop-shadow(0 0 20px ${pair.right.glow})`;
+                });
+
+                // MOBILE CHECK
+                const isMobile = window.innerWidth < 768;
+                
+                // --- DESTINATION CALCULATIONS ---
+                const centerX = window.innerWidth / 2;
+                
+                // GREEN (Starts Left: -300px)
+                // Desktop: Fly way right
+                // Mobile: Fly to Center-Left Pocket.
+                // Mobile target: CenterX - CardWidth (88) - Gap (20)
+                let greenTargetX;
+                // Mobile card width approx 88px
+                const mobileCardW = 88;
+                const gap = 20;
+                
+                if (isMobile) {
+                    // Start position is -300. 
+                    // Target visual position is CenterX - mobileCardW - gap.
+                    // Translation needed = Target - Start = (CenterX - mobileCardW - gap) - (-300)
+                    // = CenterX - mobileCardW - gap + 300
+                    greenTargetX = centerX - mobileCardW - gap + 300; 
+                } else {
+                    greenTargetX = (window.innerWidth * 0.78) + 300;
+                }
+
+                // ORANGE (Starts Right: -300px)
+                // Desktop: Fly way left
+                // Mobile: Fly to Center-Right Pocket.
+                let orangeTargetX;
+                if (isMobile) {
+                    // Logic correction: We want to move LEFT (negative X).
+                    // Visual position desired: CenterX + gap.
+                    // Start position visual: WindowWidth + 300 - CardW (Wait, CSS right: -300 puts right edge at W+300)
+                    // Visual Right Edge Target: CenterX + gap + mobileCardW.
+                    // Translation needed = TargetRightEdge - StartRightEdge
+                    // = (CenterX + gap + mobileCardW) - (WindowWidth + 300)
+                    // = CenterX + gap + mobileCardW - 2*CenterX - 300
+                    // = -CenterX + gap + mobileCardW - 300
+                    // = -(CenterX + 300 - gap - mobileCardW)
+                    orangeTargetX = -(centerX + 300 - gap - mobileCardW);
+                } else {
+                    orangeTargetX = -(window.innerWidth * 0.78) - 300;
+                }
+
+                // --- GREEN ANIMATION ---
+                gsap.set("#intro-card-green .hero-card-inner", { rotationY: 0 });
+                
+                gsap.fromTo("#intro-card-green", 
+                    { x: -200, opacity: 1, rotation: -45 }, 
+                    { 
+                        x: greenTargetX, 
+                        // On mobile, land straight vertically (rot: 0) or slightly tilted
+                        rotation: isMobile ? -5 : 10,
+                        duration: 1.4, 
+                        ease: "power2.out",
+                        onComplete: () => {
+                            gsap.to("#intro-card-green", {
+                                y: 20,
+                                yoyo: true,
+                                repeat: 3,
+                                duration: 0.5,
+                                ease: "power1.inOut",
+                                onComplete: () => {
+                                    // FLY OUT
+                                    // Mobile: Fly RIGHT (off screen)
+                                    // Desktop: Fly RIGHT (off screen)
+                                    // We continue the movement in the same direction usually
+                                    gsap.to("#intro-card-green", {
+                                        x: isMobile ? window.innerWidth + 400 : window.innerWidth + 800,
+                                        rotation: 180, 
+                                        duration: 0.8,
+                                        ease: "power1.in"
+                                    });
+                                    gsap.to("#intro-card-green .hero-card-inner", {
+                                        rotationY: 1800,
+                                        duration: 0.8,
+                                        ease: "power1.in"
+                                    });
+                                }
+                            });
+                        }
+                    }
+                );
+                gsap.fromTo("#intro-card-green .hero-card-inner", 
+                    { rotationY: 0 }, 
+                    { rotationY: 1080, duration: 1.4, ease: "power2.out" }
+                );
+
+                // --- ORANGE ANIMATION ---
+                gsap.set("#intro-card-orange .hero-card-inner", { rotationY: 0 });
+
+                gsap.fromTo("#intro-card-orange", 
+                    { x: 200, opacity: 1, rotation: 45 }, 
+                    { 
+                        x: orangeTargetX,
+                        rotation: isMobile ? 5 : -10, 
+                        duration: 1.4, 
+                        ease: "power2.out",
+                        delay: 0.1,
+                        onComplete: () => {
+                            gsap.to("#intro-card-orange", {
+                                y: 20,
+                                yoyo: true,
+                                repeat: 3,
+                                duration: 0.5,
+                                ease: "power1.inOut",
+                                delay: 0.1, 
+                                onComplete: () => {
+                                    // FLY OUT
+                                    // Mobile: Fly LEFT (off screen)
+                                    // Desktop: Fly LEFT (off screen)
+                                    gsap.to("#intro-card-orange", {
+                                        x: isMobile ? -(window.innerWidth + 400) : -window.innerWidth - 800,
+                                        rotation: -180, 
+                                        duration: 0.8,
+                                        ease: "power1.in",
+                                        onComplete: () => {
+                                            playCardCycle(index + 1);
+                                        }
+                                    });
+                                    gsap.to("#intro-card-orange .hero-card-inner", {
+                                        rotationY: -1800, 
+                                        duration: 0.8,
+                                        ease: "power1.in"
+                                    });
+                                }
+                            });
+                        }
+                    }
+                );
+                gsap.fromTo("#intro-card-orange .hero-card-inner", 
+                    { rotationY: 0 }, 
+                    { rotationY: -1080, duration: 1.4, ease: "power2.out", delay: 0.1 }
+                );
+            }
+
+            playCardCycle(0);
+        });
+        
+        // Mobile menu toggle function
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+        
+        // Navbar scroll behavior - transparent while scrolling, black when stopped (mobile only)
+        let scrollTimeout;
+        let isScrolling = false;
+        
+        // Only apply this behavior on mobile
+        if (window.innerWidth < 768) {
+            window.addEventListener('scroll', function() {
+                const navbar = document.getElementById('navbar');
+                
+                // Set to transparent while scrolling
+                if (!isScrolling) {
+                    isScrolling = true;
+                    navbar.classList.remove('bg-black/95');
+                    navbar.classList.add('bg-black/30');
+                }
+                
+                // Clear previous timeout
+                clearTimeout(scrollTimeout);
+                
+                // Set timeout to detect when scrolling stops
+                scrollTimeout = setTimeout(function() {
+                    isScrolling = false;
+                    navbar.classList.remove('bg-black/30');
+                    navbar.classList.add('bg-black/95');
+                }, 150); // Becomes solid black 150ms after scrolling stops
+            });
+        }
+        
+        // Fix scroll offset for anchor links to account for fixed navbar
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                
+                if (targetElement) {
+                    const navbarHeight = document.getElementById('navbar').offsetHeight;
+                    const targetPosition = targetElement.offsetTop - navbarHeight;
+                    
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                    
+                    // Close mobile menu if open
+                    const menu = document.getElementById('mobile-menu');
+                    if (menu && !menu.classList.contains('hidden')) {
+                        menu.classList.add('hidden');
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

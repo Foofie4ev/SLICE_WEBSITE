@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SLICE: The Tennis Card Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- GSAP Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Config provided by environment
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'slice-game';
+
+        // Authenticate anonymously
+        signInAnonymously(auth).catch((error) => {
+            console.error("Auth Error:", error);
+        });
+
+        // Expose function to window for the form to use
+        window.joinWaitlist = async function(event) {
+            event.preventDefault();
+            const emailInput = document.getElementById('email-input');
+            const submitBtn = document.getElementById('submit-btn');
+            const email = emailInput.value;
+
+            if (!email) return;
+
+            // UI Feedback - Loading
+            const originalBtnText = submitBtn.innerText;
+            submitBtn.innerText = "JOINING...";
+            submitBtn.disabled = true;
+
+            try {
+                // Save to Firestore
+                // Path: /artifacts/{appId}/public/data/waitlist
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'waitlist'), {
+                    email: email,
+                    timestamp: serverTimestamp()
+                });
+
+                // Success State
+                submitBtn.innerText = "YOU'RE IN! 🎾";
+                submitBtn.classList.remove('bg-lime-500', 'hover:bg-lime-400', 'text-black');
+                submitBtn.classList.add('bg-green-600', 'text-white');
+                emailInput.value = "";
+                
+                // Reset after 3 seconds
+                setTimeout(() => {
+                    submitBtn.innerText = originalBtnText;
+                    submitBtn.disabled = false;
+                    submitBtn.classList.add('bg-lime-500', 'hover:bg-lime-400', 'text-black');
+                    submitBtn.classList.remove('bg-green-600', 'text-white');
+                }, 3000);
+
+            } catch (e) {
+                console.error("Error adding document: ", e);
+                submitBtn.innerText = "ERROR 😕";
+                setTimeout(() => {
+                    submitBtn.innerText = originalBtnText;
+                    submitBtn.disabled = false;
+                }, 2000);
+            }
+        }
+    </script>
+    
+    <style>
+        /* Custom Font Setup */
+        .font-comic { font-family: 'Bangers', cursive; letter-spacing: 0.05em; }
+        .font-body { font-family: 'Montserrat', sans-serif; }
+
+        /* The "Hyper-Juicy" Background Animation */
+        .juice-bg {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .juice-blob {
+            position: absolute;
+            filter: blur(80px);
+            opacity: 0.6;
+            animation: float 10s infinite ease-in-out alternate;
+        }
+        /* Responsive Blob Sizes */
+        .blob-lime { background: #84cc16; width: 300px; height: 300px; top: -50px; left: -50px; animation-delay: 0s; }
+        .blob-lemon { background: #facc15; width: 250px; height: 250px; bottom: 20%; right: -20px; animation-delay: 2s; }
+        .blob-grape { background: #9333ea; width: 200px; height: 200px; top: 40%; left: 10%; animation-delay: 4s; }
+        .blob-pink { background: #ec4899; width: 280px; height: 280px; bottom: -50px; left: 10%; animation-delay: 1s; }
+
+        @media (min-width: 768px) {
+            .blob-lime { width: 500px; height: 500px; top: -100px; left: -100px; }
+            .blob-lemon { width: 400px; height: 400px; bottom: 20%; right: -50px; }
+            .blob-grape { width: 300px; height: 300px; top: 40%; left: 30%; }
+            .blob-pink { width: 450px; height: 450px; bottom: -100px; left: 10%; }
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(30px, 50px) rotate(10deg); }
+        }
+
+        /* 3D Card Flip & Rotate Animation */
+        .card-scene {
+            perspective: 1000px;
+            width: 240px; 
+            height: 380px; 
+            flex-shrink: 0; 
+            margin-right: 2rem; 
+        }
+        @media (min-width: 768px) {
+            .card-scene { width: 315px; height: 495px; margin-right: 4rem; }
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            animation: slowSpin 12s infinite linear;
+            cursor: grab; 
+            transition: transform 0.3s;
+        }
+        
+        .card-inner:active {
+            cursor: grabbing;
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+
+        .card-face img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scale(1.03);
+            pointer-events: none; 
+        }
+
+        .card-front {
+            background: #222;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            background-color: #333;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: 103%; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Updated Card Back Logic - No Borders */
+        .card-scene:nth-child(odd) .card-back {
+            background-image: url('GREEN_CARD_BACK.png');
+        }
+        .card-scene:nth-child(even) .card-back {
+            background-image: url('ORANGE_CARD_BACK.png');
+        }
+        
+        .card-back::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.1);
+            border-radius: 1.5rem;
+        }
+        
+        @keyframes slowSpin {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
+        }
+
+        /* Glowing Bobbing Logo Animation */
+        .hero-logo-container {
+            animation: floatLogo 6s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(132, 204, 22, 0.6));
+        }
+
+        @keyframes floatLogo {
+            0%, 100% { transform: translateY(0px); filter: drop-shadow(0 0 20px rgba(132, 204, 22, 0.6)); }
+            50% { transform: translateY(-20px); filter: drop-shadow(0 0 40px rgba(132, 204, 22, 0.9)); }
+        }
+
+        /* 3D SOLID DICE STYLES */
+        .dice-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100px; 
+        }
+        @media (min-width: 768px) {
+            .dice-wrapper { width: 120px; }
+        }
+        
+        .dice-container {
+            width: 60px;
+            height: 60px;
+            perspective: 800px;
+            cursor: grab;
+            margin-bottom: 1.5rem; 
+            touch-action: none; 
+        }
+        .dice-container:active {
+            cursor: grabbing;
+        }
+        .dice {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+        
+        /* Define CSS variables for colors */
+        .dice.dice-green { --dice-color: #55bd28; }
+        .dice.dice-orange { --dice-color: #f26522; }
+        .dice.dice-yellow { --dice-color: #fff200; }
+        .dice.dice-purple { --dice-color: #8b1ebd; }
+
+        .dice-face {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background-color: var(--dice-color);
+            border: 1px solid rgba(0,0,0,0.3); 
+            border-radius: 4px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            overflow: hidden;
+            backface-visibility: hidden; 
+            box-shadow: inset 0 0 12px rgba(0,0,0,0.15), inset 0 0 2px rgba(255,255,255,0.3);
+            color: black;
+            font-family: 'Bangers', cursive;
+            font-size: 1.5rem;
+        }
+        
+        /* THE SOLID CORE */
+        .dice-core {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background-color: var(--dice-color);
+            transform: translateZ(0);
+            transform-style: preserve-3d; 
+            pointer-events: none;
+        }
+        .dice-core::before, .dice-core::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: var(--dice-color);
+            top: 0;
+            left: 0;
+        }
+        .dice-core::before { transform: rotateX(90deg); }
+        .dice-core::after { transform: rotateY(90deg); }
+
+        .dice-face img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scale(1.05); 
+            pointer-events: none; 
+        }
+        
+        /* Cube Face Transforms */
+        .face-front  { transform: rotateY(0deg) translateZ(30px); }
+        .face-back   { transform: rotateY(180deg) translateZ(30px); }
+        .face-right  { transform: rotateY(90deg) translateZ(30px); }
+        .face-left   { transform: rotateY(-90deg) translateZ(30px); }
+        .face-top    { transform: rotateX(90deg) translateZ(30px); }
+        .face-bottom { transform: rotateX(-90deg) translateZ(30px); }
+
+        /* Hide Scrollbar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .glow-text { text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+        
+        .net-pattern {
+            background-image: linear-gradient(#ffffff10 1px, transparent 1px), linear-gradient(90deg, #ffffff10 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* Carousel Styles */
+        .carousel-viewport {
+            overflow: hidden;
+            cursor: grab;
+            width: 100%;
+            position: relative;
+        }
+        .carousel-viewport:active { cursor: grabbing; }
+        .horizontal-track { display: flex; width: max-content; }
+
+        /* Video Modal Styles */
+        #video-modal { transition: opacity 0.3s ease; }
+        #video-modal.hidden { opacity: 0; pointer-events: none; }
+        #video-modal:not(.hidden) { opacity: 1; pointer-events: auto; }
+        
+        /* Navbar Logo Styling */
+        .navbar-logo { height: 32px; width: auto; object-fit: contain; }
+        @media (min-width: 768px) { .navbar-logo { height: 40px; } }
+    </style>
+</head>
+<body class="bg-neutral-900 text-white font-body overflow-x-hidden selection:bg-lime-500 selection:text-black">
+
+    <!-- Video Modal Overlay -->
+    <div id="video-modal" class="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl hidden flex items-center justify-center p-4">
+        <div class="relative w-full max-w-5xl aspect-video bg-black rounded-xl overflow-hidden border border-white/20 shadow-2xl">
+            <button onclick="document.getElementById('video-modal').classList.add('hidden')" class="absolute top-4 right-4 z-10 text-white hover:text-lime-400">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <iframe class="w-full h-full" src="https://www.youtube.com/embed/dQw4w9WgXcQ?si=IsJq1Y5TzL9jG_1I" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <!-- Background Blobs (Fixed) -->
+    <div class="fixed inset-0 z-0 pointer-events-none">
+        <div class="juice-blob blob-lime"></div>
+        <div class="juice-blob blob-lemon"></div>
+        <div class="juice-blob blob-grape"></div>
+        <div class="juice-blob blob-pink"></div>
+        <div class="absolute inset-0 net-pattern opacity-30"></div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="fixed w-full z-50 top-0 transition-all duration-300" id="navbar">
+        <div class="container mx-auto px-4 md:px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <img src="Screenshot 2025-11-18 at 9.52.23 PM.png" alt="SLICE Logo" class="navbar-logo" onerror="this.onerror=null;this.src='SLICE_LOGO.png';">
+                <span class="font-comic text-2xl tracking-wider text-white glow-text whitespace-nowrap">SLICE! - The Card Game</span>
+            </div>
+            <div class="hidden md:flex gap-8 font-bold uppercase text-sm tracking-widest">
+                <a href="#gameplay" class="hover:text-lime-400 transition-colors">Gameplay</a>
+                <a href="#cards" class="hover:text-lime-400 transition-colors">The Deck</a>
+                <a href="#rules" class="hover:text-lime-400 transition-colors">Rules</a>
+            </div>
+            <button onclick="document.getElementById('rules').scrollIntoView({behavior: 'smooth'})" class="bg-lime-500 hover:bg-lime-400 text-black font-comic text-xl px-4 md:px-6 py-2 rounded-full transform hover:scale-105 transition-all shadow-[0_0_15px_rgba(132,204,22,0.5)] whitespace-nowrap">
+                Get It
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative z-10 min-h-screen flex flex-col justify-center items-center text-center px-4 pt-24 md:pt-20">
+        <div class="hero-logo-container mb-6 md:mb-8">
+             <img src="SLICE_LOGO.png" alt="SLICE Logo" class="w-64 md:w-[500px] lg:w-[650px] rounded-full object-contain" onerror="this.src='https://placehold.co/600x200/transparent/84cc16?text=SLICE+LOGO';">
+        </div>
+        <h1 class="font-comic text-4xl md:text-7xl lg:text-8xl mb-4 text-transparent bg-clip-text bg-gradient-to-r from-lime-400 via-yellow-300 to-lime-400 glow-text leading-tight">
+            TENNIS WITH A TWIST!
+        </h1>
+        <p class="font-bold text-base md:text-2xl text-gray-200 max-w-3xl mb-8 md:mb-10 leading-relaxed px-2">
+            The card game that blends a tennis match into a fresh <span class="text-lime-400">1 vs 1 and 2 v2 strategic card game!</span> 
+            Outwit, outlast, and with a little luck, out-juice your opponent!
+        </p>
+        <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto px-4">
+            <button onclick="document.getElementById('rules').scrollIntoView({behavior: 'smooth'})" class="bg-gradient-to-r from-lime-500 to-lime-600 text-black font-comic text-xl md:text-2xl px-8 py-4 rounded-full shadow-lg hover:shadow-[0_0_30px_rgba(132,204,22,0.6)] transform hover:-translate-y-1 transition-all border-2 border-white/20">
+                Start The Match
+            </button>
+            <button onclick="document.getElementById('video-modal').classList.remove('hidden')" class="bg-black/40 backdrop-blur-md border-2 border-white/20 text-white font-comic text-xl md:text-2xl px-8 py-4 rounded-full hover:bg-white/10 transition-all flex items-center justify-center gap-2">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg>
+                Watch Trailer
+            </button>
+        </div>
+        <div class="absolute bottom-6 md:bottom-10 animate-bounce">
+            <svg class="w-6 h-6 md:w-8 md:h-8 text-lime-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+        </div>
+    </header>
+
+    <!-- Flavor Profile (Stats) -->
+    <section id="gameplay" class="relative z-10 py-12 md:py-20 bg-black/30 backdrop-blur-sm border-y border-white/5">
+        <div class="container mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 text-center">
+                <div class="p-6 rounded-2xl bg-gradient-to-br from-white/5 to-transparent border border-white/10 hover:border-lime-500/50 transition-all group">
+                    <div class="w-16 h-16 mx-auto bg-lime-500/20 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <svg class="w-8 h-8 text-lime-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <h3 class="font-comic text-2xl md:text-3xl mb-2 text-lime-400">Fast Paced</h3>
+                    <p class="text-gray-400">Rallies move fast. With the unique "Slice" mechanic, momentum can shift in a single card drop.</p>
+                </div>
+                <div class="p-6 rounded-2xl bg-gradient-to-br from-white/5 to-transparent border border-white/10 hover:border-yellow-500/50 transition-all group">
+                    <div class="w-16 h-16 mx-auto bg-yellow-500/20 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                    </div>
+                    <h3 class="font-comic text-2xl md:text-3xl mb-2 text-yellow-400">Risk & Reward</h3>
+                    <p class="text-gray-400">Roll the dice on a Volley or Drop Shot. Will you hit a winner or smash it into the net?</p>
+                </div>
+                <div class="p-6 rounded-2xl bg-gradient-to-br from-white/5 to-transparent border border-white/10 hover:border-pink-500/50 transition-all group">
+                    <div class="w-16 h-16 mx-auto bg-pink-500/20 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <svg class="w-8 h-8 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    </div>
+                    <h3 class="font-comic text-2xl md:text-3xl mb-2 text-pink-400">Real Tactics</h3>
+                    <p class="text-gray-400">Cross-court, down-the-line, lobs, and smashes. It's a simulation hidden inside a fast paced card game.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Draggable Carousel Showcase -->
+    <section id="cards" class="relative z-20 bg-gradient-to-b from-transparent to-black/50 overflow-visible">
+        <div class="container mx-auto px-6 py-10 text-center">
+            <h2 class="font-comic text-4xl md:text-6xl mb-4 text-white">YOUR TENNIS BAG</h2>
+            <p class="text-gray-400 max-w-xl mx-auto">Swipe to inspect the deck.</p>
+        </div>
+
+        <div class="carousel-viewport h-[500px] md:h-[600px] flex items-center" id="dragContainer">
+            <div class="horizontal-track px-8 md:px-20">
+                <!-- 1. Serve -->
+                <div class="card-scene">
+                    <div class="card-inner">
+                        <div class="card-face card-front">
+                            <img src="FOREHAND_TOPSPIN.png" alt="Forehand" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/315x495/black/84cc16?text=FOREHAND\nTOPSPIN';">
+                        </div>
+                        <div class="card-face card-back"></div>
+                    </div>
+                </div>
+                <!-- 2. Forehand Slice -->
+                <div class="card-scene">
+                    <div class="card-inner" style="animation-delay: -1s;">
+                        <div class="card-face card-front">
+                            <img src="FOREHAND_SLICE.png" alt="Forehand Slice" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/315x495/black/f26522?text=FOREHAND\nSLICE';">
+                        </div>
+                        <div class="card-face card-back"></div>
+                    </div>
+                </div>
+                <!-- 3. Backhand Topspin -->
+                <div class="card-scene">
+                    <div class="card-inner" style="animation-delay: -2s;">
+                        <div class="card-face card-front">
+                            <img src="BACKHAND_TOPSPIN.png" alt="Backhand Topspin" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/315x495/black/84cc16?text=BACKHAND\nTOPSPIN';">
+                        </div>
+                        <div class="card-face card-back"></div>
+                    </div>
+                </div>
+                <!-- 4. Backhand Slice -->
+                <div class="card-scene">
+                    <div class="card-inner" style="animation-delay: -3s;">
+                        <div class="card-face card-front">
+                            <img src="BACKHAND_SLICE.png" alt="Backhand Slice" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/315x495/black/f26522?text=BACKHAND\nSLICE';">
+                        </div>
+                        <div class="card-face card-back"></div>
+                    </div>
+                </div>
+                <!-- 5. Volley -->
+                <div class="card-scene">
+                    <div class="card-inner" style="animation-delay: -4s;">
+                        <div class="card-face card-front">
+                            <img src="VOLLEY.png" alt="Volley" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/315x495/black/84cc16?text=VOLLEY';">
+                        </div>
+                        <div class="card-face card-back"></div>
+                    </div>
+                </div>
+                <!-- 6. Drop Shot -->
+                <div class="card-scene">
+                    <div class="card-inner" style="animation-delay: -5s;">
+                        <div class="card-face card-front">
+                            <img src="DROP_SHOT.png" alt="Drop Shot" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/315x495/black/f26522?text=DROP\nSHOT';">
+                        </div>
+                        <div class="card-face card-back"></div>
+                    </div>
+                </div>
+                <!-- 7. Lob -->
+                <div class="card-scene">
+                    <div class="card-inner" style="animation-delay: -6s;">
+                        <div class="card-face card-front">
+                            <img src="LOB.png" alt="Lob" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/315x495/black/84cc16?text=LOB';">
+                        </div>
+                        <div class="card-face card-back"></div>
+                    </div>
+                </div>
+                <!-- 8. Smash -->
+                <div class="card-scene">
+                    <div class="card-inner" style="animation-delay: -7s;">
+                        <div class="card-face card-front">
+                            <img src="SMASH.png" alt="Smash" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/315x495/black/f26522?text=SMASH';">
+                        </div>
+                        <div class="card-face card-back"></div>
+                    </div>
+                </div>
+                <!-- 9. Winner -->
+                <div class="card-scene">
+                    <div class="card-inner" style="animation-delay: -8s;">
+                        <div class="card-face card-front">
+                            <img src="WINNER.png" alt="Winner" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/315x495/black/84cc16?text=WINNER';">
+                        </div>
+                        <div class="card-face card-back"></div>
+                    </div>
+                </div>
+                <!-- 10. Good Get -->
+                <div class="card-scene">
+                    <div class="card-inner" style="animation-delay: -9s;">
+                        <div class="card-face card-front">
+                            <img src="GOOD_GET.png" alt="Good Get" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/315x495/black/f26522?text=GOOD\nGET';">
+                        </div>
+                        <div class="card-face card-back"></div>
+                    </div>
+                </div>
+                <!-- 11. Soft Touch -->
+                <div class="card-scene">
+                    <div class="card-inner" style="animation-delay: -10s;">
+                        <div class="card-face card-front">
+                            <img src="SOFT_TOUCH.png" alt="Soft Touch" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/315x495/black/84cc16?text=SOFT\nTOUCH';">
+                        </div>
+                        <div class="card-face card-back"></div>
+                    </div>
+                </div>
+                <!-- 12. Error -->
+                <div class="card-scene">
+                    <div class="card-inner" style="animation-delay: -11s;">
+                        <div class="card-face card-front">
+                            <img src="ERROR.png" alt="Error" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/315x495/black/f26522?text=ERROR';">
+                        </div>
+                        <div class="card-face card-back"></div>
+                    </div>
+                </div>
+                <!-- 13. Extra Spin -->
+                <div class="card-scene">
+                    <div class="card-inner" style="animation-delay: -12s;">
+                        <div class="card-face card-front">
+                            <img src="EXTRA_SPIN.png" alt="Extra Spin" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/315x495/black/84cc16?text=EXTRA\nSPIN';">
+                        </div>
+                        <div class="card-face card-back"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How To Play (The Recipe) -->
+    <section id="rules" class="relative z-10 py-16 md:py-24 bg-neutral-900/80 border-t border-white/10">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row items-start gap-12 md:gap-16">
+                
+                <!-- Text Content -->
+                <div class="w-full md:w-1/2 space-y-5 md:space-y-6">
+                    <h2 class="font-comic text-4xl md:text-6xl mb-4">THE RECIPE FOR <br><span class="text-lime-400">VICTORY</span></h2>
+                    
+                    <!-- Step 1 -->
+                    <div class="flex gap-4 items-start">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-lime-500 text-black font-comic text-2xl md:text-3xl flex items-center justify-center shrink-0">1</div>
+                        <div class="w-full">
+                            <h3 class="font-bold text-lg md:text-xl text-white mb-1">Serve & Dice</h3>
+                            <p class="text-sm md:text-base text-gray-400 mb-2">Start the point by rolling the Serve Dice. Your roll sets the initial Pace Value.</p>
+                            
+                            <!-- 3D Dice Container for Serve Dice -->
+                            <div class="flex flex-wrap gap-4 md:gap-8 justify-start mt-6">
+                                <!-- 1st Serve Die Column -->
+                                <div class="dice-wrapper">
+                                    <div class="dice-container">
+                                        <div class="dice dice-interactive dice-green" id="dice1">
+                                            <div class="dice-core"></div>
+                                            <div class="dice-face face-front"><img src="1stServe_6.png" alt="6" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-back"><img src="1stServe_3.png" alt="3" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-right"><img src="1stServe_5.png" alt="5" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-left"><img src="1stServe_4.png" alt="4" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-top"><img src="1stServe_FAULT!.png" alt="Fault" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-bottom"><img src="1stServe_LET!.png" alt="Let" onerror="this.style.display='none';"></div>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs md:text-sm text-lime-400 font-comic text-center uppercase">1st Serve</p>
+                                </div>
+                                
+                                <!-- 2nd Serve Die Column -->
+                                <div class="dice-wrapper">
+                                    <div class="dice-container">
+                                        <div class="dice dice-interactive dice-orange" id="dice2">
+                                            <div class="dice-core"></div>
+                                            <div class="dice-face face-front"><img src="2ndServe_1.png" alt="1" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-back"><img src="2ndServe_2.png" alt="2" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-right"><img src="2ndServe_3.png" alt="3" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-left"><img src="2ndServe_4.png" alt="4" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-top"><img src="2ndServe_FAULT!.png" alt="Fault" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-bottom"><img src="2ndServe_LET!.png" alt="Let" onerror="this.style.display='none';"></div>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs md:text-sm text-orange-400 font-comic text-center uppercase">2nd Serve</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="flex gap-4 items-start">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-orange-500 text-black font-comic text-2xl md:text-3xl flex items-center justify-center shrink-0">2</div>
+                        <div>
+                            <h3 class="font-bold text-lg md:text-xl text-white mb-1">The Rally</h3>
+                            <p class="text-sm md:text-base text-gray-400">Play <span class="text-lime-400 font-bold">Cross-Court</span> (same shot type, higher pace) or <span class="text-orange-400 font-bold">Down-the-Line</span> (switch shot type, equal pace).</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="flex gap-4 items-start">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-yellow-400 text-black font-comic text-2xl md:text-3xl flex items-center justify-center shrink-0">3</div>
+                        <div>
+                            <h3 class="font-bold text-lg md:text-xl text-white mb-1">Slice & Dice</h3>
+                            <p class="text-sm md:text-base text-gray-400">Play a SLICE card to reverse the momentum. Opponent must play a LOWER pace card. It's a rhythm breaker.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 4 (New) -->
+                    <div class="flex gap-4 items-start">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-purple-500 text-black font-comic text-2xl md:text-3xl flex items-center justify-center shrink-0">4</div>
+                        <div class="w-full">
+                            <h3 class="font-bold text-lg md:text-xl text-white mb-1">Attack the Net</h3>
+                            <p class="text-sm md:text-base text-gray-400 mb-2">Risk it all by playing a Volley or Drop-Shot and roll the dice for your Pace, just dont hit it out!</p>
+                            <!-- Tactical Dice Container -->
+                            <div class="flex flex-wrap gap-4 md:gap-8 justify-start mt-6">
+                                <!-- Drop Shot Die Column -->
+                                <div class="dice-wrapper">
+                                    <div class="dice-container">
+                                        <div class="dice dice-interactive dice-yellow" id="dice3">
+                                            <div class="dice-core"></div>
+                                            <div class="dice-face face-front"><img src="DROP_SHOT_1.png" alt="1" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-back"><img src="DROP_SHOT_2.png" alt="2" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-right"><img src="DROP_SHOT_NET!.png" alt="Net" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-left"><img src="DROP_SHOT_OUT!.png" alt="Out" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-top"><img src="DROP_SHOT_1.png" alt="1" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-bottom"><img src="DROP_SHOT_2.png" alt="2" onerror="this.style.display='none';"></div>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs md:text-sm text-yellow-400 font-comic text-center uppercase">Drop-Shot</p>
+                                </div>
+                                
+                                <!-- Volley Die Column -->
+                                <div class="dice-wrapper">
+                                    <div class="dice-container">
+                                        <div class="dice dice-interactive dice-purple" id="dice4">
+                                            <div class="dice-core"></div>
+                                            <div class="dice-face face-front"><img src="VOLLEY_6.png" alt="6" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-back"><img src="VOLLEY_7!.png" alt="7" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-right"><img src="VOLLEY_NET!.png" alt="Net" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-left"><img src="VOLLEY_OUT!.png" alt="Out" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-top"><img src="VOLLEY_6.png" alt="6" onerror="this.style.display='none';"></div>
+                                            <div class="dice-face face-bottom"><img src="VOLLEY_7!.png" alt="7" onerror="this.style.display='none';"></div>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs md:text-sm text-purple-400 font-comic text-center uppercase">Volley</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 5 (New) -->
+                    <div class="flex gap-4 items-start">
+                        <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-red-500 text-black font-comic text-2xl md:text-3xl flex items-center justify-center shrink-0">5</div>
+                        <div>
+                            <h3 class="font-bold text-lg md:text-xl text-white mb-1">Tactical Timing</h3>
+                            <p class="text-sm md:text-base text-gray-400">Punish a weak shot with a Smash or defend against aggressive attack with a Lob</p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Visual Aid (Mockup) -->
+                <div class="w-full md:w-1/2 relative mt-8 md:mt-0">
+                    <div class="relative z-10 transform rotate-3 hover:rotate-0 transition-transform duration-500">
+                         <!-- Swapped to Game Box -->
+                        <img src="GAME_BOX.png" 
+                             onerror="this.onerror=null;this.src='https://placehold.co/800x800/222/84cc16?text=3D+GAME+BOX+MOCKUP';"
+                             class="w-full md:w-3/4 mx-auto rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)]" alt="SLICE Game Box">
+                        
+                        <!-- Updated Floating Card to match Product Shot -->
+                        <div class="absolute -bottom-6 -right-4 md:-bottom-6 md:-right-6 bg-neutral-800 p-4 md:p-6 rounded-xl border border-white/10 shadow-xl max-w-[250px] md:max-w-xs text-left">
+                            <p class="font-comic text-lg md:text-xl text-lime-400 mb-1 md:mb-2">IN THE BOX:</p>
+                            <ul class="text-xs md:text-sm text-gray-300 list-disc list-inside space-y-1">
+                                <li>70 Action Cards</li>
+                                <li>4 Custom Dice</li>
+                                <li>1 Rulebook</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- Deco elements -->
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-lime-500/10 blur-3xl -z-10 rounded-full"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Digital Prototype Section (TTS) -->
+    <section class="relative z-10 py-20 bg-neutral-900 border-t border-white/10 text-center overflow-hidden">
+        <!-- Background Decor -->
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 pointer-events-none"></div>
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="max-w-4xl mx-auto bg-gradient-to-b from-neutral-800 to-neutral-900 rounded-3xl p-8 md:p-12 border border-white/10 shadow-2xl">
+                <span class="text-lime-400 font-comic text-xl uppercase tracking-widest mb-2 block">Digital Prototype</span>
+                <h2 class="font-comic text-4xl md:text-5xl mb-6 text-white">PLAY IT NOW ON TABLETOP SIMULATOR</h2>
+                <p class="text-gray-400 text-lg mb-8 max-w-2xl mx-auto">
+                    Can't wait for the physical release? Jump into the virtual court. We have a fully scripted mod available for free on Steam Workshop.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="#" onclick="alert('Link to Steam Workshop coming soon!')" class="bg-[#1b2838] hover:bg-[#2a475e] text-white font-bold py-4 px-8 rounded-xl flex items-center justify-center gap-3 transition-all border border-white/10 group">
+                        <svg class="w-8 h-8 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor"><path d="M11.979 0C5.678 0 .511 4.86.022 11.035l6.29 2.594c.57-.467 1.302-.75 2.103-.75.28 0 .55.035.81.1l2.52-3.663C11.65 9.16 11.81 9.12 11.98 9.12c2.58 0 4.67 2.09 4.67 4.67 0 2.58-2.09 4.67-4.67 4.67-2.58 0-4.67-2.09-4.67-4.67 0-.33.04-.65.12-.96L1.17 10.16C2.87 17.92 9.67 23.67 17.84 23.16 24.58 22.74 30 16.76 29.03 9.79 28.35 4.6 24.23.45 19.06.05 16.66-.14 14.26-.16 11.98 0zm0 11.39c1.34 0 2.42 1.08 2.42 2.42 0 1.34-1.08 2.42-2.42 2.42-1.34 0-2.42-1.08-2.42-2.42 0-1.34 1.08-2.42 2.42-2.42z"/></svg>
+                        <span>Get the Mod</span>
+                    </a>
+                    <a href="https://discord.com" target="_blank" class="bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold py-4 px-8 rounded-xl flex items-center justify-center gap-3 transition-all">
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037 13.496 13.496 0 0 0-2.294 4.463 12.775 12.775 0 0 0-4.447 0 13.487 13.487 0 0 0-2.305-4.462.078.078 0 0 0-.081-.038 19.666 19.666 0 0 0-4.885 1.515.074.074 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.074.074 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.418 2.157-2.418 1.21 0 2.176 1.095 2.157 2.418 0 1.334-.956 2.42-2.157 2.42zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.418 2.157-2.418 1.21 0 2.176 1.095 2.157 2.418 0 1.334-.946 2.42-2.157 2.42z"/></svg>
+                        <span>Find Players</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Community / Clubhouse Section -->
+    <section id="community" class="relative z-10 py-20 bg-black/50 border-t border-white/10">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="font-comic text-4xl md:text-5xl mb-8">JOIN THE <span class="text-lime-400">CLUBHOUSE</span></h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <!-- Discord Card -->
+                <div class="bg-[#5865F2]/10 border border-[#5865F2]/30 p-8 rounded-2xl hover:bg-[#5865F2]/20 transition-colors">
+                    <svg class="w-12 h-12 text-[#5865F2] mx-auto mb-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037 13.496 13.496 0 0 0-2.294 4.463 12.775 12.775 0 0 0-4.447 0 13.487 13.487 0 0 0-2.305-4.462.078.078 0 0 0-.081-.038 19.666 19.666 0 0 0-4.885 1.515.074.074 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.074.074 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.418 2.157-2.418 1.21 0 2.176 1.095 2.157 2.418 0 1.334-.956 2.42-2.157 2.42zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.418 2.157-2.418 1.21 0 2.176 1.095 2.157 2.418 0 1.334-.946 2.42-2.157 2.42z"/></svg>
+                    <h3 class="text-xl font-bold mb-2">Join the Discord</h3>
+                    <p class="text-gray-400 mb-4">Find players, share strategies, and chat with the creators.</p>
+                    <a href="#" class="inline-block bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold py-2 px-6 rounded-full transition-all">Connect</a>
+                </div>
+
+                <!-- Instagram Card -->
+                <div class="bg-pink-500/10 border border-pink-500/30 p-8 rounded-2xl hover:bg-pink-500/20 transition-colors">
+                    <svg class="w-12 h-12 text-pink-500 mx-auto mb-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                    <h3 class="text-xl font-bold mb-2">Follow on Insta</h3>
+                    <p class="text-gray-400 mb-4">See behind the scenes, new card art, and tour updates.</p>
+                    <a href="#" class="inline-block bg-pink-500 hover:bg-pink-400 text-white font-bold py-2 px-6 rounded-full transition-all">Follow</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Footer (Mailing List) -->
+    <footer class="relative z-10 bg-black pt-20 pb-10 border-t border-white/10">
+        <div class="container mx-auto px-6 text-center">
+            <div class="max-w-3xl mx-auto mb-16">
+                <h2 class="font-comic text-6xl text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 mb-6">GAME, SET, MATCH.</h2>
+                <p class="text-xl text-gray-400 mb-10">Get notified when the Kickstarter launches and when we drop new updates.</p>
+                
+                <form class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto" onsubmit="window.joinWaitlist(event)">
+                    <input type="email" id="email-input" placeholder="Enter your email..." class="flex-1 bg-neutral-800 border border-neutral-700 rounded-full px-6 py-4 text-white focus:outline-none focus:border-lime-500 transition-colors" required>
+                    <button type="submit" id="submit-btn" class="bg-lime-500 hover:bg-lime-400 text-black font-bold px-8 py-4 rounded-full transition-all">
+                        JOIN WAITLIST
+                    </button>
+                </form>
+            </div>
+
+            <div class="border-t border-neutral-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-2 opacity-50 hover:opacity-100 transition-opacity">
+                    <div class="w-6 h-6 rounded-full bg-lime-500 flex items-center justify-center font-comic text-black text-xs">S</div>
+                    <span class="font-comic tracking-wider">SLICE!</span>
+                </div>
+                <div class="text-gray-600 text-sm">
+                    &copy; 2025 SLICE Card Game. All Rights Reserved.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Navbar Scroll Effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('bg-black/80', 'backdrop-blur-lg', 'shadow-lg');
+            } else {
+                navbar.classList.remove('bg-black/80', 'backdrop-blur-lg', 'shadow-lg');
+            }
+        });
+
+        // GSAP Animations
+        gsap.registerPlugin(ScrollTrigger, Draggable);
+
+        // DRAGGABLE MARQUEE CAROUSEL LOGIC
+        const track = document.querySelector('.horizontal-track');
+        const dragContainer = document.querySelector('#dragContainer');
+        
+        // Initial "Moving Already" Animation (Marquee)
+        let autoScrollTween = gsap.to(track, {
+            x: () => -(track.scrollWidth - window.innerWidth), // Scroll to end
+            duration: 40, // Slow duration
+            ease: "none",
+            repeat: -1,
+            yoyo: true
+        });
+
+        // Make it draggable
+        Draggable.create(track, {
+            type: "x",
+            edgeResistance: 0.65,
+            bounds: dragContainer,
+            inertia: true,
+            onPress: function() {
+                // Stop the auto-scroll when user grabs it
+                autoScrollTween.kill();
+            }
+        });
+
+        // Animate Flavor Ingredients
+        gsap.utils.toArray('#gameplay .group').forEach((item, i) => {
+            gsap.from(item, {
+                scrollTrigger: {
+                    trigger: item,
+                    start: "top 80%",
+                },
+                y: 50,
+                opacity: 0,
+                duration: 0.8,
+                delay: i * 0.2,
+                ease: "back.out(1.7)"
+            });
+        });
+
+        // Animate Rules List
+        gsap.utils.toArray('#rules .flex').forEach((item, i) => {
+            gsap.from(item, {
+                scrollTrigger: {
+                    trigger: item,
+                    start: "top 85%",
+                },
+                x: -50,
+                opacity: 0,
+                duration: 0.6,
+                delay: i * 0.1,
+                ease: "power2.out"
+            });
+        });
+
+        // Dice Interaction Logic
+        document.querySelectorAll('.dice-interactive').forEach((dice, index) => {
+            let duration = 15;
+            let direction = 1;
+            let axisX = 360;
+            let axisY = 360;
+
+            if (index === 1) { duration = 10; direction = -1; }
+            if (index === 2) { duration = 12; axisX = -360; }
+            if (index === 3) { duration = 20; axisY = -360; }
+
+            // Use GSAP to handle the idle animation
+            const idleAnim = gsap.to(dice, {
+                rotationX: axisX * direction,
+                rotationY: axisY * direction,
+                duration: duration,
+                repeat: -1,
+                ease: "none"
+            });
+
+            // Draggable interaction
+            let isDragging = false;
+            let startX, startY;
+
+            // Helper to handle updating rotation
+            function updateRotation(dx, dy) {
+                const currentRotX = gsap.getProperty(dice, "rotationX");
+                const currentRotY = gsap.getProperty(dice, "rotationY");
+                gsap.set(dice, {
+                    rotationX: currentRotX - dy * 0.5,
+                    rotationY: currentRotY + dx * 0.5
+                });
+            }
+
+            dice.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                idleAnim.pause();
+                dice.style.cursor = 'grabbing';
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const deltaX = e.clientX - startX;
+                const deltaY = e.clientY - startY;
+                updateRotation(deltaX, deltaY);
+                startX = e.clientX;
+                startY = e.clientY;
+            });
+
+            window.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    dice.style.cursor = 'grab';
+                    idleAnim.resume();
+                }
+            });
+            
+             dice.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                idleAnim.pause();
+            });
+
+            window.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                e.preventDefault();
+                const deltaX = e.touches[0].clientX - startX;
+                const deltaY = e.touches[0].clientY - startY;
+                updateRotation(deltaX, deltaY);
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+            });
+            
+            window.addEventListener('touchend', () => {
+                isDragging = false;
+                idleAnim.resume();
+            });
+        });
+
+    </script>
+</body>
+</html>
