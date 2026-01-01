@@ -477,7 +477,7 @@
         <!-- INTRO CARD ANIMATION CONTAINER -->
         <div class="absolute inset-0 w-full h-full pointer-events-none z-[2] overflow-hidden">
              <!-- Green Card: Evenly spaced between logo and text -->
-             <div id="intro-card-green" class="hero-card-scene absolute w-[88px] h-[140px] md:w-44 md:h-[280px] opacity-0 z-10" style="left: -300px; top: 40%;">
+             <div id="intro-card-green" class="hero-card-scene absolute w-[88px] h-[140px] md:w-44 md:h-[280px] opacity-0 z-10 top-[20%] md:top-[40%]" style="left: -300px;">
                 <div class="hero-card-inner">
                     <div class="hero-card-face hero-card-front drop-shadow-[0_0_20px_rgba(132,204,22,0.5)]">
                         <img id="green-card-img" src="BACKHAND_TOPSPIN.png" class="w-full h-full object-cover">
@@ -487,7 +487,7 @@
              </div>
 
              <!-- Orange Card: Evenly spaced between logo and text -->
-             <div id="intro-card-orange" class="hero-card-scene absolute w-[88px] h-[140px] md:w-44 md:h-[280px] opacity-0 z-10" style="right: -300px; top: 40%;">
+             <div id="intro-card-orange" class="hero-card-scene absolute w-[88px] h-[140px] md:w-44 md:h-[280px] opacity-0 z-10 top-[20%] md:top-[40%]" style="right: -300px;">
                 <div class="hero-card-inner">
                     <div class="hero-card-face hero-card-front drop-shadow-[0_0_20px_rgba(249,115,22,0.5)]">
                          <img id="orange-card-img" src="FOREHAND_TOPSPIN.png" class="w-full h-full object-cover">
@@ -529,8 +529,8 @@
             </div>
         </div>
         
-        <div class="absolute bottom-4 md:bottom-10 animate-bounce cursor-pointer z-10" onclick="document.getElementById('gameplay').scrollIntoView({behavior: 'smooth'})">
-             <svg class="w-6 h-6 md:w-8 md:h-8 text-lime-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+        <div class="absolute bottom-8 md:bottom-10 animate-bounce cursor-pointer z-[100]" onclick="document.getElementById('gameplay').scrollIntoView({behavior: 'smooth'})">
+             <svg class="w-8 h-8 md:w-10 md:h-10 text-lime-400 drop-shadow-[0_0_8px_rgba(132,204,22,0.8)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
         </div>
     </header>
 
