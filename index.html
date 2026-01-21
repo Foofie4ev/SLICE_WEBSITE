@@ -443,10 +443,10 @@
             </div>
             
             <!-- Navigation Arrows -->
-            <button onclick="prevPage()" class="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-lime-500/80 backdrop-blur-sm text-white p-3 rounded-full transition-all">
+            <button id="prev-arrow" onclick="prevPage()" class="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-lime-500/80 backdrop-blur-sm text-white p-3 rounded-full transition-all opacity-100">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"></path></svg>
             </button>
-            <button onclick="nextPage()" class="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-lime-500/80 backdrop-blur-sm text-white p-3 rounded-full transition-all">
+            <button id="next-arrow" onclick="nextPage()" class="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-lime-500/80 backdrop-blur-sm text-white p-3 rounded-full transition-all opacity-100">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
             </button>
         </div>
@@ -1664,11 +1664,45 @@
         ];
         
         let currentPage = parseInt(localStorage.getItem('pocketGuidePage')) || 0;
+        let arrowFadeTimeout;
+        
+        function fadeArrows() {
+            const prevArrow = document.getElementById('prev-arrow');
+            const nextArrow = document.getElementById('next-arrow');
+            
+            if (prevArrow && nextArrow) {
+                prevArrow.style.opacity = '0';
+                nextArrow.style.opacity = '0';
+                prevArrow.style.pointerEvents = 'none';
+                nextArrow.style.pointerEvents = 'none';
+            }
+        }
+        
+        function showArrows() {
+            const prevArrow = document.getElementById('prev-arrow');
+            const nextArrow = document.getElementById('next-arrow');
+            
+            if (prevArrow && nextArrow) {
+                prevArrow.style.opacity = '1';
+                nextArrow.style.opacity = '1';
+                prevArrow.style.pointerEvents = 'auto';
+                nextArrow.style.pointerEvents = 'auto';
+                
+                // Clear existing timeout
+                clearTimeout(arrowFadeTimeout);
+                
+                // Set new timeout to fade after 1.5 seconds
+                arrowFadeTimeout = setTimeout(fadeArrows, 1500);
+            }
+        }
         
         function openPocketGuide() {
             document.getElementById('pocket-guide-modal').classList.remove('hidden');
             updatePage();
             document.body.style.overflow = 'hidden';
+            
+            // Show arrows initially, then fade after 1.5s
+            showArrows();
         }
         
         function closePocketGuide() {
@@ -1699,6 +1733,7 @@
             if (currentPage < guidePages.length - 1) {
                 currentPage++;
                 updatePage();
+                showArrows(); // Show arrows again when changing page
             }
         }
         
@@ -1706,6 +1741,7 @@
             if (currentPage > 0) {
                 currentPage--;
                 updatePage();
+                showArrows(); // Show arrows again when changing page
             }
         }
         
@@ -1723,13 +1759,23 @@
         let touchStartX = 0;
         let touchEndX = 0;
         
-        document.getElementById('pocket-guide-modal').addEventListener('touchstart', (e) => {
+        const modal = document.getElementById('pocket-guide-modal');
+        
+        modal.addEventListener('touchstart', (e) => {
             touchStartX = e.changedTouches[0].screenX;
         });
         
-        document.getElementById('pocket-guide-modal').addEventListener('touchend', (e) => {
+        modal.addEventListener('touchend', (e) => {
             touchEndX = e.changedTouches[0].screenX;
             handleSwipe();
+        });
+        
+        // Tap/click anywhere on modal to show arrows
+        modal.addEventListener('click', (e) => {
+            // Don't trigger if clicking arrows or close button
+            if (!e.target.closest('button')) {
+                showArrows();
+            }
         });
         
         function handleSwipe() {
