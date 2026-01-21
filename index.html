@@ -424,6 +424,34 @@
         </div>
     </div>
 
+    <!-- Pocket Guide Modal -->
+    <div id="pocket-guide-modal" class="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl hidden flex items-center justify-center p-4">
+        <div class="relative w-full h-full flex items-center justify-center">
+            <!-- Close Button -->
+            <button onclick="closePocketGuide()" class="absolute top-4 right-4 z-20 text-white hover:text-lime-400 bg-black/50 rounded-full p-2 backdrop-blur-sm">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            
+            <!-- Page Counter -->
+            <div class="absolute top-4 left-1/2 -translate-x-1/2 z-20 bg-black/50 backdrop-blur-sm text-white px-4 py-2 rounded-full font-comic text-lg">
+                <span id="page-counter">1 / 8</span>
+            </div>
+            
+            <!-- Image Container -->
+            <div class="relative w-full h-full flex items-center justify-center p-4">
+                <img id="guide-image" src="POCKET_GUIDE_COVER.png" alt="Pocket Guide" class="max-w-full max-h-full w-auto h-auto object-contain" style="max-width: 500px;">
+            </div>
+            
+            <!-- Navigation Arrows -->
+            <button onclick="prevPage()" class="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-lime-500/80 backdrop-blur-sm text-white p-3 rounded-full transition-all">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+            <button onclick="nextPage()" class="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-lime-500/80 backdrop-blur-sm text-white p-3 rounded-full transition-all">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+        </div>
+    </div>
+
     <div id="flying-balls-container" class="fixed inset-0 w-full h-full pointer-events-none z-[5] overflow-hidden"></div>
 
     <div class="fixed inset-0 z-0 pointer-events-none">
@@ -444,7 +472,8 @@
             <div class="hidden md:flex gap-8 font-bold uppercase text-sm tracking-widest">
                 <a href="#gameplay" class="hover:text-lime-400 transition-colors">Gameplay</a>
                 <a href="#cards" class="hover:text-lime-400 transition-colors">The Deck</a>
-                <a href="#rules" class="hover:text-lime-400 transition-colors">Rules</a>
+                <a href="#rules" class="hover:text-lime-400 transition-colors">Overview</a>
+                <a href="javascript:void(0)" onclick="openPocketGuide()" class="hover:text-lime-400 transition-colors">How to Play</a>
             </div>
             
             <!-- Mobile Menu Button -->
@@ -464,7 +493,8 @@
             <div class="container mx-auto px-4 py-4 flex flex-col gap-3">
                 <a href="#gameplay" onclick="toggleMobileMenu()" class="font-bold uppercase text-sm tracking-widest hover:text-lime-400 transition-colors py-2">Gameplay</a>
                 <a href="#cards" onclick="toggleMobileMenu()" class="font-bold uppercase text-sm tracking-widest hover:text-lime-400 transition-colors py-2">The Deck</a>
-                <a href="#rules" onclick="toggleMobileMenu()" class="font-bold uppercase text-sm tracking-widest hover:text-lime-400 transition-colors py-2">Rules</a>
+                <a href="#rules" onclick="toggleMobileMenu()" class="font-bold uppercase text-sm tracking-widest hover:text-lime-400 transition-colors py-2">Overview</a>
+                <a href="javascript:void(0)" onclick="toggleMobileMenu(); openPocketGuide()" class="font-bold uppercase text-sm tracking-widest hover:text-lime-400 transition-colors py-2">How to Play</a>
             </div>
         </div>
     </nav>
@@ -736,6 +766,23 @@
                     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-lime-500/10 blur-3xl -z-10 rounded-full"></div>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <!-- Pocket Guide Section -->
+    <section id="pocket-guide" class="relative z-10 py-16 md:py-24 bg-neutral-900 border-t border-white/10">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="font-comic text-4xl md:text-5xl mb-4 text-white">LEARN TO <span class="text-lime-400">PLAY!</span></h2>
+            <p class="text-gray-400 text-lg md:text-xl mb-10 max-w-2xl mx-auto">
+                New to SLICE? Check out our quick-start Pocket Guide! Perfect for learning the game or refreshing your memory between matches.
+            </p>
+            
+            <button onclick="openPocketGuide()" class="group bg-gradient-to-r from-lime-500 to-lime-600 text-black font-comic text-xl md:text-2xl px-10 py-4 md:px-12 md:py-5 rounded-full shadow-lg hover:shadow-[0_0_30px_rgba(132,204,22,0.6)] transform hover:-translate-y-1 transition-all border-2 border-white/20 inline-flex items-center gap-3">
+                <svg class="w-8 h-8 md:w-10 md:h-10 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                </svg>
+                View Pocket Guide
+            </button>
         </div>
     </section>
 
@@ -1603,6 +1650,92 @@
                 }
             });
         });
+
+        // Pocket Guide Carousel
+        const guidePages = [
+            'POCKET_GUIDE_COVER.png',
+            'PAGE1_DRAW_AND_SERVE.png',
+            'PAGE2_THE_RALLY_GS.png',
+            'PAGE3_NET_CARDS.png',
+            'PAGE4_TACTICAL_CARDS.png',
+            'PAGE5_SPECIAL_CARDS.png',
+            'PAGE6_MODIFIER_CARDS.png',
+            'PAGE7_SCORING.png'
+        ];
+        
+        let currentPage = parseInt(localStorage.getItem('pocketGuidePage')) || 0;
+        
+        function openPocketGuide() {
+            document.getElementById('pocket-guide-modal').classList.remove('hidden');
+            updatePage();
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closePocketGuide() {
+            document.getElementById('pocket-guide-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+        
+        function updatePage() {
+            const img = document.getElementById('guide-image');
+            const counter = document.getElementById('page-counter');
+            
+            // Create new image to force reload
+            const newSrc = guidePages[currentPage];
+            img.onerror = function() {
+                console.error('Failed to load image:', newSrc);
+            };
+            img.onload = function() {
+                console.log('Successfully loaded:', newSrc, 'Dimensions:', img.naturalWidth, 'x', img.naturalHeight);
+            };
+            
+            img.src = newSrc;
+            counter.textContent = `${currentPage + 1} / ${guidePages.length}`;
+            
+            localStorage.setItem('pocketGuidePage', currentPage);
+        }
+        
+        function nextPage() {
+            if (currentPage < guidePages.length - 1) {
+                currentPage++;
+                updatePage();
+            }
+        }
+        
+        function prevPage() {
+            if (currentPage > 0) {
+                currentPage--;
+                updatePage();
+            }
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            const modal = document.getElementById('pocket-guide-modal');
+            if (!modal.classList.contains('hidden')) {
+                if (e.key === 'ArrowRight') nextPage();
+                if (e.key === 'ArrowLeft') prevPage();
+                if (e.key === 'Escape') closePocketGuide();
+            }
+        });
+        
+        // Touch swipe support for mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.getElementById('pocket-guide-modal').addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        document.getElementById('pocket-guide-modal').addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+        
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) nextPage(); // Swipe left
+            if (touchEndX > touchStartX + 50) prevPage(); // Swipe right
+        }
     </script>
 </body>
 </html>
