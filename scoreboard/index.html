@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>SLICE! Scoreboard</title>
     
-    <!-- PWA / Add to Home Screen -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="SLICE Scoreboard">
@@ -822,14 +821,11 @@
     </style>
 </head>
 <body>
-    <!-- Sign-in Screen -->
     <div id="signin-screen">
         <div class="phone-container">
-            <!-- Bouncing Tennis Balls -->
             <img src="LIME_1.png" class="tennis-ball" id="ball1" alt="">
             <img src="ORANGE_1.png" class="tennis-ball" id="ball2" alt="">
             
-            <!-- Content with padding -->
             <div class="content-wrapper">
                 <div class="logo-container">
                     <img src="SLICE_LOGO.png" alt="SLICE Logo">
@@ -849,7 +845,6 @@
         </div>
     </div>
     
-    <!-- Rotation Prompt -->
     <div id="rotation-prompt">
         <h2>Please Rotate Your Phone</h2>
         <p>Turn your device to landscape mode<br>for the best experience</p>
@@ -857,7 +852,6 @@
         <button id="skip-rotation-btn" onclick="skipRotation()">SKIP (Desktop Preview)</button>
     </div>
     
-    <!-- Match Type Modal -->
     <div id="match-type-modal" class="modal">
         <div class="modal-content">
             <h2>Select Match Type</h2>
@@ -866,9 +860,7 @@
         </div>
     </div>
     
-    <!-- Scoreboard Screen -->
     <div id="scoreboard-screen">
-        <!-- Floating Screenshot Button -->
         <button class="floating-screenshot-btn" onclick="takeScreenshot()" title="Screenshot">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
@@ -885,7 +877,6 @@
         <div id="orange-score" class="score-box" onclick="incrementScore('orange')">❤️</div>
         <div id="orange-games" class="score-box">0</div>
         
-        <!-- Dice Tower -->
         <div class="dice-tower">
             <button id="serve1-btn" class="dice-btn" onclick="rollDice('serve1')">1ST SERVE</button>
             <button id="serve2-btn" class="dice-btn" onclick="rollDice('serve2')">2ND SERVE</button>
@@ -893,11 +884,9 @@
             <button id="dropshot-btn" class="dice-btn" onclick="rollDice('dropshot')">DROP-SHOT</button>
         </div>
         
-        <!-- Match Format Display -->
         <div class="match-format" id="match-format-display"></div>
     </div>
     
-    <!-- Dice Result Modal -->
     <div id="dice-result-modal" class="modal">
         <div class="modal-content">
             <div id="dice-animation-container"></div>
@@ -906,7 +895,6 @@
         </div>
     </div>
     
-    <!-- Win Modal -->
     <div id="win-modal" class="modal">
         <div class="modal-content">
             <div id="win-message"></div>
@@ -931,6 +919,27 @@
         let greenName = "GREEN";
         let orangeName = "ORANGE";
         let isTiebreaker = false;
+        
+        // --- Fullscreen Helper Function ---
+        function toggleFullscreen() {
+            const elem = document.documentElement;
+            
+            // Check if we are already in fullscreen
+            const isFullscreen = document.fullscreenElement || 
+                                 document.webkitFullscreenElement || 
+                                 document.mozFullScreenElement || 
+                                 document.msFullscreenElement;
+        
+            if (!isFullscreen) {
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen().catch(err => console.log(err));
+                } else if (elem.webkitRequestFullscreen) { /* Safari */
+                    elem.webkitRequestFullscreen();
+                } else if (elem.msRequestFullscreen) { /* IE11 */
+                    elem.msRequestFullscreen();
+                }
+            }
+        }
         
         // Dice faces
         const diceFaces = {
@@ -989,6 +998,9 @@
         }
         
         function startMatch(games) {
+            // Attempt fullscreen when match starts
+            toggleFullscreen();
+
             if (games === 2) {
                 targetGames = 2;
                 matchType = 'best3';
@@ -1405,6 +1417,16 @@
             // Reinitialize balls on window resize
             window.addEventListener('resize', initBalls);
         }
+
+        /* --- Trigger Fullscreen on Tap --- */
+        document.addEventListener('click', function() {
+            // Only trigger if the scoreboard is currently visible
+            const scoreboard = document.getElementById('scoreboard-screen');
+            
+            if (scoreboard.style.display === 'block') {
+                toggleFullscreen();
+            }
+        });
     </script>
 </body>
 </html>
