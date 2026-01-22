@@ -27,9 +27,9 @@
             font-family: 'Arial Black', sans-serif;
             margin: 0;
             padding: 0;
+            overflow-x: hidden;
             width: 100vw;
-            min-height: calc(100vh + 1px);
-            position: relative;
+            min-height: 100vh;
         }
         
         /* Sign-in Screen */
@@ -43,7 +43,7 @@
             display: block;
             padding: 0;
             margin: 0;
-            position: relative;
+            position: absolute;
             top: 0;
             left: 0;
             overflow-x: hidden;
@@ -53,14 +53,14 @@
         /* Phone screen container - full screen */
         .phone-container {
             width: 100vw;
-            min-height: 100vh;
+            height: 100vh;
             position: relative;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
             align-items: center;
             padding: 0;
-            overflow-x: hidden;
+            overflow: hidden;
         }
         
         /* Content wrapper with padding for form elements only */
@@ -1405,30 +1405,32 @@
             window.addEventListener('resize', initBalls);
         }
         
-        // Fullscreen functionality - hide URL bar and navigation buttons on tap
-        let hasHiddenAddressBar = false;
-        
+        // Fullscreen functionality - hide URL bar and navigation buttons
         function hideAddressBar() {
-            if (!hasHiddenAddressBar) {
-                window.scrollTo(0, 1);
-                setTimeout(() => window.scrollTo(0, 0), 10);
-                hasHiddenAddressBar = true;
-            }
+            // Trigger browser to hide address bar by scrolling
+            window.scrollTo(0, 1);
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+            }, 0);
         }
         
-        // Trigger on user interaction
-        document.addEventListener('touchstart', hideAddressBar, { once: true });
-        document.addEventListener('click', hideAddressBar, { once: true });
+        // Trigger on first touch/click
+        document.addEventListener('touchstart', function() {
+            hideAddressBar();
+        }, { once: true });
         
-        // Trigger on load
-        window.addEventListener('load', () => {
+        document.addEventListener('click', function() {
+            hideAddressBar();
+        }, { once: true });
+        
+        // Also trigger on page load
+        window.addEventListener('load', function() {
             setTimeout(hideAddressBar, 100);
         });
         
-        // Re-trigger on orientation change
-        window.addEventListener('orientationchange', () => {
-            hasHiddenAddressBar = false;
-            setTimeout(hideAddressBar, 100);
+        // Re-hide on orientation change
+        window.addEventListener('orientationchange', function() {
+            setTimeout(hideAddressBar, 200);
         });
     </script>
 </body>
