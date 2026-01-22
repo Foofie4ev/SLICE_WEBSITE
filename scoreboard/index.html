@@ -2,17 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2e7d32">
     <title>SLICE! Scoreboard</title>
-    
-    <!-- PWA / Add to Home Screen -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="SLICE Scoreboard">
-    <meta name="mobile-web-app-capable" content="yes">
-    <link rel="apple-touch-icon" href="SLICE_LOGO.png">
-    <link rel="icon" type="image/png" href="SLICE_LOGO.png">
-    
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -27,10 +19,9 @@
             font-family: 'Arial Black', sans-serif;
             margin: 0;
             padding: 0;
-            overflow: hidden;
             width: 100vw;
-            height: 100vh;
-            position: fixed;
+            min-height: 100dvh;
+            overscroll-behavior: none;
         }
         
         /* Sign-in Screen */
@@ -40,45 +31,28 @@
                 radial-gradient(circle at 70% 60%, rgba(255,136,0,0.3) 0%, transparent 50%),
                 linear-gradient(135deg, #1a5d1a 0%, #2e7d32 25%, #ff8f00 75%, #ff6f00 100%);
             width: 100vw;
-            height: 100vh;
+            min-height: 100dvh;
             display: block;
-            padding: 0;
+            padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
             margin: 0;
-            position: fixed;
-            top: 0;
-            left: 0;
-            overflow: hidden;
             box-shadow: inset 0 0 100px rgba(0,0,0,0.3);
         }
         
         /* Phone screen container - full screen */
         .phone-container {
             width: 100vw;
-            min-height: 101vh; /* Slightly taller to enable scroll */
+            min-height: 100dvh;
             position: relative;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
             align-items: center;
             padding: 0;
-            overflow-y: auto; /* Enable vertical scroll */
-            overflow-x: hidden;
-            overscroll-behavior: none; /* Prevent pull-to-refresh */
-            touch-action: pan-y; /* Allow vertical scroll but prevent default gestures */
-        }
-        
-        /* Hide scrollbar but keep scroll functionality */
-        .phone-container::-webkit-scrollbar {
-            display: none;
-        }
-        .phone-container {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
         }
         
         /* Content wrapper with padding for form elements only */
         .content-wrapper {
-            padding: 40px 20px 20px 20px;
+            padding: max(env(safe-area-inset-top), 40px) 20px max(env(safe-area-inset-bottom), 20px) 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -236,7 +210,7 @@
             top: 0;
             left: 0;
             width: 100vw;
-            height: 100vh;
+            height: 100dvh;
             background: linear-gradient(135deg, #1a5d1a 0%, #2e7d32 25%, #ff8f00 75%, #ff6f00 100%);
             z-index: 1000;
             flex-direction: column;
@@ -1416,11 +1390,6 @@
             
             // Reinitialize balls on window resize
             window.addEventListener('resize', initBalls);
-            
-            // Auto-hide URL bar on mobile by scrolling slightly
-            setTimeout(() => {
-                window.scrollTo(0, 1);
-            }, 100);
         }
     </script>
 </body>
