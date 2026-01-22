@@ -27,9 +27,10 @@
             font-family: 'Arial Black', sans-serif;
             margin: 0;
             padding: 0;
-            overflow-x: hidden;
+            overflow: hidden;
             width: 100vw;
-            min-height: 100vh;
+            height: 100vh;
+            position: fixed;
         }
         
         /* Sign-in Screen */
@@ -39,14 +40,14 @@
                 radial-gradient(circle at 70% 60%, rgba(255,136,0,0.3) 0%, transparent 50%),
                 linear-gradient(135deg, #1a5d1a 0%, #2e7d32 25%, #ff8f00 75%, #ff6f00 100%);
             width: 100vw;
-            min-height: 100vh;
+            height: 100vh;
             display: block;
             padding: 0;
             margin: 0;
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
-            overflow-x: hidden;
+            overflow: hidden;
             box-shadow: inset 0 0 100px rgba(0,0,0,0.3);
         }
         
@@ -1404,34 +1405,6 @@
             // Reinitialize balls on window resize
             window.addEventListener('resize', initBalls);
         }
-        
-        // Fullscreen functionality - hide URL bar and navigation buttons
-        function hideAddressBar() {
-            // Trigger browser to hide address bar by scrolling
-            window.scrollTo(0, 1);
-            setTimeout(() => {
-                window.scrollTo(0, 0);
-            }, 0);
-        }
-        
-        // Trigger on first touch/click
-        document.addEventListener('touchstart', function() {
-            hideAddressBar();
-        }, { once: true });
-        
-        document.addEventListener('click', function() {
-            hideAddressBar();
-        }, { once: true });
-        
-        // Also trigger on page load
-        window.addEventListener('load', function() {
-            setTimeout(hideAddressBar, 100);
-        });
-        
-        // Re-hide on orientation change
-        window.addEventListener('orientationchange', function() {
-            setTimeout(hideAddressBar, 200);
-        });
     </script>
 </body>
 </html>
