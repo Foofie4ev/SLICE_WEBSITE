@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>SLICE! Scoreboard</title>
     
     <!-- PWA / Add to Home Screen -->
@@ -1405,6 +1405,36 @@
             // Reinitialize balls on window resize
             window.addEventListener('resize', initBalls);
         }
+        
+        // Fullscreen functionality - hide URL bar and nav buttons on mobile
+        let hasTriggeredFullscreen = false;
+        
+        function enterFullscreen() {
+            if (!hasTriggeredFullscreen) {
+                // Scroll slightly to trigger browser UI to hide
+                window.scrollTo(0, 1);
+                // Scroll back to maintain layout
+                setTimeout(() => window.scrollTo(0, 0), 10);
+                hasTriggeredFullscreen = true;
+            }
+        }
+        
+        // Trigger fullscreen on any user interaction
+        document.addEventListener('touchstart', enterFullscreen, { once: true });
+        document.addEventListener('click', enterFullscreen, { once: true });
+        
+        // Also trigger on page load after a brief delay
+        window.addEventListener('load', () => {
+            setTimeout(enterFullscreen, 100);
+        });
+        
+        // Maintain fullscreen when orientation changes
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                window.scrollTo(0, 1);
+                setTimeout(() => window.scrollTo(0, 0), 10);
+            }, 100);
+        });
     </script>
 </body>
 </html>
