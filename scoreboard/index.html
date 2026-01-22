@@ -67,7 +67,7 @@
         
         /* Content wrapper with padding for form elements only */
         .content-wrapper {
-            padding: 40px 20px 20px 20px;
+            padding: 15px 20px 20px 20px; /* Reduced top padding from 40px to 15px to raise logo */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -112,6 +112,8 @@
             color: white;
             text-shadow: 4px 4px 8px rgba(0,0,0,0.8);
             letter-spacing: 0.1em;
+            text-align: center;
+            line-height: 1.2;
         }
         
         .name-input-group {
@@ -416,7 +418,7 @@
         /* Green side - left to right: SCORE then GAMES */
         #green-score {
             top: 50%;
-            left: 6.5%; /* Restored to near original (5.5%) + tiny nudge right */
+            left: 6.0%; /* Slightly left from 6.5% */
         }
         
         #green-games {
@@ -428,7 +430,7 @@
         /* Orange side - right to left: GAMES then SCORE (mirrored from green) */
         #orange-games {
             top: 54%; /* Lowered from 52% */
-            right: 2%; /* Moved from 1.5% to 2% (halfway between 1.5% and 2.5%) */
+            right: 2.2%; /* Slightly left (increased from 2%) */
             font-size: 5.6rem;
             color: #ff8800;
             text-shadow: 0 0 10px rgba(255,136,0,0.8);
@@ -497,122 +499,6 @@
         #dropshot-btn {
             background: linear-gradient(180deg, #fde047 0%, #facc15 50%, #eab308 100%);
             border-color: #fbbf24;
-            color: #333;
-            text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
-        }
-        
-        /* Dice Result Modal with Animation */
-        #dice-result-modal .modal-content {
-            padding: 30px 20px;
-            background: linear-gradient(135deg, #1a5d1a 0%, #2e7d32 25%, #ff8f00 75%, #ff6f00 100%);
-            border-radius: 20px;
-            min-width: 320px;
-            max-width: 350px;
-            min-height: 320px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-        }
-        
-        .rolling-text {
-            font-size: 1.8rem;
-            font-weight: 900;
-            margin-bottom: 20px;
-            font-family: 'Orbitron', monospace;
-            letter-spacing: 0.2em;
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .rolling-text span {
-            opacity: 0;
-            display: inline-block;
-            animation: letterReveal 0.15s forwards;
-        }
-        
-        .rolling-text span:nth-child(1) { animation-delay: 0s; }
-        .rolling-text span:nth-child(2) { animation-delay: 0.1s; }
-        .rolling-text span:nth-child(3) { animation-delay: 0.2s; }
-        .rolling-text span:nth-child(4) { animation-delay: 0.3s; }
-        .rolling-text span:nth-child(5) { animation-delay: 0.4s; }
-        .rolling-text span:nth-child(6) { animation-delay: 0.5s; }
-        .rolling-text span:nth-child(7) { animation-delay: 0.6s; }
-        .rolling-text span:nth-child(8) { animation-delay: 0.7s; }
-        .rolling-text span:nth-child(9) { animation-delay: 0.8s; }
-        .rolling-text span:nth-child(10) { animation-delay: 0.9s; }
-        
-        @keyframes letterReveal {
-            0% { opacity: 0; transform: translateY(-10px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-        
-        #dice-animation-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 180px;
-        }
-        
-        .let-message {
-            font-size: 1rem;
-            font-weight: 900;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
-            margin-top: 15px;
-            text-align: center;
-            font-family: 'Orbitron', monospace;
-            letter-spacing: 0.05em;
-        }
-        
-        .dice-animation {
-            width: 140px;
-            height: 140px;
-            margin: 0 auto;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            font-weight: 900;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            animation: diceRoll 1.5s ease-out;
-            box-shadow: 
-                0 8px 0 rgba(0,0,0,0.2),
-                0 12px 30px rgba(0,0,0,0.4),
-                inset 0 2px 0 rgba(255,255,255,0.3);
-        }
-        
-        @keyframes diceRoll {
-            0% { transform: rotate(0deg) scale(0.5); opacity: 0; }
-            50% { transform: rotate(720deg) scale(1.2); }
-            100% { transform: rotate(1080deg) scale(1); opacity: 1; }
-        }
-        
-        .dice-serve1 {
-            background: linear-gradient(180deg, #a3e635 0%, #65a30d 50%, #4d7c0f 100%);
-            border: 3px solid #84cc16;
-        }
-        
-        .dice-serve2 {
-            background: linear-gradient(180deg, #fb923c 0%, #ea580c 50%, #c2410c 100%);
-            border: 3px solid #f97316;
-        }
-        
-        .dice-volley {
-            background: linear-gradient(180deg, #c084fc 0%, #9333ea 50%, #7e22ce 100%);
-            border: 3px solid #a855f7;
-        }
-        
-        .dice-dropshot {
-            background: linear-gradient(180deg, #fde047 0%, #facc15 50%, #eab308 100%);
-            border: 3px solid #fbbf24;
             color: #333;
             text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
         }
@@ -854,7 +740,7 @@
             <div class="content-wrapper">
                 <div class="logo-container">
                     <img src="SLICE_LOGO.png" alt="SLICE Logo">
-                    <div class="scoreboard-title">SCOREBOARD</div>
+                    <div class="scoreboard-title">SCOREBOARD<br><span style="font-size: 0.8em">SIGN-IN</span></div>
                 </div>
                 
                 <div class="name-input-group">
@@ -1323,7 +1209,7 @@
                     canvas.toBlob(blob => {
                         const url = URL.createObjectURL(blob);
                         const link = document.createElement('a');
-                        link.download = 'slice-scoreboard.png';
+                        link.download = 'My SLICE Scorecard.png';
                         link.href = url;
                         link.click();
                         URL.revokeObjectURL(url);
@@ -1346,7 +1232,7 @@
                             // Must use toDataURL with tainted canvas, NOT toBlob
                             const dataUrl = canvas.toDataURL('image/png');
                             const link = document.createElement('a');
-                            link.download = 'slice-scoreboard.png';
+                            link.download = 'My SLICE Scorecard.png';
                             link.href = dataUrl;
                             link.click();
                             
