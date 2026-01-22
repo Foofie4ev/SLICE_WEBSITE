@@ -1,1 +1,1401 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>SLICE! Scoreboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: 'Arial Black', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+        }
+        
+        /* Sign-in Screen */
+        #signin-screen {
+            background: 
+                radial-gradient(circle at 30% 40%, rgba(132,204,22,0.3) 0%, transparent 50%),
+                radial-gradient(circle at 70% 60%, rgba(255,136,0,0.3) 0%, transparent 50%),
+                linear-gradient(135deg, #1a5d1a 0%, #2e7d32 25%, #ff8f00 75%, #ff6f00 100%);
+            width: 100vw;
+            height: 100vh;
+            display: block;
+            padding: 0;
+            margin: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.3);
+        }
+        
+        /* Phone screen container - full screen */
+        .phone-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        /* Content wrapper with padding for form elements only */
+        .content-wrapper {
+            padding: 40px 20px 20px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            z-index: 2;
+        }
+        
+        #signin-screen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(0deg, transparent, transparent 49px, rgba(255,255,255,0.03) 49px, rgba(255,255,255,0.03) 50px),
+                repeating-linear-gradient(90deg, transparent, transparent 49px, rgba(255,255,255,0.03) 49px, rgba(255,255,255,0.03) 50px);
+            opacity: 0.3;
+            z-index: 0;
+        }
+        
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 15px;
+            margin-top: 0;
+            z-index: 2;
+        }
+        
+        .logo-container img {
+            max-width: 360px;
+            width: 90%;
+            height: auto;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+            margin-bottom: 8px;
+        }
+        
+        .scoreboard-title {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: white;
+            text-shadow: 4px 4px 8px rgba(0,0,0,0.8);
+            letter-spacing: 0.1em;
+        }
+        
+        .name-input-group {
+            margin: 12px 0;
+            width: 100%;
+            max-width: 500px;
+            z-index: 2;
+        }
+        
+        .name-input-group label {
+            display: block;
+            font-size: 1.6rem;
+            font-weight: 900;
+            margin-bottom: 6px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
+            text-align: center;
+        }
+        
+        .green-label {
+            color: #84cc16;
+        }
+        
+        .orange-label {
+            color: #ff8800;
+        }
+        
+        .name-input-group input {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.2rem;
+            border: 4px solid white;
+            border-radius: 15px;
+            text-align: center;
+            font-weight: bold;
+            background: rgba(255,255,255,0.95);
+            box-shadow: 0 6px 0 rgba(0,0,0,0.3), 0 8px 15px rgba(0,0,0,0.4);
+            transition: all 0.2s;
+        }
+        
+        .name-input-group input:focus {
+            outline: none;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 rgba(0,0,0,0.3), 0 10px 20px rgba(0,0,0,0.5);
+        }
+        
+        #start-btn {
+            margin-top: 15px;
+            padding: 14px 50px;
+            font-size: 1.4rem;
+            font-weight: 900;
+            background: linear-gradient(180deg, #ffffff 0%, #e5e5e5 50%, #cccccc 100%);
+            color: #333;
+            border: 4px solid white;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+            box-shadow: 
+                0 6px 0 rgba(0,0,0,0.4),
+                0 8px 20px rgba(0,0,0,0.5),
+                inset 0 2px 0 rgba(255,255,255,0.5);
+            z-index: 2;
+        }
+        
+        #start-btn:active {
+            transform: translateY(4px);
+            box-shadow: 
+                0 2px 0 rgba(0,0,0,0.4),
+                0 4px 15px rgba(0,0,0,0.4);
+        }
+        
+        /* Bouncing Tennis Balls */
+        .tennis-ball {
+            position: absolute;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.6;
+            object-fit: contain;
+            filter: blur(2px);
+        }
+        
+        #ball1 {
+            /* Lime ball - now square */
+            width: 28%;
+            height: auto;
+        }
+        
+        #ball2 {
+            /* Orange ball - square, 25% bigger */
+            width: 35%;
+            height: auto;
+        }
+        
+        /* Mobile ball scaling - reduce size by ~40% */
+        @media (max-width: 768px) {
+            #ball1 {
+                width: 200px;
+                height: 112px;
+            }
+            
+            #ball2 {
+                width: 140px;
+                height: 140px;
+            }
+        }
+        
+        /* Rotation Prompt Screen */
+        #rotation-prompt {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #1a5d1a 0%, #2e7d32 25%, #ff8f00 75%, #ff6f00 100%);
+            z-index: 1000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+        
+        #rotation-prompt h2 {
+            font-size: 2.2rem;
+            color: white;
+            text-align: center;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
+            margin-bottom: 15px;
+            font-weight: 900;
+        }
+        
+        #rotation-prompt p {
+            font-size: 1.3rem;
+            color: white;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
+            margin-bottom: 40px;
+        }
+        
+        #skip-rotation-btn {
+            margin-top: 30px;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: 900;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            border: 3px solid white;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.3), 0 6px 15px rgba(0,0,0,0.4);
+            transition: all 0.2s;
+        }
+        
+        #skip-rotation-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.3), 0 4px 10px rgba(0,0,0,0.3);
+        }
+        
+        .rotate-icon {
+            font-size: 8rem;
+            filter: hue-rotate(90deg) brightness(1.2);
+            animation: rotatePhone 2s ease-in-out infinite;
+        }
+        
+        @keyframes rotatePhone {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(90deg); }
+        }
+        
+        /* Match Type Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 90%;
+        }
+        
+        .modal-content h2 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+        }
+        
+        .match-type-btn {
+            display: block;
+            width: 100%;
+            padding: 14px 22px;
+            margin: 15px 0;
+            font-size: 1.1rem;
+            font-weight: 900;
+            border: 3px solid rgba(255,255,255,0.8);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+            box-shadow: 
+                0 6px 0 rgba(0,0,0,0.4),
+                0 12px 25px rgba(0,0,0,0.3),
+                inset 0 2px 0 rgba(255,255,255,0.3),
+                inset 0 -2px 0 rgba(0,0,0,0.3);
+        }
+        
+        .match-type-btn:first-of-type {
+            background: linear-gradient(180deg, #a3e635 0%, #65a30d 50%, #4d7c0f 100%);
+            border-color: #84cc16;
+        }
+        
+        .match-type-btn:last-of-type {
+            background: linear-gradient(180deg, #fb923c 0%, #ea580c 50%, #c2410c 100%);
+            border-color: #f97316;
+        }
+        
+        .match-type-btn:active {
+            transform: translateY(4px);
+            box-shadow: 
+                0 2px 0 rgba(0,0,0,0.4),
+                0 6px 15px rgba(0,0,0,0.25),
+                inset 0 2px 0 rgba(255,255,255,0.3);
+        }
+        
+        /* Scoreboard Screen */
+        #scoreboard-screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            background-image: url('SLICE_SCOREBOARD_NEW.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+        }
+        
+        /* Player Names */
+        .player-name {
+            position: absolute;
+            font-size: 4rem;
+            font-weight: 900;
+            text-shadow: 4px 4px 8px rgba(0,0,0,1), -2px -2px 0 rgba(0,0,0,0.9), 2px -2px 0 rgba(0,0,0,0.9), -2px 2px 0 rgba(0,0,0,0.9), 2px 2px 0 rgba(0,0,0,0.9);
+            color: white;
+            text-align: center;
+        }
+        
+        #green-name {
+            top: 8%;
+            left: 5%;
+            text-align: left;
+        }
+        
+        #orange-name {
+            top: 8%;
+            right: 5%;
+            text-align: right;
+        }
+        
+        /* Score Boxes */
+        .score-box {
+            position: absolute;
+            font-family: 'Orbitron', monospace;
+            font-size: 6rem;
+            font-weight: 900;
+            color: #00ff00;
+            text-shadow: 0 0 10px rgba(0,255,0,0.8);
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 18%;
+            height: 22%;
+        }
+        
+        /* Green side - left to right: SCORE then GAMES */
+        #green-score {
+            top: 50%;
+            left: 5.5%;
+        }
+        
+        #green-games {
+            top: 52%;
+            left: 27%;
+            font-size: 7.5rem;
+        }
+        
+        /* Orange side - right to left: GAMES then SCORE (mirrored from green) */
+        #orange-games {
+            top: 52%;
+            right: 2.5%;
+            font-size: 7.5rem;
+            color: #ff8800;
+            text-shadow: 0 0 10px rgba(255,136,0,0.8);
+        }
+        
+        #orange-score {
+            top: 50%;
+            right: 23%;
+            color: #ff8800;
+            text-shadow: 0 0 10px rgba(255,136,0,0.8);
+        }
+        
+        /* Dice Tower */
+        .dice-tower {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 10;
+        }
+        
+        .dice-btn {
+            padding: 14px 22px;
+            font-size: 1rem;
+            font-weight: 900;
+            border: 3px solid rgba(255,255,255,0.8);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+            position: relative;
+            box-shadow: 
+                0 6px 0 rgba(0,0,0,0.4),
+                0 12px 25px rgba(0,0,0,0.3),
+                inset 0 2px 0 rgba(255,255,255,0.3),
+                inset 0 -2px 0 rgba(0,0,0,0.3);
+        }
+        
+        .dice-btn:active {
+            transform: translateY(4px);
+            box-shadow: 
+                0 2px 0 rgba(0,0,0,0.4),
+                0 6px 15px rgba(0,0,0,0.25),
+                inset 0 2px 0 rgba(255,255,255,0.3);
+        }
+        
+        #serve1-btn {
+            background: linear-gradient(180deg, #a3e635 0%, #65a30d 50%, #4d7c0f 100%);
+            border-color: #84cc16;
+        }
+        
+        #serve2-btn {
+            background: linear-gradient(180deg, #fb923c 0%, #ea580c 50%, #c2410c 100%);
+            border-color: #f97316;
+        }
+        
+        #volley-btn {
+            background: linear-gradient(180deg, #c084fc 0%, #9333ea 50%, #7e22ce 100%);
+            border-color: #a855f7;
+        }
+        
+        #dropshot-btn {
+            background: linear-gradient(180deg, #fde047 0%, #facc15 50%, #eab308 100%);
+            border-color: #fbbf24;
+            color: #333;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+        }
+        
+        /* Dice Result Modal with Animation */
+        #dice-result-modal .modal-content {
+            padding: 30px 20px;
+            background: linear-gradient(135deg, #1a5d1a 0%, #2e7d32 25%, #ff8f00 75%, #ff6f00 100%);
+            border-radius: 20px;
+            min-width: 320px;
+            max-width: 350px;
+            min-height: 320px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        
+        .rolling-text {
+            font-size: 1.8rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            font-family: 'Orbitron', monospace;
+            letter-spacing: 0.2em;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .rolling-text span {
+            opacity: 0;
+            display: inline-block;
+            animation: letterReveal 0.15s forwards;
+        }
+        
+        .rolling-text span:nth-child(1) { animation-delay: 0s; }
+        .rolling-text span:nth-child(2) { animation-delay: 0.1s; }
+        .rolling-text span:nth-child(3) { animation-delay: 0.2s; }
+        .rolling-text span:nth-child(4) { animation-delay: 0.3s; }
+        .rolling-text span:nth-child(5) { animation-delay: 0.4s; }
+        .rolling-text span:nth-child(6) { animation-delay: 0.5s; }
+        .rolling-text span:nth-child(7) { animation-delay: 0.6s; }
+        .rolling-text span:nth-child(8) { animation-delay: 0.7s; }
+        .rolling-text span:nth-child(9) { animation-delay: 0.8s; }
+        .rolling-text span:nth-child(10) { animation-delay: 0.9s; }
+        
+        @keyframes letterReveal {
+            0% { opacity: 0; transform: translateY(-10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        #dice-animation-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 180px;
+        }
+        
+        .let-message {
+            font-size: 1rem;
+            font-weight: 900;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
+            margin-top: 15px;
+            text-align: center;
+            font-family: 'Orbitron', monospace;
+            letter-spacing: 0.05em;
+        }
+        
+        .dice-animation {
+            width: 140px;
+            height: 140px;
+            margin: 0 auto;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 900;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: diceRoll 1.5s ease-out;
+            box-shadow: 
+                0 8px 0 rgba(0,0,0,0.2),
+                0 12px 30px rgba(0,0,0,0.4),
+                inset 0 2px 0 rgba(255,255,255,0.3);
+        }
+        
+        @keyframes diceRoll {
+            0% { transform: rotate(0deg) scale(0.5); opacity: 0; }
+            50% { transform: rotate(720deg) scale(1.2); }
+            100% { transform: rotate(1080deg) scale(1); opacity: 1; }
+        }
+        
+        .dice-serve1 {
+            background: linear-gradient(180deg, #a3e635 0%, #65a30d 50%, #4d7c0f 100%);
+            border: 3px solid #84cc16;
+        }
+        
+        .dice-serve2 {
+            background: linear-gradient(180deg, #fb923c 0%, #ea580c 50%, #c2410c 100%);
+            border: 3px solid #f97316;
+        }
+        
+        .dice-volley {
+            background: linear-gradient(180deg, #c084fc 0%, #9333ea 50%, #7e22ce 100%);
+            border: 3px solid #a855f7;
+        }
+        
+        .dice-dropshot {
+            background: linear-gradient(180deg, #fde047 0%, #facc15 50%, #eab308 100%);
+            border: 3px solid #fbbf24;
+            color: #333;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+        }
+        
+        /* Match Format Display */
+        .match-format {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2rem;
+            font-weight: 900;
+            color: white;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
+            font-family: 'Orbitron', monospace;
+            letter-spacing: 0.1em;
+            z-index: 10;
+        }
+        
+        /* Floating Screenshot Button */
+        .floating-screenshot-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(180deg, #ffffff 0%, #e5e5e5 50%, #cccccc 100%);
+            border: 3px solid rgba(255,255,255,0.9);
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            box-shadow: 
+                0 4px 0 rgba(0,0,0,0.4),
+                0 8px 20px rgba(0,0,0,0.3),
+                inset 0 2px 0 rgba(255,255,255,0.4);
+            z-index: 100;
+            transition: all 0.2s;
+        }
+        
+        .floating-screenshot-btn svg {
+            width: 28px;
+            height: 28px;
+            fill: #333;
+        }
+        
+        .floating-screenshot-btn:active {
+            transform: translateY(2px);
+            box-shadow: 
+                0 2px 0 rgba(0,0,0,0.4),
+                0 4px 12px rgba(0,0,0,0.25),
+                inset 0 2px 0 rgba(255,255,255,0.4);
+        }
+        
+        #dice-result {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin: 20px 0;
+            font-family: 'Orbitron', monospace;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        #close-dice-btn {
+            margin-top: 20px;
+            padding: 12px 35px;
+            font-size: 1.1rem;
+            font-weight: 900;
+            background: rgba(255,255,255,0.95);
+            color: #333;
+            border: 3px solid white;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.3), 0 6px 15px rgba(0,0,0,0.4);
+            transition: all 0.2s;
+        }
+        
+        #close-dice-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.3), 0 4px 10px rgba(0,0,0,0.3);
+        }
+        
+        /* Win Modal */
+        #win-modal .modal-content {
+            padding: 50px 30px;
+            background: linear-gradient(135deg, #1a5d1a 0%, #2e7d32 25%, #ff8f00 75%, #ff6f00 100%);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+        
+        #win-message {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 30px;
+            color: white;
+            text-shadow: 4px 4px 8px rgba(0,0,0,0.8);
+            font-family: 'Orbitron', monospace;
+            letter-spacing: 0.05em;
+            animation: winPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes winPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        #screenshot-btn, #new-match-btn {
+            padding: 14px 35px;
+            margin: 10px;
+            font-size: 1.1rem;
+            font-weight: 900;
+            border: 3px solid rgba(255,255,255,0.8);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+            box-shadow: 
+                0 6px 0 rgba(0,0,0,0.4),
+                0 12px 25px rgba(0,0,0,0.3),
+                inset 0 2px 0 rgba(255,255,255,0.3),
+                inset 0 -2px 0 rgba(0,0,0,0.3);
+        }
+        
+        #screenshot-btn {
+            background: linear-gradient(180deg, #c084fc 0%, #9333ea 50%, #7e22ce 100%);
+            border-color: #a855f7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        #screenshot-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+        
+        #new-match-btn {
+            background: linear-gradient(180deg, #ffffff 0%, #e5e5e5 50%, #cccccc 100%);
+            color: #333;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+        }
+        
+        #screenshot-btn:active, #new-match-btn:active {
+            transform: translateY(4px);
+            box-shadow: 
+                0 2px 0 rgba(0,0,0,0.4),
+                0 6px 15px rgba(0,0,0,0.25),
+                inset 0 2px 0 rgba(255,255,255,0.3);
+        }
+        
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            .logo-container {
+                margin-bottom: 5px;
+            }
+            
+            .logo-container img {
+                max-width: 280px;
+                margin-bottom: 0;
+            }
+            
+            .scoreboard-title {
+                font-size: 1.8rem;
+            }
+            
+            .name-input-group {
+                margin: 6px 0;
+            }
+            
+            .name-input-group label {
+                font-size: 1.4rem;
+                margin-bottom: 4px;
+            }
+            
+            .name-input-group input {
+                font-size: 1rem;
+                padding: 10px;
+            }
+            
+            #start-btn {
+                font-size: 1.2rem;
+                padding: 12px 40px;
+                margin-top: 8px;
+            }
+            
+            .phone-container {
+                padding: 15px 20px;
+            }
+            
+            .player-name {
+                font-size: 1.2rem;
+            }
+            
+            .score-box {
+                font-size: 2.5rem;
+            }
+            
+            #green-games, #orange-games {
+                font-size: 4.5rem;
+            }
+            
+            .score-box {
+                font-size: 3.5rem;
+            }
+            
+            .dice-btn {
+                font-size: 0.75rem;
+                padding: 10px 15px;
+            }
+            
+            #dice-result {
+                font-size: 2.5rem;
+            }
+            
+            #win-message {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sign-in Screen -->
+    <div id="signin-screen">
+        <div class="phone-container">
+            <!-- Bouncing Tennis Balls -->
+            <img src="LIME_1.png" class="tennis-ball" id="ball1" alt="">
+            <img src="ORANGE_1.png" class="tennis-ball" id="ball2" alt="">
+            
+            <!-- Content with padding -->
+            <div class="content-wrapper">
+                <div class="logo-container">
+                    <img src="SLICE_LOGO.png" alt="SLICE Logo">
+                    <div class="scoreboard-title">SCOREBOARD</div>
+                </div>
+                
+                <div class="name-input-group">
+                    <label class="green-label">GREEN TEAM NAME</label>
+                    <input type="text" id="green-name-input" placeholder="Enter name" maxlength="20">
+                </div>
+                <div class="name-input-group">
+                    <label class="orange-label">ORANGE TEAM NAME</label>
+                    <input type="text" id="orange-name-input" placeholder="Enter name" maxlength="20">
+                </div>
+                <button id="start-btn" onclick="showMatchTypeModal()">START MATCH</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Rotation Prompt -->
+    <div id="rotation-prompt">
+        <h2>Please Rotate Your Phone</h2>
+        <p>Turn your device to landscape mode<br>for the best experience</p>
+        <div class="rotate-icon">🔄</div>
+        <button id="skip-rotation-btn" onclick="skipRotation()">SKIP (Desktop Preview)</button>
+    </div>
+    
+    <!-- Match Type Modal -->
+    <div id="match-type-modal" class="modal">
+        <div class="modal-content">
+            <h2>Select Match Type</h2>
+            <button class="match-type-btn" onclick="startMatch(2)">BEST OF 3 GAMES</button>
+            <button class="match-type-btn" onclick="startMatch(6)">FIRST TO 6 GAMES</button>
+        </div>
+    </div>
+    
+    <!-- Scoreboard Screen -->
+    <div id="scoreboard-screen">
+        <!-- Floating Screenshot Button -->
+        <button class="floating-screenshot-btn" onclick="takeScreenshot()" title="Screenshot">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+                <circle cx="12" cy="12" r="3"/>
+            </svg>
+        </button>
+        
+        <div id="green-name" class="player-name">GREEN</div>
+        <div id="orange-name" class="player-name">ORANGE</div>
+        
+        <div id="green-score" class="score-box" onclick="incrementScore('green')">❤️</div>
+        <div id="green-games" class="score-box">0</div>
+        
+        <div id="orange-score" class="score-box" onclick="incrementScore('orange')">❤️</div>
+        <div id="orange-games" class="score-box">0</div>
+        
+        <!-- Dice Tower -->
+        <div class="dice-tower">
+            <button id="serve1-btn" class="dice-btn" onclick="rollDice('serve1')">1ST SERVE</button>
+            <button id="serve2-btn" class="dice-btn" onclick="rollDice('serve2')">2ND SERVE</button>
+            <button id="volley-btn" class="dice-btn" onclick="rollDice('volley')">VOLLEY</button>
+            <button id="dropshot-btn" class="dice-btn" onclick="rollDice('dropshot')">DROP-SHOT</button>
+        </div>
+        
+        <!-- Match Format Display -->
+        <div class="match-format" id="match-format-display"></div>
+    </div>
+    
+    <!-- Dice Result Modal -->
+    <div id="dice-result-modal" class="modal">
+        <div class="modal-content">
+            <div id="dice-animation-container"></div>
+            <div id="dice-result"></div>
+            <button id="close-dice-btn" onclick="closeDiceModal()">CLOSE</button>
+        </div>
+    </div>
+    
+    <!-- Win Modal -->
+    <div id="win-modal" class="modal">
+        <div class="modal-content">
+            <div id="win-message"></div>
+            <button id="screenshot-btn" onclick="takeScreenshot()">
+                SCREENSHOT FOR 
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/>
+                </svg>
+            </button>
+            <br>
+            <button id="new-match-btn" onclick="newMatch()">NEW MATCH</button>
+        </div>
+    </div>
+    
+    <script>
+        let greenPoints = 0;
+        let orangePoints = 0;
+        let greenGames = 0;
+        let orangeGames = 0;
+        let targetGames = 2;
+        let matchType = 'best3'; // 'best3' or 'fullset'
+        let greenName = "GREEN";
+        let orangeName = "ORANGE";
+        let isTiebreaker = false;
+        
+        // Dice faces
+        const diceFaces = {
+            serve1: ["3⬇", "4⬇", "4⬆", "5⬆", "LET", "FAULT!"],
+            serve2: ["1⬆", "2⬆", "3⬆", "4⬇", "LET", "FAULT!"],
+            volley: ["6⬆", "6⬆", "7", "7", "OUT!", "NET!"],
+            dropshot: ["2⬇", "2⬇", "1", "1", "OUT!", "NET!"]
+        };
+        
+        function showMatchTypeModal() {
+            const greenInput = document.getElementById('green-name-input').value.trim();
+            const orangeInput = document.getElementById('orange-name-input').value.trim();
+            
+            if (!greenInput || !orangeInput) {
+                alert("Please enter both team names!");
+                return;
+            }
+            
+            greenName = greenInput;
+            orangeName = orangeInput;
+            
+            // Check if device is in portrait mode
+            if (window.innerHeight > window.innerWidth) {
+                // Show rotation prompt
+                document.getElementById('rotation-prompt').style.display = 'flex';
+                
+                // Listen for orientation change
+                window.addEventListener('orientationchange', checkOrientation);
+                window.addEventListener('resize', checkOrientation);
+            } else {
+                // Already in landscape, show match type modal
+                document.getElementById('match-type-modal').style.display = 'flex';
+            }
+        }
+        
+        function checkOrientation() {
+            if (window.innerWidth > window.innerHeight) {
+                // Now in landscape
+                document.getElementById('rotation-prompt').style.display = 'none';
+                document.getElementById('match-type-modal').style.display = 'flex';
+                
+                // Remove listeners
+                window.removeEventListener('orientationchange', checkOrientation);
+                window.removeEventListener('resize', checkOrientation);
+            }
+        }
+        
+        function skipRotation() {
+            // For desktop testing - skip rotation prompt
+            document.getElementById('rotation-prompt').style.display = 'none';
+            document.getElementById('match-type-modal').style.display = 'flex';
+            
+            // Remove listeners if they exist
+            window.removeEventListener('orientationchange', checkOrientation);
+            window.removeEventListener('resize', checkOrientation);
+        }
+        
+        function startMatch(games) {
+            if (games === 2) {
+                targetGames = 2;
+                matchType = 'best3';
+                document.getElementById('match-format-display').textContent = 'BEST OF 3';
+            } else {
+                targetGames = 6;
+                matchType = 'fullset';
+                document.getElementById('match-format-display').textContent = 'FULL SET';
+            }
+            
+            document.getElementById('match-type-modal').style.display = 'none';
+            document.getElementById('signin-screen').style.display = 'none';
+            document.getElementById('scoreboard-screen').style.display = 'block';
+            
+            document.getElementById('green-name').textContent = greenName.toUpperCase();
+            document.getElementById('orange-name').textContent = orangeName.toUpperCase();
+        }
+        
+        function getTennisScore(points) {
+            switch (points) {
+                case 0: return "❤️";
+                case 1: return "15";
+                case 2: return "30";
+                case 3: return "40";
+                default: return "40";
+            }
+        }
+        
+        function incrementScore(team) {
+            if (team === 'green') {
+                greenPoints++;
+                if (greenPoints >= 4) {
+                    greenGames++;
+                    document.getElementById('green-games').textContent = greenGames;
+                    resetPoints();
+                    
+                    // If in tiebreaker, winning this game wins the match
+                    if (isTiebreaker) {
+                        showWinner(greenName);
+                    } else {
+                        checkWinner();
+                    }
+                } else {
+                    document.getElementById('green-score').textContent = getTennisScore(greenPoints);
+                }
+            } else if (team === 'orange') {
+                orangePoints++;
+                if (orangePoints >= 4) {
+                    orangeGames++;
+                    document.getElementById('orange-games').textContent = orangeGames;
+                    resetPoints();
+                    
+                    // If in tiebreaker, winning this game wins the match
+                    if (isTiebreaker) {
+                        showWinner(orangeName);
+                    } else {
+                        checkWinner();
+                    }
+                } else {
+                    document.getElementById('orange-score').textContent = getTennisScore(orangePoints);
+                }
+            }
+        }
+        
+        function resetPoints() {
+            greenPoints = 0;
+            orangePoints = 0;
+            document.getElementById('green-score').textContent = "❤️";
+            document.getElementById('orange-score').textContent = "❤️";
+        }
+        
+        function checkWinner() {
+            if (matchType === 'best3') {
+                // Best of 3: first to 2 games wins
+                if (greenGames >= 2) {
+                    showWinner(greenName);
+                } else if (orangeGames >= 2) {
+                    showWinner(orangeName);
+                }
+            } else if (matchType === 'fullset') {
+                // Full set: first to 6, win by 2
+                if (greenGames === 6 && orangeGames === 6 && !isTiebreaker) {
+                    // Tied at 6-6: sudden death tiebreaker
+                    isTiebreaker = true;
+                    resetPoints();
+                    alert("SUDDEN DEATH TIEBREAKER!\nNext GAME wins the match!");
+                } else if (isTiebreaker) {
+                    // In tiebreaker mode - whoever reaches GAME (4 points) wins the match
+                    // This is checked after a game is won in incrementScore
+                    return;
+                } else {
+                    // Normal full set scoring
+                    if (greenGames >= 6 && greenGames - orangeGames >= 2) {
+                        showWinner(greenName);
+                    } else if (orangeGames >= 6 && orangeGames - greenGames >= 2) {
+                        showWinner(orangeName);
+                    }
+                }
+            }
+        }
+        
+        function showWinner(name) {
+            document.getElementById('win-message').textContent = `${name.toUpperCase()} WINS!`;
+            document.getElementById('win-modal').style.display = 'flex';
+        }
+        
+        function rollDice(type) {
+            const faces = diceFaces[type];
+            const result = faces[Math.floor(Math.random() * faces.length)];
+            
+            // Color classes for each dice type
+            const colorClass = {
+                'serve1': 'dice-serve1',
+                'serve2': 'dice-serve2',
+                'volley': 'dice-volley',
+                'dropshot': 'dice-dropshot'
+            }[type];
+            
+            // Text colors for ROLLING
+            const textColors = {
+                'serve1': '#65a30d',
+                'serve2': '#ea580c',
+                'volley': '#9333ea',
+                'dropshot': '#eab308'
+            };
+            
+            // Show modal
+            document.getElementById('dice-result-modal').style.display = 'flex';
+            
+            // Create ROLLING text above dice with letter-by-letter reveal
+            const animContainer = document.getElementById('dice-animation-container');
+            const rollingText = document.createElement('div');
+            rollingText.className = 'rolling-text';
+            rollingText.style.color = textColors[type];
+            rollingText.innerHTML = 'ROLLING...'.split('').map(char => `<span>${char}</span>`).join('');
+            
+            // Create animated dice (empty during animation)
+            const diceBox = document.createElement('div');
+            diceBox.className = `dice-animation ${colorClass}`;
+            diceBox.textContent = '';
+            
+            animContainer.innerHTML = '';
+            animContainer.appendChild(rollingText);
+            animContainer.appendChild(diceBox);
+            
+            // Hide the separate result element
+            const resultElement = document.getElementById('dice-result');
+            resultElement.style.display = 'none';
+            
+            // After animation, hide ROLLING text and show result in dice box
+            setTimeout(() => {
+                rollingText.style.display = 'none';
+                
+                diceBox.style.fontFamily = "'Orbitron', monospace";
+                diceBox.style.webkitTextStroke = '3px rgba(0,0,0,0.3)';
+                diceBox.style.textStroke = '3px rgba(0,0,0,0.3)';
+                diceBox.style.filter = 'drop-shadow(4px 4px 8px rgba(0,0,0,0.5))';
+                
+                // Check if result contains arrow
+                if (result.includes('⬇') || result.includes('⬆')) {
+                    const number = result.replace('⬇', '').replace('⬆', '');
+                    const arrow = result.includes('⬇') ? '⬇' : '⬆';
+                    diceBox.style.fontSize = '4rem';
+                    diceBox.textContent = number + arrow;
+                } else if (result.length > 2) {
+                    diceBox.style.fontSize = '1.6rem';
+                    diceBox.textContent = result;
+                } else {
+                    diceBox.style.fontSize = '4rem';
+                    diceBox.textContent = result;
+                }
+                
+                // Handle FAULT results
+                const closeBtn = document.getElementById('close-dice-btn');
+                
+                // Check for LET result and add message
+                if (result === 'LET') {
+                    const letMessage = document.createElement('div');
+                    letMessage.className = 'let-message';
+                    letMessage.textContent = 'EACH PLAYER DRAW A CARD';
+                    animContainer.appendChild(letMessage);
+                }
+                
+                if (result === 'FAULT!' && type === 'serve1') {
+                    // 1st serve fault - show "2ND SERVE" button
+                    closeBtn.textContent = '2ND SERVE';
+                    closeBtn.style.background = 'linear-gradient(180deg, #fb923c 0%, #ea580c 50%, #c2410c 100%)';
+                    closeBtn.style.borderColor = '#f97316';
+                    closeBtn.style.color = 'white';
+                    closeBtn.onclick = function() {
+                        closeDiceModal();
+                        rollDice('serve2');
+                    };
+                } else if (result === 'FAULT!' && type === 'serve2') {
+                    // 2nd serve fault - show "LOSE THE POINT" (user updates score manually)
+                    closeBtn.textContent = 'LOSE THE POINT';
+                    closeBtn.style.background = 'linear-gradient(180deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%)';
+                    closeBtn.style.borderColor = '#f87171';
+                    closeBtn.style.color = 'white';
+                    closeBtn.onclick = closeDiceModal;
+                } else {
+                    // Normal result - show "CLOSE" button
+                    closeBtn.textContent = 'CLOSE';
+                    closeBtn.style.background = 'rgba(255,255,255,0.95)';
+                    closeBtn.style.borderColor = 'white';
+                    closeBtn.style.color = '#333';
+                    closeBtn.onclick = closeDiceModal;
+                }
+            }, 1500);
+        }
+        
+        function closeDiceModal() {
+            document.getElementById('dice-result-modal').style.display = 'none';
+        }
+        
+        function takeScreenshot(fromWinModal = false) {
+            // Hide the win modal if it's visible
+            const winModal = document.getElementById('win-modal');
+            const wasWinModalVisible = winModal.style.display === 'flex';
+            if (wasWinModalVisible) {
+                winModal.style.display = 'none';
+            }
+            
+            // Wait a moment for modal to hide
+            setTimeout(() => {
+                // Try the proper method first (for live server)
+                html2canvas(document.getElementById('scoreboard-screen'), {
+                    backgroundColor: null,
+                    scale: 2,
+                    logging: false,
+                    useCORS: true,
+                    allowTaint: false
+                }).then(canvas => {
+                    canvas.toBlob(blob => {
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.download = 'slice-scoreboard.png';
+                        link.href = url;
+                        link.click();
+                        URL.revokeObjectURL(url);
+                        
+                        if (wasWinModalVisible) {
+                            showScreenshotConfirmation();
+                        }
+                    });
+                }).catch(error => {
+                    console.log('First attempt failed, trying fallback for local testing...');
+                    // Fallback for local testing - use allowTaint and toDataURL
+                    html2canvas(document.getElementById('scoreboard-screen'), {
+                        backgroundColor: null,
+                        scale: 2,
+                        logging: false,
+                        allowTaint: true,
+                        useCORS: false
+                    }).then(canvas => {
+                        try {
+                            // Must use toDataURL with tainted canvas, NOT toBlob
+                            const dataUrl = canvas.toDataURL('image/png');
+                            const link = document.createElement('a');
+                            link.download = 'slice-scoreboard.png';
+                            link.href = dataUrl;
+                            link.click();
+                            
+                            if (wasWinModalVisible) {
+                                showScreenshotConfirmation();
+                            }
+                        } catch (err) {
+                            console.error('toDataURL failed:', err);
+                            alert('Screenshot failed. Please use your device screenshot function instead.');
+                            if (wasWinModalVisible) {
+                                document.getElementById('win-modal').style.display = 'flex';
+                            }
+                        }
+                    }).catch(err => {
+                        console.error('Fallback html2canvas failed:', err);
+                        alert('Screenshot failed. Please use your device screenshot function instead.');
+                        if (wasWinModalVisible) {
+                            document.getElementById('win-modal').style.display = 'flex';
+                        }
+                    });
+                });
+            }, 100);
+        }
+        
+        function showScreenshotConfirmation() {
+            const confirmed = confirm('Screenshot saved! Start a new match?');
+            if (confirmed) {
+                newMatch();
+            } else {
+                // Show win modal again
+                document.getElementById('win-modal').style.display = 'flex';
+            }
+        }
+        
+        function newMatch() {
+            greenPoints = 0;
+            orangePoints = 0;
+            greenGames = 0;
+            orangeGames = 0;
+            isTiebreaker = false;
+            
+            document.getElementById('green-score').textContent = "❤️";
+            document.getElementById('orange-score').textContent = "❤️";
+            document.getElementById('green-games').textContent = "0";
+            document.getElementById('orange-games').textContent = "0";
+            
+            document.getElementById('win-modal').style.display = 'none';
+            document.getElementById('scoreboard-screen').style.display = 'none';
+            document.getElementById('signin-screen').style.display = 'flex';
+            
+            document.getElementById('green-name-input').value = '';
+            document.getElementById('orange-name-input').value = '';
+        }
+        
+        // Physics-based bouncing tennis balls with dynamic sizing
+        let balls = [];
+        
+        function initBalls() {
+            const phoneContainer = document.querySelector('.phone-container');
+            if (!phoneContainer) return;
+            
+            const containerWidth = phoneContainer.offsetWidth;
+            
+            // Ball sizes as percentage of container width (both square now)
+            const ball1Width = containerWidth * 0.28; // 28% of container (lime)
+            const ball1Height = ball1Width; // Square aspect ratio
+            const ball2Width = containerWidth * 0.35; // 35% of container (orange - 25% bigger)
+            const ball2Height = ball2Width; // Square aspect ratio
+            
+            balls = [
+                { 
+                    element: document.getElementById('ball1'), 
+                    x: 50, 
+                    y: 200, 
+                    vx: 9, 
+                    vy: 6.75, 
+                    rotation: 0, 
+                    width: ball1Width, 
+                    height: ball1Height 
+                },
+                { 
+                    element: document.getElementById('ball2'), 
+                    x: containerWidth - ball2Width - 50, 
+                    y: 100, 
+                    vx: -8.25, 
+                    vy: 7.5, 
+                    rotation: 0, 
+                    width: ball2Width, 
+                    height: ball2Height 
+                }
+            ];
+        }
+        
+        function animateBalls() {
+            const signinScreen = document.getElementById('signin-screen');
+            const phoneContainer = document.querySelector('.phone-container');
+            
+            if (!signinScreen || signinScreen.style.display === 'none' || !phoneContainer) {
+                requestAnimationFrame(animateBalls);
+                return;
+            }
+            
+            // Use actual viewport dimensions for true screen edges
+            const containerWidth = window.innerWidth;
+            const containerHeight = window.innerHeight;
+            
+            balls.forEach(ball => {
+                // Get actual rendered dimensions from DOM
+                if (ball.element) {
+                    const actualWidth = ball.element.offsetWidth;
+                    const actualHeight = ball.element.offsetHeight;
+                    
+                    // Update ball dimensions if they've changed
+                    ball.width = actualWidth;
+                    ball.height = actualHeight;
+                }
+                
+                // Update position
+                ball.x += ball.vx;
+                ball.y += ball.vy;
+                
+                // Wall collision - allow balls to go well past the edge
+                // Negative buffer means ball center can be OUTSIDE the viewport
+                const edgeBuffer = -60; // Ball can go 60px past edge
+                
+                if (ball.x <= edgeBuffer || ball.x >= containerWidth - ball.width - edgeBuffer) {
+                    ball.vx *= -1;
+                    ball.x = ball.x <= edgeBuffer ? edgeBuffer : containerWidth - ball.width - edgeBuffer;
+                }
+                if (ball.y <= edgeBuffer || ball.y >= containerHeight - ball.height - edgeBuffer) {
+                    ball.vy *= -1;
+                    ball.y = ball.y <= edgeBuffer ? edgeBuffer : containerHeight - ball.height - edgeBuffer;
+                }
+                
+                // Update rotation based on velocity
+                ball.rotation += (Math.abs(ball.vx) + Math.abs(ball.vy)) * 2;
+                
+                // Apply to DOM
+                if (ball.element) {
+                    ball.element.style.left = ball.x + 'px';
+                    ball.element.style.top = ball.y + 'px';
+                    ball.element.style.transform = `rotate(${ball.rotation}deg)`;
+                }
+            });
+            
+            requestAnimationFrame(animateBalls);
+        }
+        
+        // Start ball animation when page loads
+        if (document.getElementById('ball1')) {
+            initBalls();
+            animateBalls();
+            
+            // Reinitialize balls on window resize
+            window.addEventListener('resize', initBalls);
+        }
+    </script>
+</body>
+</html>
