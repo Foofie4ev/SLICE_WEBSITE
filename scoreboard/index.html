@@ -428,7 +428,7 @@
         /* Orange side - right to left: GAMES then SCORE (mirrored from green) */
         #orange-games {
             top: 54%; /* Lowered from 52% */
-            right: 1.5%; /* Moved right from 2.5% */
+            right: 2%; /* Moved from 1.5% to 2% (halfway between 1.5% and 2.5%) */
             font-size: 5.6rem;
             color: #ff8800;
             text-shadow: 0 0 10px rgba(255,136,0,0.8);
@@ -444,7 +444,7 @@
         /* Dice Tower */
         .dice-tower {
             position: absolute;
-            top: 42%; /* Raised from 45% to 42% */
+            top: 46%; /* Lowered from 42% to balance with score boxes */
             left: 50%;
             transform: translateX(-50%);
             display: flex;
@@ -882,8 +882,8 @@
     <div id="match-type-modal" class="modal">
         <div class="modal-content">
             <h2>Select Match Type</h2>
-            <button class="match-type-btn" onclick="startMatch(2)">BEST OF 3 GAMES</button>
-            <button class="match-type-btn" onclick="startMatch(6)">FIRST TO 6 GAMES</button>
+            <button class="match-type-btn" onclick="selectMatchType(2)">BEST OF 3 GAMES</button>
+            <button class="match-type-btn" onclick="selectMatchType(6)">FULL SET</button>
         </div>
     </div>
     
@@ -952,6 +952,7 @@
         let greenName = "GREEN";
         let orangeName = "ORANGE";
         let isTiebreaker = false;
+        let selectedGames = 2; // Store game selection temporarily
         
         // --- Fullscreen & Orientation Helper Functions ---
         async function toggleFullscreen() {
@@ -992,6 +993,26 @@
                 }
             }
         }
+
+        // New helper to unlock orientation
+        async function unlockOrientation() {
+            if (screen.orientation && screen.orientation.unlock) {
+                try {
+                    screen.orientation.unlock();
+                    console.log("Orientation unlocked");
+                } catch (e) {
+                    console.log('Unlock failed:', e);
+                }
+            }
+            // Optional: Exit fullscreen to return to normal browsing state
+            if (document.fullscreenElement) {
+                if (document.exitFullscreen) {
+                    await document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    await document.webkitExitFullscreen();
+                }
+            }
+        }
         
         // Dice faces
         const diceFaces = {
@@ -1013,6 +1034,15 @@
             greenName = greenInput;
             orangeName = orangeInput;
             
+            // Just show the modal now, check orientation later
+            document.getElementById('match-type-modal').style.display = 'flex';
+        }
+
+        // New function to handle selection flow
+        function selectMatchType(games) {
+            selectedGames = games;
+            document.getElementById('match-type-modal').style.display = 'none';
+
             // Check if device is in portrait mode
             if (window.innerHeight > window.innerWidth) {
                 // Show rotation prompt
@@ -1022,8 +1052,8 @@
                 window.addEventListener('orientationchange', checkOrientation);
                 window.addEventListener('resize', checkOrientation);
             } else {
-                // Already in landscape, show match type modal
-                document.getElementById('match-type-modal').style.display = 'flex';
+                // Already in landscape, start immediately
+                startMatch(selectedGames);
             }
         }
         
@@ -1031,22 +1061,26 @@
             if (window.innerWidth > window.innerHeight) {
                 // Now in landscape
                 document.getElementById('rotation-prompt').style.display = 'none';
-                document.getElementById('match-type-modal').style.display = 'flex';
                 
                 // Remove listeners
                 window.removeEventListener('orientationchange', checkOrientation);
                 window.removeEventListener('resize', checkOrientation);
+
+                // Start the match with the stored selection
+                startMatch(selectedGames);
             }
         }
         
         function skipRotation() {
-            // For desktop testing - skip rotation prompt
+            // For desktop testing or force skip - skip rotation prompt
             document.getElementById('rotation-prompt').style.display = 'none';
-            document.getElementById('match-type-modal').style.display = 'flex';
             
             // Remove listeners if they exist
             window.removeEventListener('orientationchange', checkOrientation);
             window.removeEventListener('resize', checkOrientation);
+
+            // Start match
+            startMatch(selectedGames);
         }
         
         function startMatch(games) {
@@ -1348,6 +1382,9 @@
         }
         
         function newMatch() {
+            // Unlock orientation when starting a new match
+            unlockOrientation();
+
             greenPoints = 0;
             orangePoints = 0;
             greenGames = 0;
