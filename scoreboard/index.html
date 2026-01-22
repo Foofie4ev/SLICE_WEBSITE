@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>SLICE! Scoreboard</title>
     
+    <!-- PWA / Add to Home Screen -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="SLICE Scoreboard">
@@ -367,13 +368,13 @@
         }
         
         #green-name {
-            top: 8%;
+            top: 3%; /* RAISED from 8% to 3% to cover background name */
             left: 5%;
             text-align: left;
         }
         
         #orange-name {
-            top: 8%;
+            top: 3%; /* RAISED from 8% to 3% to cover background name */
             right: 5%;
             text-align: right;
         }
@@ -402,16 +403,16 @@
         }
         
         #green-games {
-            top: 52%;
+            top: 58%; /* LOWERED from 52% */
             left: 27%;
-            font-size: 7.5rem;
+            font-size: 5.6rem; /* REDUCED from 7.5rem */
         }
         
         /* Orange side - right to left: GAMES then SCORE (mirrored from green) */
         #orange-games {
-            top: 52%;
+            top: 58%; /* LOWERED from 52% */
             right: 2.5%;
-            font-size: 7.5rem;
+            font-size: 5.6rem; /* REDUCED from 7.5rem */
             color: #ff8800;
             text-shadow: 0 0 10px rgba(255,136,0,0.8);
         }
@@ -431,13 +432,13 @@
             transform: translateX(-50%);
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px; /* REDUCED gap */
             z-index: 10;
         }
         
         .dice-btn {
-            padding: 14px 22px;
-            font-size: 1rem;
+            padding: 10px 18px; /* REDUCED padding */
+            font-size: 0.9rem; /* REDUCED font size */
             font-weight: 900;
             border: 3px solid rgba(255,255,255,0.8);
             border-radius: 12px;
@@ -602,10 +603,10 @@
         /* Match Format Display */
         .match-format {
             position: absolute;
-            bottom: 20px;
+            bottom: 5px; /* LOWERED to bottom edge */
             left: 50%;
             transform: translateX(-50%);
-            font-size: 2rem;
+            font-size: 1.2rem; /* REDUCED from 2rem */
             font-weight: 900;
             color: white;
             text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
@@ -798,16 +799,20 @@
             }
             
             #green-games, #orange-games {
-                font-size: 4.5rem;
+                font-size: 3.5rem; /* SIGNIFICANTLY REDUCED for mobile */
             }
             
             .score-box {
                 font-size: 3.5rem;
             }
             
+            .dice-tower {
+                gap: 4px; /* TIGHTER gap for mobile */
+            }
+
             .dice-btn {
-                font-size: 0.75rem;
-                padding: 10px 15px;
+                font-size: 0.65rem; /* MUCH SMALLER text for mobile */
+                padding: 6px 10px; /* MUCH SMALLER padding for mobile */
             }
             
             #dice-result {
@@ -821,11 +826,14 @@
     </style>
 </head>
 <body>
+    <!-- Sign-in Screen -->
     <div id="signin-screen">
         <div class="phone-container">
+            <!-- Bouncing Tennis Balls -->
             <img src="LIME_1.png" class="tennis-ball" id="ball1" alt="">
             <img src="ORANGE_1.png" class="tennis-ball" id="ball2" alt="">
             
+            <!-- Content with padding -->
             <div class="content-wrapper">
                 <div class="logo-container">
                     <img src="SLICE_LOGO.png" alt="SLICE Logo">
@@ -845,6 +853,7 @@
         </div>
     </div>
     
+    <!-- Rotation Prompt -->
     <div id="rotation-prompt">
         <h2>Please Rotate Your Phone</h2>
         <p>Turn your device to landscape mode<br>for the best experience</p>
@@ -852,6 +861,7 @@
         <button id="skip-rotation-btn" onclick="skipRotation()">SKIP (Desktop Preview)</button>
     </div>
     
+    <!-- Match Type Modal -->
     <div id="match-type-modal" class="modal">
         <div class="modal-content">
             <h2>Select Match Type</h2>
@@ -860,7 +870,9 @@
         </div>
     </div>
     
+    <!-- Scoreboard Screen -->
     <div id="scoreboard-screen">
+        <!-- Floating Screenshot Button -->
         <button class="floating-screenshot-btn" onclick="takeScreenshot()" title="Screenshot">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
@@ -877,6 +889,7 @@
         <div id="orange-score" class="score-box" onclick="incrementScore('orange')">❤️</div>
         <div id="orange-games" class="score-box">0</div>
         
+        <!-- Dice Tower -->
         <div class="dice-tower">
             <button id="serve1-btn" class="dice-btn" onclick="rollDice('serve1')">1ST SERVE</button>
             <button id="serve2-btn" class="dice-btn" onclick="rollDice('serve2')">2ND SERVE</button>
@@ -884,9 +897,11 @@
             <button id="dropshot-btn" class="dice-btn" onclick="rollDice('dropshot')">DROP-SHOT</button>
         </div>
         
+        <!-- Match Format Display -->
         <div class="match-format" id="match-format-display"></div>
     </div>
     
+    <!-- Dice Result Modal -->
     <div id="dice-result-modal" class="modal">
         <div class="modal-content">
             <div id="dice-animation-container"></div>
@@ -895,6 +910,7 @@
         </div>
     </div>
     
+    <!-- Win Modal -->
     <div id="win-modal" class="modal">
         <div class="modal-content">
             <div id="win-message"></div>
