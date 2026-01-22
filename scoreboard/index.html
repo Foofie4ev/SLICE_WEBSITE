@@ -416,19 +416,19 @@
         /* Green side - left to right: SCORE then GAMES */
         #green-score {
             top: 50%;
-            left: 10%; /* Nudged right again from 8% to 10% */
+            left: 6.5%; /* Restored to near original (5.5%) + tiny nudge right */
         }
         
         #green-games {
-            top: 52%; /* Raised from 55% to 52% */
+            top: 54%; /* Lowered from 52% */
             left: 27%;
             font-size: 5.6rem;
         }
         
         /* Orange side - right to left: GAMES then SCORE (mirrored from green) */
         #orange-games {
-            top: 52%; /* Raised from 55% to 52% */
-            right: 2.5%;
+            top: 54%; /* Lowered from 52% */
+            right: 1.5%; /* Moved right from 2.5% */
             font-size: 5.6rem;
             color: #ff8800;
             text-shadow: 0 0 10px rgba(255,136,0,0.8);
@@ -454,8 +454,8 @@
         }
         
         .dice-btn {
-            padding: 10px 18px;
-            font-size: 0.9rem;
+            padding: 8px 15px; /* Reduced ~15% */
+            font-size: 0.76rem; /* Reduced ~15% */
             font-weight: 900;
             border: 3px solid rgba(255,255,255,0.8);
             border-radius: 12px;
@@ -824,12 +824,12 @@
             }
             
             .dice-tower {
-                gap: 3px; /* EVEN TIGHTER gap for mobile */
+                gap: 2px; /* EVEN TIGHTER gap for mobile (reduced from 3px) */
             }
 
             .dice-btn {
-                font-size: 0.5rem; /* SMALLER (was 0.55rem, originally 0.65rem) */
-                padding: 3px 6px; /* SMALLER (was 4px 8px, originally 6px 10px) */
+                font-size: 0.42rem; /* Reduced ~15% from 0.5rem */
+                padding: 3px 5px; /* Reduced padding from 3px 6px */
             }
             
             #dice-result {
