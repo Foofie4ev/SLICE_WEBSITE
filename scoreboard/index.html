@@ -15,6 +15,8 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -418,7 +420,7 @@
         /* Green side - left to right: SCORE then GAMES */
         #green-score {
             top: 50%;
-            left: 9.0%; /* Moved to 9.0% (was 6.0%) */
+            left: calc(6.5% + 2px); /* Restored to 6.5% + 2px nudge */
         }
         
         #green-games {
@@ -502,6 +504,128 @@
             color: #333;
             text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
         }
+        
+        /* 3D Dice Styles */
+        .scene {
+            width: 120px;
+            height: 120px;
+            perspective: 600px;
+            margin: 0 auto 20px auto;
+        }
+
+        .cube {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            /* No default animation here, added in JS */
+        }
+
+        .cube__face {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border: 4px solid white;
+            border-radius: 20px;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: white;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            background: inherit; /* Inherit gradient from parent setting */
+        }
+
+        .cube__face--front  { transform: rotateY(  0deg) translateZ(60px); }
+        .cube__face--right  { transform: rotateY( 90deg) translateZ(60px); }
+        .cube__face--back   { transform: rotateY(180deg) translateZ(60px); }
+        .cube__face--left   { transform: rotateY(-90deg) translateZ(60px); }
+        .cube__face--top    { transform: rotateX( 90deg) translateZ(60px); }
+        .cube__face--bottom { transform: rotateX(-90deg) translateZ(60px); }
+
+        @keyframes spinDice {
+            0% { transform: translateZ(-60px) rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+            100% { transform: translateZ(-60px) rotateX(720deg) rotateY(1080deg) rotateZ(360deg); }
+        }
+
+        /* Dice Result Modal */
+        #dice-result-modal .modal-content {
+            padding: 30px 20px;
+            background: linear-gradient(135deg, #1a5d1a 0%, #2e7d32 25%, #ff8f00 75%, #ff6f00 100%);
+            border-radius: 20px;
+            min-width: 320px;
+            max-width: 350px;
+            min-height: 320px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        
+        .rolling-text {
+            font-size: 1.8rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            font-family: 'Orbitron', monospace;
+            letter-spacing: 0.2em;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .rolling-text span {
+            opacity: 0;
+            display: inline-block;
+            animation: letterReveal 0.15s forwards;
+        }
+        
+        .rolling-text span:nth-child(1) { animation-delay: 0s; }
+        .rolling-text span:nth-child(2) { animation-delay: 0.1s; }
+        .rolling-text span:nth-child(3) { animation-delay: 0.2s; }
+        .rolling-text span:nth-child(4) { animation-delay: 0.3s; }
+        .rolling-text span:nth-child(5) { animation-delay: 0.4s; }
+        .rolling-text span:nth-child(6) { animation-delay: 0.5s; }
+        .rolling-text span:nth-child(7) { animation-delay: 0.6s; }
+        .rolling-text span:nth-child(8) { animation-delay: 0.7s; }
+        .rolling-text span:nth-child(9) { animation-delay: 0.8s; }
+        .rolling-text span:nth-child(10) { animation-delay: 0.9s; }
+        
+        @keyframes letterReveal {
+            0% { opacity: 0; transform: translateY(-10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        #dice-animation-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 220px; /* Increased height for 3D cube */
+        }
+        
+        .let-message {
+            font-size: 1rem;
+            font-weight: 900;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
+            margin-top: 15px;
+            text-align: center;
+            font-family: 'Orbitron', monospace;
+            letter-spacing: 0.05em;
+        }
+        
+        /* Colors for 3D Cube faces */
+        .bg-serve1 .cube__face { background: linear-gradient(135deg, #a3e635 0%, #4d7c0f 100%); border-color: #84cc16; }
+        .bg-serve2 .cube__face { background: linear-gradient(135deg, #fb923c 0%, #c2410c 100%); border-color: #f97316; }
+        .bg-volley .cube__face { background: linear-gradient(135deg, #c084fc 0%, #7e22ce 100%); border-color: #a855f7; }
+        .bg-dropshot .cube__face { background: linear-gradient(135deg, #fde047 0%, #eab308 100%); border-color: #fbbf24; color: #333; text-shadow: none; }
+
         
         /* Match Format Display */
         .match-format {
@@ -786,10 +910,10 @@
         <div id="green-name" class="player-name">GREEN</div>
         <div id="orange-name" class="player-name">ORANGE</div>
         
-        <div id="green-score" class="score-box" onclick="incrementScore('green')">❤️</div>
+        <div id="green-score" class="score-box" onclick="incrementScore('green')">💚</div>
         <div id="green-games" class="score-box">0</div>
         
-        <div id="orange-score" class="score-box" onclick="incrementScore('orange')">❤️</div>
+        <div id="orange-score" class="score-box" onclick="incrementScore('orange')">🧡</div>
         <div id="orange-games" class="score-box">0</div>
         
         <!-- Dice Tower -->
@@ -991,9 +1115,9 @@
             document.getElementById('orange-name').textContent = orangeName.toUpperCase();
         }
         
-        function getTennisScore(points) {
+        function getTennisScore(points, team) {
             switch (points) {
-                case 0: return "❤️";
+                case 0: return team === 'green' ? "💚" : "🧡";
                 case 1: return "15";
                 case 2: return "30";
                 case 3: return "40";
@@ -1016,7 +1140,7 @@
                         checkWinner();
                     }
                 } else {
-                    document.getElementById('green-score').textContent = getTennisScore(greenPoints);
+                    document.getElementById('green-score').textContent = getTennisScore(greenPoints, 'green');
                 }
             } else if (team === 'orange') {
                 orangePoints++;
@@ -1032,7 +1156,7 @@
                         checkWinner();
                     }
                 } else {
-                    document.getElementById('orange-score').textContent = getTennisScore(orangePoints);
+                    document.getElementById('orange-score').textContent = getTennisScore(orangePoints, 'orange');
                 }
             }
         }
@@ -1040,8 +1164,8 @@
         function resetPoints() {
             greenPoints = 0;
             orangePoints = 0;
-            document.getElementById('green-score').textContent = "❤️";
-            document.getElementById('orange-score').textContent = "❤️";
+            document.getElementById('green-score').textContent = "💚";
+            document.getElementById('orange-score').textContent = "🧡";
         }
         
         function checkWinner() {
@@ -1077,19 +1201,19 @@
         function showWinner(name) {
             document.getElementById('win-message').textContent = `${name.toUpperCase()} WINS!`;
             document.getElementById('win-modal').style.display = 'flex';
+            
+            // Confetti!
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#84cc16', '#ff8800', '#ffffff'] // Green, Orange, White theme
+            });
         }
         
         function rollDice(type) {
             const faces = diceFaces[type];
             const result = faces[Math.floor(Math.random() * faces.length)];
-            
-            // Color classes for each dice type
-            const colorClass = {
-                'serve1': 'dice-serve1',
-                'serve2': 'dice-serve2',
-                'volley': 'dice-volley',
-                'dropshot': 'dice-dropshot'
-            }[type];
             
             // Text colors for ROLLING
             const textColors = {
@@ -1099,56 +1223,89 @@
                 'dropshot': '#eab308'
             };
             
+            // Color class map for faces
+            const colorClassMap = {
+                'serve1': 'bg-serve1',
+                'serve2': 'bg-serve2',
+                'volley': 'bg-volley',
+                'dropshot': 'bg-dropshot'
+            };
+            
+            const colorClass = colorClassMap[type];
+            
             // Show modal
             document.getElementById('dice-result-modal').style.display = 'flex';
             
-            // Create ROLLING text above dice with letter-by-letter reveal
+            // 1. Create container
             const animContainer = document.getElementById('dice-animation-container');
+            animContainer.innerHTML = '';
+            
+            // 2. Create Rolling Text
             const rollingText = document.createElement('div');
             rollingText.className = 'rolling-text';
             rollingText.style.color = textColors[type];
             rollingText.innerHTML = 'ROLLING...'.split('').map(char => `<span>${char}</span>`).join('');
-            
-            // Create animated dice (empty during animation)
-            const diceBox = document.createElement('div');
-            diceBox.className = `dice-animation ${colorClass}`;
-            diceBox.textContent = '';
-            
-            animContainer.innerHTML = '';
             animContainer.appendChild(rollingText);
-            animContainer.appendChild(diceBox);
             
-            // Hide the separate result element
-            const resultElement = document.getElementById('dice-result');
-            resultElement.style.display = 'none';
+            // 3. Create 3D Cube Structure
+            const scene = document.createElement('div');
+            scene.className = 'scene';
             
-            // After animation, hide ROLLING text and show result in dice box
+            const cube = document.createElement('div');
+            cube.className = `cube`; // Base cube class
+            // Add specific color class to parent so faces inherit
+            scene.className += ` ${colorClass}`; 
+            
+            // Create 6 faces
+            const facesList = ['front', 'back', 'right', 'left', 'top', 'bottom'];
+            facesList.forEach(faceName => {
+                const face = document.createElement('div');
+                face.className = `cube__face cube__face--${faceName}`;
+                // While spinning, we can put "?" or leave empty. 
+                // Let's put a question mark on all faces for the spin
+                face.textContent = "?";
+                cube.appendChild(face);
+            });
+            
+            // Start the infinite spin animation
+            cube.style.animation = 'spinDice 1s infinite linear';
+            
+            scene.appendChild(cube);
+            animContainer.appendChild(scene);
+            
+            // Hide separate result element
+            document.getElementById('dice-result').style.display = 'none';
+            
+            // 4. Stop animation after 1.5s and show result on the cube
             setTimeout(() => {
-                rollingText.style.display = 'none';
+                rollingText.style.visibility = 'hidden'; // Changed from display: none to maintain space
                 
-                diceBox.style.fontFamily = "'Orbitron', monospace";
-                diceBox.style.webkitTextStroke = '3px rgba(0,0,0,0.3)';
-                diceBox.style.textStroke = '3px rgba(0,0,0,0.3)';
-                diceBox.style.filter = 'drop-shadow(4px 4px 8px rgba(0,0,0,0.5))';
+                // Stop animation
+                cube.style.animation = 'none';
                 
-                // Check if result contains arrow
+                // Force rotation to show front face
+                cube.style.transform = 'translateZ(-60px) rotateX(0deg) rotateY(0deg)';
+                cube.style.transition = 'transform 0.3s ease-out'; // Smooth snap
+                
+                // Update the FRONT face with the result
+                const frontFace = cube.querySelector('.cube__face--front');
+                
+                // Format result (arrows)
                 if (result.includes('⬇') || result.includes('⬆')) {
                     const number = result.replace('⬇', '').replace('⬆', '');
                     const arrow = result.includes('⬇') ? '⬇' : '⬆';
-                    diceBox.style.fontSize = '4rem';
-                    diceBox.textContent = number + arrow;
-                } else if (result.length > 2) {
-                    diceBox.style.fontSize = '1.6rem';
-                    diceBox.textContent = result;
+                    frontFace.innerHTML = `${number}<span style="font-size: 0.8em">${arrow}</span>`;
                 } else {
-                    diceBox.style.fontSize = '4rem';
-                    diceBox.textContent = result;
+                    frontFace.textContent = result;
+                    // Adjust font size for longer text like "FAULT!"
+                    if (result.length > 4) {
+                        frontFace.style.fontSize = '1.8rem';
+                    }
                 }
                 
-                // Handle FAULT results
+                // Handle special buttons logic (FAULT/LET)
                 const closeBtn = document.getElementById('close-dice-btn');
                 
-                // Check for LET result and add message
                 if (result === 'LET') {
                     const letMessage = document.createElement('div');
                     letMessage.className = 'let-message';
@@ -1157,7 +1314,6 @@
                 }
                 
                 if (result === 'FAULT!' && type === 'serve1') {
-                    // 1st serve fault - show "2ND SERVE" button
                     closeBtn.textContent = '2ND SERVE';
                     closeBtn.style.background = 'linear-gradient(180deg, #fb923c 0%, #ea580c 50%, #c2410c 100%)';
                     closeBtn.style.borderColor = '#f97316';
@@ -1167,21 +1323,20 @@
                         rollDice('serve2');
                     };
                 } else if (result === 'FAULT!' && type === 'serve2') {
-                    // 2nd serve fault - show "LOSE THE POINT" (user updates score manually)
                     closeBtn.textContent = 'LOSE THE POINT';
                     closeBtn.style.background = 'linear-gradient(180deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%)';
                     closeBtn.style.borderColor = '#f87171';
                     closeBtn.style.color = 'white';
                     closeBtn.onclick = closeDiceModal;
                 } else {
-                    // Normal result - show "CLOSE" button
                     closeBtn.textContent = 'CLOSE';
                     closeBtn.style.background = 'rgba(255,255,255,0.95)';
                     closeBtn.style.borderColor = 'white';
                     closeBtn.style.color = '#333';
                     closeBtn.onclick = closeDiceModal;
                 }
-            }, 1500);
+                
+            }, 1000);
         }
         
         function closeDiceModal() {
@@ -1277,8 +1432,8 @@
             orangeGames = 0;
             isTiebreaker = false;
             
-            document.getElementById('green-score').textContent = "❤️";
-            document.getElementById('orange-score').textContent = "❤️";
+            document.getElementById('green-score').textContent = "💚";
+            document.getElementById('orange-score').textContent = "🧡";
             document.getElementById('green-games').textContent = "0";
             document.getElementById('orange-games').textContent = "0";
             
