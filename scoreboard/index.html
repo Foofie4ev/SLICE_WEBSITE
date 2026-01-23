@@ -420,7 +420,8 @@
         /* Green side - left to right: SCORE then GAMES */
         #green-score {
             top: 50%;
-            left: calc(6.5% + 2px); /* Restored to 6.5% + 2px nudge */
+            /* 6.5% was previous good spot, adding 2px nudge */
+            left: calc(6.5% + 2px); 
         }
         
         #green-games {
@@ -518,7 +519,6 @@
             height: 100%;
             position: relative;
             transform-style: preserve-3d;
-            /* No default animation here, added in JS */
         }
 
         .cube__face {
@@ -850,6 +850,107 @@
                 font-size: 2rem;
             }
         }
+        
+        /* Phantom Card for Social Share */
+        #phantom-card {
+            position: fixed;
+            top: -9999px; /* Hide off-screen */
+            left: -9999px;
+            width: 1080px;
+            height: 1920px;
+            /* background-image removed */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Arial Black', sans-serif;
+            padding: 80px;
+            z-index: 99999;
+        }
+
+        #phantom-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+        
+        /* Hidden since background image has the title */
+        #phantom-header {
+            display: none;
+        }
+        
+        /* Top Third - Player Names Under Colors */
+        #phantom-names-container {
+            margin-top: 400px; /* Push down past the header graphic */
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 40px;
+        }
+
+        .phantom-name-display {
+            font-size: 3.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            width: 45%;
+            text-align: center;
+        }
+
+        /* Middle Third - Winner & Message (vacant tennis net space) */
+        #phantom-winner-container {
+            margin-top: 300px; /* Push into the middle space */
+            text-align: center;
+            width: 100%;
+            background: rgba(0,0,0,0.4); /* Slight backing to pop against net */
+            padding: 30px;
+            backdrop-filter: blur(2px);
+            border-radius: 20px;
+        }
+        
+        #phantom-winner-name {
+            font-size: 7rem;
+            color: #84cc16; /* Default to Green, changed by JS */
+            text-shadow: 6px 6px 15px rgba(0,0,0,0.9);
+            font-weight: 900;
+            text-transform: uppercase;
+            line-height: 1.1;
+        }
+        
+        #phantom-message {
+            font-size: 3.5rem;
+            color: white;
+            margin-top: 10px;
+            text-shadow: 3px 3px 8px rgba(0,0,0,0.8);
+            font-style: italic;
+        }
+        
+        /* Bottom Third - Final Scores */
+        #phantom-score-container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: auto;
+            margin-bottom: 220px; /* Position in the bottom squares */
+            padding: 0 100px; /* Bring them in slightly closer */
+        }
+        
+        .phantom-score {
+            font-family: 'Orbitron', monospace;
+            font-size: 10rem;
+            font-weight: 900;
+            color: white;
+            text-shadow: 0 0 20px rgba(255,255,255,0.5);
+            width: 300px;
+            text-align: center;
+        }
+        
+        .phantom-green-text { color: #84cc16; }
+        .phantom-orange-text { color: #ff8800; }
+        
     </style>
 </head>
 <body>
@@ -941,14 +1042,38 @@
     <div id="win-modal" class="modal">
         <div class="modal-content">
             <div id="win-message"></div>
-            <button id="screenshot-btn" onclick="takeScreenshot()">
-                SCREENSHOT FOR 
+            <button id="screenshot-btn" onclick="generatePhantomCard()">
+                GET MY SCORECARD
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/>
                 </svg>
             </button>
             <br>
             <button id="new-match-btn" onclick="newMatch()">NEW MATCH</button>
+        </div>
+    </div>
+    
+    <!-- Phantom Card (Hidden) -->
+    <div id="phantom-card">
+        <img id="phantom-bg" src="PHANTOM_SCORECARD.jpg" alt="" crossorigin="anonymous">
+        <!-- Header removed as it is in the background image -->
+        
+        <!-- Top Third: Names -->
+        <div id="phantom-names-container">
+            <div id="phantom-green-name" class="phantom-name-display phantom-green-text">GREEN TEAM</div>
+            <div id="phantom-orange-name" class="phantom-name-display phantom-orange-text">ORANGE TEAM</div>
+        </div>
+        
+        <!-- Middle Third: Winner -->
+        <div id="phantom-winner-container">
+            <div id="phantom-winner-name">GREEN</div>
+            <div id="phantom-message">TAKES THE SET!</div>
+        </div>
+        
+        <!-- Bottom Third: Scores -->
+        <div id="phantom-score-container">
+            <div id="phantom-green-score" class="phantom-score phantom-green-text">6</div>
+            <div id="phantom-orange-score" class="phantom-score phantom-orange-text">4</div>
         </div>
     </div>
     
@@ -1557,6 +1682,101 @@
                 toggleFullscreen();
             }
         });
+
+        // Generate Phantom Card for Screenshot
+        function generatePhantomCard() {
+            // Check protocol for debugging aid
+            if (window.location.protocol === 'file:') {
+                alert("Note: Image capture may fail when running locally due to browser security.\n\nIt works best when hosted on GitHub or a web server.");
+            }
+
+            // Determine winner
+            let winnerName = "";
+            let winnerColor = "";
+            let message = "";
+            
+            if (greenGames > orangeGames) {
+                winnerName = greenName;
+                winnerColor = "#84cc16"; // Green
+                // Logic for message
+                if (orangeGames === 0) message = "WINS A BAGEL! 🥯";
+                else message = "TAKES THE SET!";
+            } else {
+                winnerName = orangeName;
+                winnerColor = "#ff8800"; // Orange
+                if (greenGames === 0) message = "WINS A BAGEL! 🥯";
+                else message = "TAKES THE SET!";
+            }
+            
+            // Populate Data
+            document.getElementById('phantom-winner-name').textContent = winnerName;
+            document.getElementById('phantom-winner-name').style.color = winnerColor;
+            document.getElementById('phantom-message').textContent = message;
+            
+            document.getElementById('phantom-green-name').textContent = greenName;
+            
+            // Green Score Logic (0 = heart)
+            const pGreenScore = document.getElementById('phantom-green-score');
+            if (greenGames === 0) pGreenScore.textContent = "💚";
+            else pGreenScore.textContent = greenGames;
+            
+            document.getElementById('phantom-orange-name').textContent = orangeName;
+            
+            // Orange Score Logic (0 = heart)
+            const pOrangeScore = document.getElementById('phantom-orange-score');
+            if (orangeGames === 0) pOrangeScore.textContent = "🧡";
+            else pOrangeScore.textContent = orangeGames;
+            
+            // Screenshot Logic
+            const phantomCard = document.getElementById('phantom-card');
+            
+            // Temporarily make visible for capture (but still off-screen)
+            // Note: html2canvas captures hidden elements if display is not 'none'
+            
+            html2canvas(phantomCard, {
+                scale: 1, // Native 1080x1920 scale
+                useCORS: true,
+                backgroundColor: null,
+                allowTaint: false
+            }).then(canvas => {
+                canvas.toBlob(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.download = 'My SLICE Scorecard.png';
+                    link.href = url;
+                    link.click();
+                    URL.revokeObjectURL(url);
+                    
+                    showScreenshotConfirmation();
+                });
+            }).catch(err => {
+                console.log("Standard capture failed, trying fallback...", err);
+                
+                // Fallback for local files (allowTaint: true)
+                html2canvas(phantomCard, {
+                    scale: 1,
+                    useCORS: false,
+                    allowTaint: true,
+                    backgroundColor: null
+                }).then(canvas => {
+                    try {
+                        const dataUrl = canvas.toDataURL('image/png');
+                        const link = document.createElement('a');
+                        link.download = 'My SLICE Scorecard.png';
+                        link.href = dataUrl;
+                        link.click();
+                        
+                        showScreenshotConfirmation();
+                    } catch (e) {
+                        console.error("Fallback capture failed:", e);
+                        alert("Screenshot failed. If running locally, browser security may be blocking the image.");
+                    }
+                }).catch(e => {
+                    console.error("Fallback html2canvas failed:", e);
+                    alert("Screenshot failed. Please try again.");
+                });
+            });
+        }
     </script>
 </body>
 </html>
