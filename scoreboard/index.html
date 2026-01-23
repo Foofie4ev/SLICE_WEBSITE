@@ -52,6 +52,7 @@
             left: 0;
             overflow: hidden;
             box-shadow: inset 0 0 100px rgba(0,0,0,0.3);
+            z-index: 10; /* Ensure this is above the phantom card */
         }
         
         /* Phone screen container - full screen */
@@ -69,7 +70,7 @@
         
         /* Content wrapper with padding for form elements only */
         .content-wrapper {
-            padding: 15px 20px 20px 20px; /* Reduced top padding from 40px to 15px to raise logo */
+            padding: 15px 20px 20px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -360,6 +361,7 @@
             background-position: center;
             background-repeat: no-repeat;
             position: relative;
+            z-index: 10; /* Ensure above phantom card */
         }
         
         /* Orientation Lock Fallback for Scoreboard */
@@ -853,18 +855,19 @@
         
         /* Phantom Card for Social Share */
         #phantom-card {
-            position: fixed;
-            top: -9999px; /* Hide off-screen */
-            left: -9999px;
+            position: absolute; /* Changed from fixed */
+            top: 0;
+            left: 0;
             width: 1080px;
             height: 1920px;
-            /* background-image removed */
+            background-color: #333; /* Fallback background color */
             display: flex;
             flex-direction: column;
             align-items: center;
             font-family: 'Arial Black', sans-serif;
             padding: 80px;
-            z-index: 99999;
+            z-index: -5; /* Move behind everything */
+            /* Ensure it is part of the layout but hidden by z-index */
         }
 
         #phantom-bg {
@@ -874,7 +877,7 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            z-index: 0; /* Changed from -1 to 0 */
+            z-index: 0; 
         }
         
         /* Hidden since background image has the title */
@@ -1061,7 +1064,7 @@
     
     <!-- Phantom Card (Hidden) -->
     <div id="phantom-card">
-        <img id="phantom-bg" src="PHANTOM_SCORECARD.jpg" alt="">
+        <img id="phantom-bg" src="PHANTOM_SCORECARD.jpg" alt="" loading="eager">
         <!-- Header removed as it is in the background image -->
         
         <!-- Top Third: Names -->
@@ -1691,11 +1694,6 @@
 
         // Generate Phantom Card for Screenshot
         function generatePhantomCard() {
-            // Check protocol for debugging aid
-            if (window.location.protocol === 'file:') {
-                alert("Note: Image capture may fail when running locally due to browser security.\n\nIt works best when hosted on GitHub or a web server.");
-            }
-
             // Determine winner
             let winnerName = "";
             let winnerColor = "";
@@ -1736,52 +1734,55 @@
             // Screenshot Logic
             const phantomCard = document.getElementById('phantom-card');
             
-            // Temporarily make visible for capture (but still off-screen)
-            // Note: html2canvas captures hidden elements if display is not 'none'
-            
-            html2canvas(phantomCard, {
-                scale: 1, // Native 1080x1920 scale
-                useCORS: true,
-                backgroundColor: null,
-                allowTaint: false
-            }).then(canvas => {
-                canvas.toBlob(blob => {
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.download = 'My SLICE Scorecard.png';
-                    link.href = url;
-                    link.click();
-                    URL.revokeObjectURL(url);
-                    
-                    showScreenshotConfirmation();
-                });
-            }).catch(err => {
-                console.log("Standard capture failed, trying fallback...", err);
-                
-                // Fallback for local files (allowTaint: true)
+            // Wait for image to be ready just in case
+            // Use setTimeout to ensure DOM updates are painted
+            setTimeout(() => {
+                // Try standard method first (best quality if served correctly)
                 html2canvas(phantomCard, {
-                    scale: 1,
-                    useCORS: false,
-                    allowTaint: true,
-                    backgroundColor: null
+                    scale: 1, // Native 1080x1920 scale
+                    useCORS: true,
+                    backgroundColor: null,
+                    allowTaint: false,
+                    logging: true // Helpful for debugging
                 }).then(canvas => {
-                    try {
-                        const dataUrl = canvas.toDataURL('image/png');
+                    canvas.toBlob(blob => {
+                        const url = URL.createObjectURL(blob);
                         const link = document.createElement('a');
                         link.download = 'My SLICE Scorecard.png';
-                        link.href = dataUrl;
+                        link.href = url;
                         link.click();
+                        URL.revokeObjectURL(url);
                         
                         showScreenshotConfirmation();
-                    } catch (e) {
-                        console.error("Fallback capture failed:", e);
-                        alert("Screenshot failed. If running locally, browser security may be blocking the image.");
-                    }
-                }).catch(e => {
-                    console.error("Fallback html2canvas failed:", e);
-                    alert("Screenshot failed. Please try again.");
+                    });
+                }).catch(err => {
+                    console.log("Standard capture failed, trying fallback...", err);
+                    
+                    // Fallback for local files (allowTaint: true)
+                    html2canvas(phantomCard, {
+                        scale: 1,
+                        useCORS: false,
+                        allowTaint: true,
+                        backgroundColor: null
+                    }).then(canvas => {
+                        try {
+                            const dataUrl = canvas.toDataURL('image/png');
+                            const link = document.createElement('a');
+                            link.download = 'My SLICE Scorecard.png';
+                            link.href = dataUrl;
+                            link.click();
+                            
+                            showScreenshotConfirmation();
+                        } catch (e) {
+                            console.error("Fallback capture failed:", e);
+                            alert("Screenshot failed. If running locally, browser security may be blocking the image.");
+                        }
+                    }).catch(e => {
+                        console.error("Fallback html2canvas failed:", e);
+                        alert("Screenshot failed. Please try again.");
+                    });
                 });
-            });
+            }, 100);
         }
     </script>
 </body>
