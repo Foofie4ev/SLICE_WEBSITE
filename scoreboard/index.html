@@ -885,7 +885,7 @@
         
         /* Top Third - Player Names Under Colors */
         #phantom-names-container {
-            margin-top: 550px; /* Went from 560 to 550 (back up 10px) */
+            margin-top: 545px; /* Raised to 545px (Raised 5px from 550px) */
             width: 100%;
             display: flex;
             justify-content: space-between;
@@ -941,7 +941,7 @@
             width: 100%;
             margin-top: auto;
             margin-bottom: 350px; /* Raised from 290px */
-            padding: 0 100px; /* CHANGED: from 80px to 100px to bring scores inward slightly */
+            padding: 0 105px; /* CHANGED: from 100px to 105px to bring scores inward slightly */
             position: relative; /* Added relative positioning */
             z-index: 1; /* Added z-index */
         }
@@ -1503,9 +1503,7 @@
                         link.click();
                         URL.revokeObjectURL(url);
                         
-                        if (wasWinModalVisible) {
-                            showScreenshotConfirmation();
-                        }
+                        showScreenshotConfirmation();
                     });
                 }).catch(error => {
                     console.log('First attempt failed, trying fallback for local testing...');
