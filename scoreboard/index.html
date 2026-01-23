@@ -885,11 +885,13 @@
         
         /* Top Third - Player Names Under Colors */
         #phantom-names-container {
-            margin-top: 535px; /* Raised to 535px (Raised 5px from 540px) */
-            width: 100%;
+            margin-top: 535px; /* Raised to 535px */
+            width: calc(100% + 30px); /* Increased width to allow moving outwards */
+            margin-left: -15px; /* Shift left */
+            margin-right: -15px; /* Shift right logic */
             display: flex;
             justify-content: space-between;
-            padding: 0 0px; /* Reduced padding to 0px to push names outwards */
+            padding: 0; /* Padding removed */
             position: relative; /* Added relative positioning */
             z-index: 1; /* Added z-index */
         }
