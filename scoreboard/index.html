@@ -855,9 +855,9 @@
         
         /* Phantom Card for Social Share */
         #phantom-card {
-            position: absolute; /* Changed from fixed */
-            top: 0;
-            left: 0;
+            position: fixed; /* Changed from absolute to fixed for robust hiding */
+            top: -9999px; /* Move far off-screen */
+            left: -9999px; /* Move far off-screen */
             width: 1080px;
             height: 1920px;
             background-color: #333; /* Fallback background color */
@@ -873,8 +873,7 @@
             align-items: center;
             font-family: 'Arial Black', sans-serif;
             padding: 80px;
-            z-index: -5; /* Move behind everything */
-            /* Ensure it is part of the layout but hidden by z-index */
+            z-index: -9999; /* Deeply hidden index */
         }
         
         /* REMOVED: #phantom-bg img style as we are using background-image now */
