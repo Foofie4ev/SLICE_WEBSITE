@@ -17,6 +17,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <!-- Confetti Library -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    
+    <!-- Preload critical images -->
+    <link rel="preload" as="image" href="SLICE_SCOREBOARD_NEW.png">
+    <link rel="preload" as="image" href="SLICE_LOGO.png">
+    <link rel="preload" as="image" href="PHANTOM_SCORECARD.jpeg">
+    
     <style>
         * {
             margin: 0;
@@ -341,6 +347,7 @@
             display: none;
             width: 100%;
             height: 100%;
+            background-color: #2d5a2d; /* Fallback color similar to scoreboard */
             background-image: url('SLICE_SCOREBOARD_NEW.png');
             background-size: cover;
             background-position: center;
@@ -840,7 +847,7 @@
             left: -9999px;
             width: 1080px;
             height: 1920px;
-            background-color: #333;
+            background-color: #1a5d1a; /* Fallback color */
             background-image: url('PHANTOM_SCORECARD.jpeg');
             background-size: cover;
             background-position: center;
@@ -1180,7 +1187,18 @@
             
             document.getElementById('match-type-modal').style.display = 'none';
             document.getElementById('signin-screen').style.display = 'none';
-            document.getElementById('scoreboard-screen').style.display = 'block';
+            
+            // Preload background image before showing scoreboard
+            const bgImage = new Image();
+            bgImage.onload = function() {
+                // Image loaded, now show the scoreboard
+                document.getElementById('scoreboard-screen').style.display = 'block';
+            };
+            bgImage.onerror = function() {
+                // If image fails to load, still show scoreboard (fallback color will show)
+                document.getElementById('scoreboard-screen').style.display = 'block';
+            };
+            bgImage.src = 'SLICE_SCOREBOARD_NEW.png';
             
             document.getElementById('green-name').textContent = greenName.toUpperCase();
             document.getElementById('orange-name').textContent = orangeName.toUpperCase();
