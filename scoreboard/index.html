@@ -52,7 +52,7 @@
             left: 0;
             overflow: hidden;
             box-shadow: inset 0 0 100px rgba(0,0,0,0.3);
-            z-index: 10; /* Ensure this is above the phantom card */
+            z-index: 10;
         }
         
         /* Phone screen container - full screen */
@@ -131,8 +131,15 @@
             font-size: 1.6rem;
             font-weight: 900;
             margin-bottom: 6px;
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
             text-align: center;
+            -webkit-text-stroke: 1px black;
+            text-stroke: 1px black;
+            filter: drop-shadow(0 0 10px currentColor);
+            text-shadow: 
+                2px 2px 4px rgba(0,0,0,0.9),
+                -1px -1px 2px rgba(0,0,0,0.8),
+                1px -1px 2px rgba(0,0,0,0.8),
+                -1px 1px 2px rgba(0,0,0,0.8);
         }
         
         .green-label {
@@ -199,18 +206,15 @@
         }
         
         #ball1 {
-            /* Lime ball - now square */
             width: 28%;
             height: auto;
         }
         
         #ball2 {
-            /* Orange ball - square, 25% bigger */
             width: 35%;
             height: auto;
         }
         
-        /* Mobile ball scaling - reduce size by ~40% */
         @media (max-width: 768px) {
             #ball1 {
                 width: 200px;
@@ -254,25 +258,6 @@
             text-align: center;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
             margin-bottom: 40px;
-        }
-        
-        #skip-rotation-btn {
-            margin-top: 30px;
-            padding: 15px 40px;
-            font-size: 1.1rem;
-            font-weight: 900;
-            background: rgba(255,255,255,0.9);
-            color: #333;
-            border: 3px solid white;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.3), 0 6px 15px rgba(0,0,0,0.4);
-            transition: all 0.2s;
-        }
-        
-        #skip-rotation-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 0 rgba(0,0,0,0.3), 0 4px 10px rgba(0,0,0,0.3);
         }
         
         .rotate-icon {
@@ -361,11 +346,9 @@
             background-position: center;
             background-repeat: no-repeat;
             position: relative;
-            z-index: 10; /* Ensure above phantom card */
+            z-index: 10;
         }
         
-        /* Orientation Lock Fallback for Scoreboard */
-        /* If screen is portrait and scoreboard is showing, visually rotate it */
         @media screen and (orientation: portrait) {
             #scoreboard-screen {
                 transform: rotate(90deg);
@@ -375,8 +358,8 @@
                 position: fixed;
                 top: 50%;
                 left: 50%;
-                margin-left: -50vh; /* Half of width */
-                margin-top: -50vw; /* Half of height */
+                margin-left: -50vh;
+                margin-top: -50vw;
             }
         }
         
@@ -419,23 +402,20 @@
             height: 22%;
         }
         
-        /* Green side - left to right: SCORE then GAMES */
         #green-score {
             top: 50%;
-            /* 6.5% was previous good spot, adding 2px nudge */
             left: calc(6.5% + 2px); 
         }
         
         #green-games {
-            top: 54%; /* Lowered from 52% */
+            top: 54%;
             left: 27%;
             font-size: 5.6rem;
         }
         
-        /* Orange side - right to left: GAMES then SCORE (mirrored from green) */
         #orange-games {
-            top: 54%; /* Lowered from 52% */
-            right: 2.2%; /* Slightly left (increased from 2%) */
+            top: 54%;
+            right: 2.2%;
             font-size: 5.6rem;
             color: #ff8800;
             text-shadow: 0 0 10px rgba(255,136,0,0.8);
@@ -451,7 +431,7 @@
         /* Dice Tower */
         .dice-tower {
             position: absolute;
-            top: 46%; /* Lowered from 42% to balance with score boxes */
+            top: 46%;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
@@ -461,8 +441,8 @@
         }
         
         .dice-btn {
-            padding: 8px 15px; /* Reduced ~15% */
-            font-size: 0.76rem; /* Reduced ~15% */
+            padding: 8px 15px;
+            font-size: 0.76rem;
             font-weight: 900;
             border: 3px solid rgba(255,255,255,0.8);
             border-radius: 12px;
@@ -538,7 +518,7 @@
             align-items: center;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-            background: inherit; /* Inherit gradient from parent setting */
+            background: inherit;
         }
 
         .cube__face--front  { transform: rotateY(  0deg) translateZ(60px); }
@@ -608,7 +588,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 220px; /* Increased height for 3D cube */
+            min-height: 220px;
         }
         
         .let-message {
@@ -632,10 +612,10 @@
         /* Match Format Display */
         .match-format {
             position: absolute;
-            bottom: 5px; /* LOWERED to bottom edge */
+            bottom: 5px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 1.2rem; /* REDUCED from 2rem */
+            font-size: 1.2rem;
             font-weight: 900;
             color: white;
             text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
@@ -648,7 +628,7 @@
         .floating-screenshot-btn {
             position: absolute;
             bottom: 20px;
-            right: 20px; /* Kept at right */
+            right: 20px;
             width: 50px;
             height: 50px;
             background: linear-gradient(180deg, #ffffff 0%, #e5e5e5 50%, #cccccc 100%);
@@ -754,7 +734,7 @@
         #screenshot-btn {
             background: linear-gradient(180deg, #c084fc 0%, #9333ea 50%, #7e22ce 100%);
             border-color: #a855f7;
-            display: inline-flex; /* CHANGED from flex to inline-flex to center in parent */
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
@@ -802,6 +782,8 @@
             .name-input-group label {
                 font-size: 1.4rem;
                 margin-bottom: 4px;
+                -webkit-text-stroke: 1px black;
+                text-stroke: 1px black;
             }
             
             .name-input-group input {
@@ -828,7 +810,7 @@
             }
             
             #green-games, #orange-games {
-                font-size: 3.5rem; /* SIGNIFICANTLY REDUCED for mobile */
+                font-size: 3.5rem;
             }
             
             .score-box {
@@ -836,12 +818,12 @@
             }
             
             .dice-tower {
-                gap: 2px; /* EVEN TIGHTER gap for mobile (reduced from 3px) */
+                gap: 2px;
             }
 
             .dice-btn {
-                font-size: 0.42rem; /* Reduced ~15% from 0.5rem */
-                padding: 3px 5px; /* Reduced padding from 3px 6px */
+                font-size: 0.42rem;
+                padding: 3px 5px;
             }
             
             #dice-result {
@@ -855,73 +837,66 @@
         
         /* Phantom Card for Social Share */
         #phantom-card {
-            position: fixed; /* Changed from absolute to fixed for robust hiding */
-            top: -9999px; /* Move far off-screen */
-            left: -9999px; /* Move far off-screen */
+            position: fixed;
+            top: -9999px;
+            left: -9999px;
             width: 1080px;
             height: 1920px;
-            background-color: #333; /* Fallback background color */
-            
-            /* ADDED: Background image styling */
-            background-image: url('PHANTOM_SCORECARD.jpeg'); /* UPDATED EXTENSION */
+            background-color: #333;
+            background-image: url('PHANTOM_SCORECARD.jpeg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            
             display: flex;
             flex-direction: column;
             align-items: center;
             font-family: 'Arial Black', sans-serif;
             padding: 80px;
-            z-index: -9999; /* Deeply hidden index */
+            z-index: -9999;
         }
         
-        /* REMOVED: #phantom-bg img style as we are using background-image now */
-        
-        /* Hidden since background image has the title */
         #phantom-header {
             display: none;
         }
         
         /* Top Third - Player Names Under Colors */
         #phantom-names-container {
-            margin-top: 535px; /* Raised to 535px */
-            width: calc(100% + 30px); /* Increased width to allow moving outwards */
-            margin-left: -15px; /* Shift left */
-            margin-right: -15px; /* Shift right logic */
+            margin-top: 535px;
+            width: calc(100% + 30px);
+            margin-left: -15px;
+            margin-right: -15px;
             display: flex;
             justify-content: space-between;
-            padding: 0; /* Padding removed */
-            position: relative; /* Added relative positioning */
-            z-index: 1; /* Added z-index */
+            padding: 0;
+            position: relative;
+            z-index: 1;
         }
 
         .phantom-name-display {
             font-size: 3.5rem;
             font-weight: 900;
             text-transform: uppercase;
-            /* UPDATED: Added glow effect via text-shadow */
             text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 15px currentColor, 0 0 30px currentColor;
             width: 45%;
             text-align: center;
         }
 
-        /* Middle Third - Winner & Message (vacant tennis net space) */
+        /* Middle Third - Winner & Message */
         #phantom-winner-container {
-            margin-top: 200px; /* Reduced margin to 200px to pull it back up */
+            margin-top: 200px;
             text-align: center;
             width: 100%;
-            background: rgba(0,0,0,0.4); /* Slight backing to pop against net */
+            background: rgba(0,0,0,0.4);
             padding: 30px;
             backdrop-filter: blur(2px);
             border-radius: 20px;
-            position: relative; /* Added relative positioning */
-            z-index: 1; /* Added z-index */
+            position: relative;
+            z-index: 1;
         }
         
         #phantom-winner-name {
             font-size: 7rem;
-            color: #84cc16; /* Default to Green, changed by JS */
+            color: #84cc16;
             text-shadow: 6px 6px 15px rgba(0,0,0,0.9);
             font-weight: 900;
             text-transform: uppercase;
@@ -942,10 +917,10 @@
             justify-content: space-between;
             width: 100%;
             margin-top: auto;
-            margin-bottom: 357px; /* Raised from 350px by 7px */
-            padding: 0 115px; /* CHANGED: from 110px to 115px to bring scores inward 5px */
-            position: relative; /* Added relative positioning */
-            z-index: 1; /* Added z-index */
+            margin-bottom: 357px;
+            padding: 0 115px;
+            position: relative;
+            z-index: 1;
         }
         
         .phantom-score {
@@ -979,11 +954,11 @@
                 </div>
                 
                 <div class="name-input-group">
-                    <label class="green-label">GREEN TEAM NAME</label>
+                    <label class="green-label">GREEN PLAYER'S NAME</label>
                     <input type="text" id="green-name-input" placeholder="Enter name" maxlength="20">
                 </div>
                 <div class="name-input-group">
-                    <label class="orange-label">ORANGE TEAM NAME</label>
+                    <label class="orange-label">ORANGE PLAYER'S NAME</label>
                     <input type="text" id="orange-name-input" placeholder="Enter name" maxlength="20">
                 </div>
                 <button id="start-btn" onclick="showMatchTypeModal()">START MATCH</button>
@@ -996,7 +971,6 @@
         <h2>Please Rotate Your Phone</h2>
         <p>Turn your device to landscape mode<br>for the best experience</p>
         <div class="rotate-icon">🔄</div>
-        <button id="skip-rotation-btn" onclick="skipRotation()">SKIP (Desktop Preview)</button>
     </div>
     
     <!-- Match Type Modal -->
@@ -1010,7 +984,6 @@
     
     <!-- Scoreboard Screen -->
     <div id="scoreboard-screen">
-        <!-- Floating Screenshot Button -->
         <button class="floating-screenshot-btn" onclick="takeScreenshot()" title="Screenshot">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
@@ -1035,7 +1008,6 @@
             <button id="dropshot-btn" class="dice-btn" onclick="rollDice('dropshot')">DROP-SHOT</button>
         </div>
         
-        <!-- Match Format Display -->
         <div class="match-format" id="match-format-display"></div>
     </div>
     
@@ -1065,23 +1037,16 @@
     
     <!-- Phantom Card (Hidden) -->
     <div id="phantom-card">
-        <!-- BACKGROUND IMG REMOVED, NOW IN CSS -->
-        
-        <!-- Header removed as it is in the background image -->
-        
-        <!-- Top Third: Names -->
         <div id="phantom-names-container">
             <div id="phantom-green-name" class="phantom-name-display phantom-green-text">GREEN TEAM</div>
             <div id="phantom-orange-name" class="phantom-name-display phantom-orange-text">ORANGE TEAM</div>
         </div>
         
-        <!-- Middle Third: Winner -->
         <div id="phantom-winner-container">
             <div id="phantom-winner-name">GREEN</div>
             <div id="phantom-message">TAKES THE SET!</div>
         </div>
         
-        <!-- Bottom Third: Scores -->
         <div id="phantom-score-container">
             <div id="phantom-green-score" class="phantom-score phantom-green-text">6</div>
             <div id="phantom-orange-score" class="phantom-score phantom-orange-text">4</div>
@@ -1094,17 +1059,14 @@
         let greenGames = 0;
         let orangeGames = 0;
         let targetGames = 2;
-        let matchType = 'best3'; // 'best3' or 'fullset'
+        let matchType = 'best3';
         let greenName = "GREEN";
         let orangeName = "ORANGE";
         let isTiebreaker = false;
-        let selectedGames = 2; // Store game selection temporarily
+        let selectedGames = 2;
         
-        // --- Fullscreen & Orientation Helper Functions ---
         async function toggleFullscreen() {
             const elem = document.documentElement;
-            
-            // Check if we are already in fullscreen
             const isFullscreen = document.fullscreenElement || 
                                  document.webkitFullscreenElement || 
                                  document.mozFullScreenElement || 
@@ -1114,17 +1076,15 @@
                 try {
                     if (elem.requestFullscreen) {
                         await elem.requestFullscreen();
-                    } else if (elem.webkitRequestFullscreen) { /* Safari */
+                    } else if (elem.webkitRequestFullscreen) {
                         await elem.webkitRequestFullscreen();
-                    } else if (elem.msRequestFullscreen) { /* IE11 */
+                    } else if (elem.msRequestFullscreen) {
                         await elem.msRequestFullscreen();
                     }
                 } catch (err) {
                     console.log("Fullscreen error:", err);
                 }
             }
-            
-            // Attempt to lock orientation (mostly works on Android Chrome)
             lockLandscape();
         }
         
@@ -1134,13 +1094,11 @@
                     await screen.orientation.lock('landscape');
                     console.log("Orientation locked to landscape");
                 } catch (e) {
-                    // Orientation lock failed (not supported or permission denied)
                     console.log('Orientation lock failed:', e);
                 }
             }
         }
 
-        // New helper to unlock orientation
         async function unlockOrientation() {
             if (screen.orientation && screen.orientation.unlock) {
                 try {
@@ -1150,7 +1108,6 @@
                     console.log('Unlock failed:', e);
                 }
             }
-            // Optional: Exit fullscreen to return to normal browsing state
             if (document.fullscreenElement) {
                 if (document.exitFullscreen) {
                     await document.exitFullscreen();
@@ -1160,7 +1117,6 @@
             }
         }
         
-        // Dice faces
         const diceFaces = {
             serve1: ["3⬇", "4⬇", "4⬆", "5⬆", "LET", "FAULT!"],
             serve2: ["1⬆", "2⬆", "3⬆", "4⬇", "LET", "FAULT!"],
@@ -1179,58 +1135,39 @@
             
             greenName = greenInput;
             orangeName = orangeInput;
-            
-            // Just show the modal now, check orientation later
             document.getElementById('match-type-modal').style.display = 'flex';
         }
 
-        // New function to handle selection flow
         function selectMatchType(games) {
             selectedGames = games;
             document.getElementById('match-type-modal').style.display = 'none';
 
-            // Check if device is in portrait mode
             if (window.innerHeight > window.innerWidth) {
-                // Show rotation prompt
                 document.getElementById('rotation-prompt').style.display = 'flex';
-                
-                // Listen for orientation change
                 window.addEventListener('orientationchange', checkOrientation);
                 window.addEventListener('resize', checkOrientation);
             } else {
-                // Already in landscape, start immediately
                 startMatch(selectedGames);
             }
         }
         
         function checkOrientation() {
             if (window.innerWidth > window.innerHeight) {
-                // Now in landscape
                 document.getElementById('rotation-prompt').style.display = 'none';
-                
-                // Remove listeners
                 window.removeEventListener('orientationchange', checkOrientation);
                 window.removeEventListener('resize', checkOrientation);
-
-                // Start the match with the stored selection
                 startMatch(selectedGames);
             }
         }
         
         function skipRotation() {
-            // For desktop testing or force skip - skip rotation prompt
             document.getElementById('rotation-prompt').style.display = 'none';
-            
-            // Remove listeners if they exist
             window.removeEventListener('orientationchange', checkOrientation);
             window.removeEventListener('resize', checkOrientation);
-
-            // Start match
             startMatch(selectedGames);
         }
         
         function startMatch(games) {
-            // Attempt fullscreen and lock orientation when match starts
             toggleFullscreen();
 
             if (games === 2) {
@@ -1269,7 +1206,6 @@
                     document.getElementById('green-games').textContent = greenGames;
                     resetPoints();
                     
-                    // If in tiebreaker, winning this game wins the match
                     if (isTiebreaker) {
                         showWinner(greenName);
                     } else {
@@ -1285,7 +1221,6 @@
                     document.getElementById('orange-games').textContent = orangeGames;
                     resetPoints();
                     
-                    // If in tiebreaker, winning this game wins the match
                     if (isTiebreaker) {
                         showWinner(orangeName);
                     } else {
@@ -1306,25 +1241,19 @@
         
         function checkWinner() {
             if (matchType === 'best3') {
-                // Best of 3: first to 2 games wins
                 if (greenGames >= 2) {
                     showWinner(greenName);
                 } else if (orangeGames >= 2) {
                     showWinner(orangeName);
                 }
             } else if (matchType === 'fullset') {
-                // Full set: first to 6, win by 2
                 if (greenGames === 6 && orangeGames === 6 && !isTiebreaker) {
-                    // Tied at 6-6: sudden death tiebreaker
                     isTiebreaker = true;
                     resetPoints();
                     alert("SUDDEN DEATH TIEBREAKER!\nNext GAME wins the match!");
                 } else if (isTiebreaker) {
-                    // In tiebreaker mode - whoever reaches GAME (4 points) wins the match
-                    // This is checked after a game is won in incrementScore
                     return;
                 } else {
-                    // Normal full set scoring
                     if (greenGames >= 6 && greenGames - orangeGames >= 2) {
                         showWinner(greenName);
                     } else if (orangeGames >= 6 && orangeGames - greenGames >= 2) {
@@ -1338,12 +1267,11 @@
             document.getElementById('win-message').textContent = `${name.toUpperCase()} WINS!`;
             document.getElementById('win-modal').style.display = 'flex';
             
-            // Confetti!
             confetti({
                 particleCount: 150,
                 spread: 70,
                 origin: { y: 0.6 },
-                colors: ['#84cc16', '#ff8800', '#ffffff'] // Green, Orange, White theme
+                colors: ['#84cc16', '#ff8800', '#ffffff']
             });
         }
         
@@ -1351,7 +1279,6 @@
             const faces = diceFaces[type];
             const result = faces[Math.floor(Math.random() * faces.length)];
             
-            // Text colors for ROLLING
             const textColors = {
                 'serve1': '#65a30d',
                 'serve2': '#ea580c',
@@ -1359,7 +1286,6 @@
                 'dropshot': '#eab308'
             };
             
-            // Color class map for faces
             const colorClassMap = {
                 'serve1': 'bg-serve1',
                 'serve2': 'bg-serve2',
@@ -1369,77 +1295,59 @@
             
             const colorClass = colorClassMap[type];
             
-            // Show modal
             document.getElementById('dice-result-modal').style.display = 'flex';
             
-            // 1. Create container
             const animContainer = document.getElementById('dice-animation-container');
             animContainer.innerHTML = '';
             
-            // 2. Create Rolling Text
             const rollingText = document.createElement('div');
             rollingText.className = 'rolling-text';
             rollingText.style.color = textColors[type];
             rollingText.innerHTML = 'ROLLING...'.split('').map(char => `<span>${char}</span>`).join('');
             animContainer.appendChild(rollingText);
             
-            // 3. Create 3D Cube Structure
             const scene = document.createElement('div');
             scene.className = 'scene';
             
             const cube = document.createElement('div');
-            cube.className = `cube`; // Base cube class
-            // Add specific color class to parent so faces inherit
+            cube.className = `cube`;
             scene.className += ` ${colorClass}`; 
             
-            // Create 6 faces
             const facesList = ['front', 'back', 'right', 'left', 'top', 'bottom'];
             facesList.forEach(faceName => {
                 const face = document.createElement('div');
                 face.className = `cube__face cube__face--${faceName}`;
-                // While spinning, we can put "?" or leave empty. 
-                // Let's put a question mark on all faces for the spin
                 face.textContent = "?";
                 cube.appendChild(face);
             });
             
-            // Start the infinite spin animation
             cube.style.animation = 'spinDice 1s infinite linear';
             
             scene.appendChild(cube);
             animContainer.appendChild(scene);
             
-            // Hide separate result element
             document.getElementById('dice-result').style.display = 'none';
             
-            // 4. Stop animation after 1.5s and show result on the cube
             setTimeout(() => {
-                rollingText.style.visibility = 'hidden'; // Changed from display: none to maintain space
+                rollingText.style.visibility = 'hidden';
                 
-                // Stop animation
                 cube.style.animation = 'none';
-                
-                // Force rotation to show front face
                 cube.style.transform = 'translateZ(-60px) rotateX(0deg) rotateY(0deg)';
-                cube.style.transition = 'transform 0.3s ease-out'; // Smooth snap
+                cube.style.transition = 'transform 0.3s ease-out';
                 
-                // Update the FRONT face with the result
                 const frontFace = cube.querySelector('.cube__face--front');
                 
-                // Format result (arrows)
                 if (result.includes('⬇') || result.includes('⬆')) {
                     const number = result.replace('⬇', '').replace('⬆', '');
                     const arrow = result.includes('⬇') ? '⬇' : '⬆';
                     frontFace.innerHTML = `${number}<span style="font-size: 0.8em">${arrow}</span>`;
                 } else {
                     frontFace.textContent = result;
-                    // Adjust font size for longer text like "FAULT!"
                     if (result.length > 4) {
                         frontFace.style.fontSize = '1.8rem';
                     }
                 }
                 
-                // Handle special buttons logic (FAULT/LET)
                 const closeBtn = document.getElementById('close-dice-btn');
                 
                 if (result === 'LET') {
@@ -1480,16 +1388,13 @@
         }
         
         function takeScreenshot(fromWinModal = false) {
-            // Hide the win modal if it's visible
             const winModal = document.getElementById('win-modal');
             const wasWinModalVisible = winModal.style.display === 'flex';
             if (wasWinModalVisible) {
                 winModal.style.display = 'none';
             }
             
-            // Wait a moment for modal to hide
             setTimeout(() => {
-                // Try the proper method first (for live server)
                 html2canvas(document.getElementById('scoreboard-screen'), {
                     backgroundColor: null,
                     scale: 2,
@@ -1505,11 +1410,13 @@
                         link.click();
                         URL.revokeObjectURL(url);
                         
-                        showScreenshotConfirmation();
+                        // Just show a simple alert, don't navigate anywhere
+                        if (!wasWinModalVisible) {
+                            alert('Screenshot saved!');
+                        }
                     });
                 }).catch(error => {
-                    console.log('First attempt failed, trying fallback for local testing...');
-                    // Fallback for local testing - use allowTaint and toDataURL
+                    console.log('First attempt failed, trying fallback...');
                     html2canvas(document.getElementById('scoreboard-screen'), {
                         backgroundColor: null,
                         scale: 2,
@@ -1518,26 +1425,25 @@
                         useCORS: false
                     }).then(canvas => {
                         try {
-                            // Must use toDataURL with tainted canvas, NOT toBlob
                             const dataUrl = canvas.toDataURL('image/png');
                             const link = document.createElement('a');
                             link.download = 'My SLICE Scorecard.png';
                             link.href = dataUrl;
                             link.click();
                             
-                            if (wasWinModalVisible) {
-                                showScreenshotConfirmation();
+                            if (!wasWinModalVisible) {
+                                alert('Screenshot saved!');
                             }
                         } catch (err) {
                             console.error('toDataURL failed:', err);
-                            alert('Screenshot failed. Please use your device screenshot function instead.');
+                            alert('Screenshot failed. Please use your device screenshot function.');
                             if (wasWinModalVisible) {
                                 document.getElementById('win-modal').style.display = 'flex';
                             }
                         }
                     }).catch(err => {
-                        console.error('Fallback html2canvas failed:', err);
-                        alert('Screenshot failed. Please use your device screenshot function instead.');
+                        console.error('Fallback failed:', err);
+                        alert('Screenshot failed. Please use your device screenshot function.');
                         if (wasWinModalVisible) {
                             document.getElementById('win-modal').style.display = 'flex';
                         }
@@ -1547,19 +1453,20 @@
         }
         
         function showScreenshotConfirmation() {
-            const confirmed = confirm('Screenshot saved! Start a new match?');
-            if (confirmed) {
-                newMatch();
-            } else {
-                // Show win modal again
-                document.getElementById('win-modal').style.display = 'flex';
-            }
+            // Just keep the win modal open - user must click NEW MATCH manually
+            document.getElementById('win-modal').style.display = 'flex';
+            
+            // Optional: Show a brief "Saved!" message
+            const screenshotBtn = document.getElementById('screenshot-btn');
+            const originalText = screenshotBtn.innerHTML;
+            screenshotBtn.innerHTML = 'SCORECARD SAVED! ✓';
+            screenshotBtn.style.opacity = '0.6';
+            screenshotBtn.style.cursor = 'not-allowed';
+            screenshotBtn.disabled = true;
         }
         
         function newMatch() {
-            // Unlock orientation when starting a new match
             unlockOrientation();
-
             greenPoints = 0;
             orangePoints = 0;
             greenGames = 0;
@@ -1571,6 +1478,16 @@
             document.getElementById('green-games').textContent = "0";
             document.getElementById('orange-games').textContent = "0";
             
+            // Reset the screenshot button for next match
+            const screenshotBtn = document.getElementById('screenshot-btn');
+            screenshotBtn.style.opacity = '1';
+            screenshotBtn.style.cursor = 'pointer';
+            screenshotBtn.disabled = false;
+            screenshotBtn.innerHTML = `GET MY SCORECARD
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/>
+                </svg>`;
+            
             document.getElementById('win-modal').style.display = 'none';
             document.getElementById('scoreboard-screen').style.display = 'none';
             document.getElementById('signin-screen').style.display = 'flex';
@@ -1579,7 +1496,6 @@
             document.getElementById('orange-name-input').value = '';
         }
         
-        // Physics-based bouncing tennis balls with dynamic sizing
         let balls = [];
         
         function initBalls() {
@@ -1587,12 +1503,10 @@
             if (!phoneContainer) return;
             
             const containerWidth = phoneContainer.offsetWidth;
-            
-            // Ball sizes as percentage of container width (both square now)
-            const ball1Width = containerWidth * 0.28; // 28% of container (lime)
-            const ball1Height = ball1Width; // Square aspect ratio
-            const ball2Width = containerWidth * 0.35; // 35% of container (orange - 25% bigger)
-            const ball2Height = ball2Width; // Square aspect ratio
+            const ball1Width = containerWidth * 0.28;
+            const ball1Height = ball1Width;
+            const ball2Width = containerWidth * 0.35;
+            const ball2Height = ball2Width;
             
             balls = [
                 { 
@@ -1627,28 +1541,21 @@
                 return;
             }
             
-            // Use actual viewport dimensions for true screen edges
             const containerWidth = window.innerWidth;
             const containerHeight = window.innerHeight;
             
             balls.forEach(ball => {
-                // Get actual rendered dimensions from DOM
                 if (ball.element) {
                     const actualWidth = ball.element.offsetWidth;
                     const actualHeight = ball.element.offsetHeight;
-                    
-                    // Update ball dimensions if they've changed
                     ball.width = actualWidth;
                     ball.height = actualHeight;
                 }
                 
-                // Update position
                 ball.x += ball.vx;
                 ball.y += ball.vy;
                 
-                // Wall collision - allow balls to go well past the edge
-                // Negative buffer means ball center can be OUTSIDE the viewport
-                const edgeBuffer = -60; // Ball can go 60px past edge
+                const edgeBuffer = -60;
                 
                 if (ball.x <= edgeBuffer || ball.x >= containerWidth - ball.width - edgeBuffer) {
                     ball.vx *= -1;
@@ -1659,10 +1566,8 @@
                     ball.y = ball.y <= edgeBuffer ? edgeBuffer : containerHeight - ball.height - edgeBuffer;
                 }
                 
-                // Update rotation based on velocity
                 ball.rotation += (Math.abs(ball.vx) + Math.abs(ball.vy)) * 2;
                 
-                // Apply to DOM
                 if (ball.element) {
                     ball.element.style.left = ball.x + 'px';
                     ball.element.style.top = ball.y + 'px';
@@ -1673,77 +1578,66 @@
             requestAnimationFrame(animateBalls);
         }
         
-        // Start ball animation when page loads
         if (document.getElementById('ball1')) {
             initBalls();
             animateBalls();
-            
-            // Reinitialize balls on window resize
             window.addEventListener('resize', initBalls);
         }
 
-        /* --- Trigger Fullscreen on Tap --- */
         document.addEventListener('click', function() {
-            // Only trigger if the scoreboard is currently visible
             const scoreboard = document.getElementById('scoreboard-screen');
-            
             if (scoreboard.style.display === 'block') {
                 toggleFullscreen();
             }
         });
 
-        // Generate Phantom Card for Screenshot
         function generatePhantomCard() {
-            // Determine winner
+            // Grey out button immediately to show it's been clicked
+            const screenshotBtn = document.getElementById('screenshot-btn');
+            screenshotBtn.style.opacity = '0.6';
+            screenshotBtn.style.cursor = 'not-allowed';
+            screenshotBtn.disabled = true;
+            screenshotBtn.innerHTML = 'PROCESSING...';
+            
             let winnerName = "";
             let winnerColor = "";
             let message = "";
             
             if (greenGames > orangeGames) {
                 winnerName = greenName;
-                winnerColor = "#84cc16"; // Green
-                // Logic for message
+                winnerColor = "#84cc16";
                 if (orangeGames === 0) message = "WINS A BAGEL! 🥯";
                 else message = "TAKES THE SET!";
             } else {
                 winnerName = orangeName;
-                winnerColor = "#ff8800"; // Orange
+                winnerColor = "#ff8800";
                 if (greenGames === 0) message = "WINS A BAGEL! 🥯";
                 else message = "TAKES THE SET!";
             }
             
-            // Populate Data
             document.getElementById('phantom-winner-name').textContent = winnerName;
             document.getElementById('phantom-winner-name').style.color = winnerColor;
             document.getElementById('phantom-message').textContent = message;
             
             document.getElementById('phantom-green-name').textContent = greenName;
-            
-            // Green Score Logic (0 = heart)
             const pGreenScore = document.getElementById('phantom-green-score');
             if (greenGames === 0) pGreenScore.textContent = "💚";
             else pGreenScore.textContent = greenGames;
             
             document.getElementById('phantom-orange-name').textContent = orangeName;
-            
-            // Orange Score Logic (0 = heart)
             const pOrangeScore = document.getElementById('phantom-orange-score');
             if (orangeGames === 0) pOrangeScore.textContent = "🧡";
             else pOrangeScore.textContent = orangeGames;
             
-            // Screenshot Logic
             const phantomCard = document.getElementById('phantom-card');
             
-            // Wait for image to be ready just in case
-            // Use setTimeout to ensure DOM updates are painted
             setTimeout(() => {
-                // Try standard method first (best quality if served correctly)
                 html2canvas(phantomCard, {
-                    scale: 1, // Native 1080x1920 scale
+                    scale: 1,
                     useCORS: true,
                     backgroundColor: null,
                     allowTaint: false,
-                    logging: true // Helpful for debugging
+                    logging: true
                 }).then(canvas => {
                     canvas.toBlob(blob => {
                         const url = URL.createObjectURL(blob);
@@ -1757,8 +1651,6 @@
                     });
                 }).catch(err => {
                     console.log("Standard capture failed, trying fallback...", err);
-                    
-                    // Fallback for local files (allowTaint: true)
                     html2canvas(phantomCard, {
                         scale: 1,
                         useCORS: false,
@@ -1775,11 +1667,21 @@
                             showScreenshotConfirmation();
                         } catch (e) {
                             console.error("Fallback capture failed:", e);
-                            alert("Screenshot failed. If running locally, browser security may be blocking the image.");
+                            alert("Screenshot failed. Browser security may be blocking the image.");
+                            // Reset button on error
+                            screenshotBtn.style.opacity = '1';
+                            screenshotBtn.style.cursor = 'pointer';
+                            screenshotBtn.disabled = false;
+                            screenshotBtn.innerHTML = 'GET MY SCORECARD<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>';
                         }
                     }).catch(e => {
                         console.error("Fallback html2canvas failed:", e);
                         alert("Screenshot failed. Please try again.");
+                        // Reset button on error
+                        screenshotBtn.style.opacity = '1';
+                        screenshotBtn.style.cursor = 'pointer';
+                        screenshotBtn.disabled = false;
+                        screenshotBtn.innerHTML = 'GET MY SCORECARD<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>';
                     });
                 });
             }, 100);
