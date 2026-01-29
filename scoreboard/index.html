@@ -631,43 +631,6 @@
             z-index: 10;
         }
         
-        /* Floating Screenshot Button */
-        .floating-screenshot-btn {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(180deg, #ffffff 0%, #e5e5e5 50%, #cccccc 100%);
-            border: 3px solid rgba(255,255,255,0.9);
-            border-radius: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.3rem;
-            box-shadow: 
-                0 4px 0 rgba(0,0,0,0.4),
-                0 8px 20px rgba(0,0,0,0.3),
-                inset 0 2px 0 rgba(255,255,255,0.4);
-            z-index: 100;
-            transition: all 0.2s;
-        }
-        
-        .floating-screenshot-btn svg {
-            width: 28px;
-            height: 28px;
-            fill: #333;
-        }
-        
-        .floating-screenshot-btn:active {
-            transform: translateY(2px);
-            box-shadow: 
-                0 2px 0 rgba(0,0,0,0.4),
-                0 4px 12px rgba(0,0,0,0.25),
-                inset 0 2px 0 rgba(255,255,255,0.4);
-        }
-        
         #dice-result {
             font-size: 3.5rem;
             font-weight: 900;
@@ -989,13 +952,6 @@
     
     <!-- Scoreboard Screen -->
     <div id="scoreboard-screen">
-        <button class="floating-screenshot-btn" onclick="takeScreenshot()" title="Screenshot">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
-                <circle cx="12" cy="12" r="3"/>
-            </svg>
-        </button>
-        
         <div id="green-name" class="player-name">GREEN</div>
         <div id="orange-name" class="player-name">ORANGE</div>
         
