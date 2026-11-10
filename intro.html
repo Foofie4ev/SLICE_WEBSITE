@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SLICE! — Learn to Play</title>
+<meta name="description" content="Learn SLICE! in under two minutes: match the color, topspin goes up, slice goes down, match the pace to switch.">
+<link rel="icon" type="image/png" href="assets/slice-logo-sm.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=Rubik:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+:root{
+  --bg:#0b0d0a;--fg:#f4f6ef;--lime:#c6f432;--orange:#ff8a2a;--yellow:#ffd23f;--red:#ff4a5e;
+  --display:'Archivo',system-ui,sans-serif;--body:'Rubik',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --barh:64px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#050604;color:var(--fg);font-family:var(--body);overflow:hidden;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+img{display:block;user-select:none;-webkit-user-drag:none}
+
+#host{position:fixed;left:0;right:0;top:0;bottom:var(--barh)}
+body.record #host,body.embed #host{bottom:0}
+#stage{position:absolute;left:50%;top:50%;transform-origin:50% 50%;overflow:hidden;background:#0b0d0a}
+
+/* ---------- background ---------- */
+.bg{position:absolute;inset:0;overflow:hidden;
+  background:radial-gradient(120% 90% at 50% 0%,#152012 0%,#0b0d0a 60%),#0b0d0a}
+.blob{position:absolute;left:0;top:0;width:1300px;height:1300px;margin:-650px;border-radius:50%;filter:blur(40px);opacity:.55}
+.blob.l{--c:rgba(198,244,50,.45);background:radial-gradient(closest-side,var(--c),transparent)}
+.blob.o{background:radial-gradient(closest-side,rgba(255,138,42,.38),rgba(255,138,42,0))}
+.court{position:absolute;left:0;top:0;width:1250px;margin-left:-625px;margin-top:-430px;opacity:.10;overflow:visible}
+.fmt-tall .court{width:1150px;margin-left:-575px;margin-top:-400px}
+.rays{position:absolute;left:0;top:0;width:2800px;height:2800px;margin:-1400px;
+  background:repeating-conic-gradient(from 0deg,rgba(198,244,50,.13) 0deg 5deg,transparent 5deg 15deg);
+  -webkit-mask:radial-gradient(closest-side,#000 12%,transparent 72%);mask:radial-gradient(closest-side,#000 12%,transparent 72%)}
+.grain{position:absolute;inset:0;opacity:.06;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* ---------- cards ---------- */
+#cards,#fx,#txt{position:absolute;inset:0}
+#cards{z-index:1}#fx{z-index:2}#txt{z-index:3}.meter,.score,.die,.logo{z-index:4}
+.card{position:absolute;left:0;top:0;perspective:1800px;-webkit-perspective:1800px}
+.ci{position:relative;width:100%;height:100%;transform-style:preserve-3d;-webkit-transform-style:preserve-3d}
+/* corners clipped with clip-path too: Safari ignores border-radius on 3D-flipped images */
+.ci img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:7.2%/4.6%;-webkit-clip-path:inset(0 round 7.2% / 4.6%);clip-path:inset(0 round 7.2% / 4.6%);backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.card .sh{position:absolute;inset:1%;border-radius:7.2%/4.6%;box-shadow:0 calc(4 * var(--u)) calc(10 * var(--u)) rgba(0,0,0,.55)}
+.ci .b{transform:rotateY(180deg)}
+.card .dim{position:absolute;inset:0;border-radius:7.2%/4.6%;background:rgba(6,8,5,.66);opacity:0;visibility:hidden}
+.card .glow{position:absolute;inset:-3.5%;border-radius:9%/6%;box-shadow:0 0 0 calc(2.4 * var(--u)) var(--gc,var(--lime)),0 0 calc(14 * var(--u)) calc(3 * var(--u)) var(--gc,rgba(198,244,50,.7));opacity:0;visibility:hidden}
+.card .hl{position:absolute;border:calc(1.8 * var(--u)) solid #fff;border-radius:calc(3.5 * var(--u));box-shadow:0 0 0 calc(1.2 * var(--u)) rgba(0,0,0,.45),0 0 calc(8 * var(--u)) rgba(255,255,255,.75);opacity:0;visibility:hidden}
+.stamp{position:absolute;right:calc(-8 * var(--u));top:calc(-8 * var(--u));z-index:5;opacity:0;visibility:hidden}
+.stamp i{width:calc(28 * var(--u));height:calc(28 * var(--u));border-radius:50%;display:grid;place-items:center;font:normal 900 calc(17 * var(--u))/1 var(--display);border:calc(1.8 * var(--u)) solid #0b0d0a;box-shadow:0 calc(2 * var(--u)) calc(6 * var(--u)) rgba(0,0,0,.5)}
+.stamp.ok i{background:var(--lime);color:#0b0d0a}
+.stamp.no i{background:var(--red);color:#fff}
+.stamp span{position:absolute;top:100%;right:0;margin-top:calc(2.5 * var(--u));white-space:nowrap;font:italic 800 calc(9.5 * var(--u))/1 var(--display);font-stretch:105%;text-transform:uppercase;padding:calc(2.6 * var(--u)) calc(4.5 * var(--u));border-radius:calc(3 * var(--u));background:#0b0d0a;box-shadow:0 calc(2 * var(--u)) calc(5 * var(--u)) rgba(0,0,0,.4)}
+.stamp.ok span{color:var(--lime)}
+.stamp.no span{color:#ff9aa6}
+.quiz .card.q{cursor:pointer}
+.quiz .card.q:hover .glow{opacity:1!important;visibility:visible!important}
+
+/* ---------- fx ---------- */
+.ring{position:absolute;left:0;top:0;width:140px;height:140px;margin:-70px;border-radius:50%;border:10px solid var(--lime)}
+.ball{position:absolute;left:0;top:0;width:150px;height:150px;margin:-75px}
+.ball .orb{position:absolute;inset:0;border-radius:50%;overflow:hidden;filter:drop-shadow(0 0 22px rgba(198,244,50,.8))}
+.ball .orb img{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);max-width:none;height:155%}
+.ball .trail{position:absolute;top:50%;right:50%;height:44%;width:300%;transform:translateY(-50%);border-radius:999px;filter:blur(8px);opacity:.6;background:linear-gradient(90deg,transparent,rgba(210,255,87,.85))}
+.burst{position:absolute;left:0;top:0;font:italic 900 54px/1 var(--display);font-stretch:112%;text-transform:uppercase;letter-spacing:-.01em;padding:16px 28px 14px;border-radius:16px;white-space:nowrap;box-shadow:0 10px 0 rgba(0,0,0,.35),0 20px 40px rgba(0,0,0,.4)}
+.burst.g{background:var(--lime);color:#0b0d0a}
+.burst.o{background:var(--orange);color:#0b0d0a}
+.burst.y{background:var(--yellow);color:#0b0d0a}
+.burst.r{background:var(--red);color:#fff}
+.burst.w{background:#fff;color:#0b0d0a}
+.burst.k{background:#0b0d0a;color:var(--lime);border:3px solid var(--lime);font-size:30px;letter-spacing:.14em;font-style:normal;padding:12px 20px}
+.burst.eq{font-size:110px;padding:6px 34px 10px;border-radius:24px}
+.burst.count{font-size:220px;padding:0 54px 12px;border-radius:40px}
+
+/* ---------- logo ---------- */
+.logo{position:absolute;left:0;top:0;perspective:1600px}
+.lg{position:relative;transform-style:preserve-3d}
+.lg img{width:100%;height:auto;backface-visibility:visible}
+.lg .d{position:absolute;left:0;top:0;filter:brightness(.28) saturate(1.4)}
+.lg .f{position:relative;filter:drop-shadow(0 0 40px rgba(198,244,50,.35))}
+
+/* ---------- text ---------- */
+.tb{position:absolute;display:flex;flex-direction:column;justify-content:center;gap:22px;pointer-events:none}
+.fmt-wide .tb{left:1040px;right:70px;top:100px;height:620px;align-items:flex-start;text-align:left}
+.fmt-tall .tb{left:50px;right:50px;top:290px;height:560px;align-items:center;text-align:center}
+.fmt-wide .tb.quiz{left:620px;top:50px;height:320px}
+.fmt-tall .tb.quiz{top:290px;height:300px}
+.tb.quiz .s{max-width:none}
+.fmt-wide .tb.under{left:0;right:0;top:756px;height:130px;align-items:center;text-align:center}
+.fmt-tall .tb.under{top:1250px;height:230px}
+.fmt-tall .tb.low{top:1010px;height:440px}
+.tb .k{font:800 28px/1 var(--display);letter-spacing:.26em;text-transform:uppercase;color:#0b0d0a;background:var(--lime);padding:10px 16px 9px;border-radius:10px}
+.tb .h{font-family:var(--display);font-weight:900;font-style:italic;font-stretch:112%;text-transform:uppercase;font-size:128px;line-height:.9;letter-spacing:-.015em;text-shadow:0 8px 0 rgba(0,0,0,.35)}
+.fmt-tall .tb .h{font-size:112px}
+.tb.under .h{font-size:96px}
+.tb .ln{display:block;white-space:nowrap}
+.tb .wd{display:inline-block;padding-right:.22em}
+.tb .wd:last-child{padding-right:0}
+.c-g{color:var(--lime)}.c-o{color:var(--orange)}.c-y{color:var(--yellow)}.c-r{color:var(--red)}
+.tb .s{font:500 42px/1.25 var(--body);color:rgba(244,246,239,.86);max-width:780px}
+.fmt-tall .tb .s{font-size:44px;max-width:900px}
+
+/* recap chips */
+.recap{position:absolute;display:flex;flex-direction:column;gap:22px;pointer-events:none}
+.fmt-wide .recap{left:1040px;right:70px;top:150px;height:620px;justify-content:center;align-items:flex-start}
+.fmt-tall .recap{left:50px;right:50px;top:975px;height:450px;justify-content:center;align-items:center}
+.chip{display:flex;align-items:center;gap:22px;font:italic 900 56px/1 var(--display);font-stretch:110%;text-transform:uppercase;padding:18px 30px 16px;border-radius:20px;background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.14);white-space:nowrap}
+.fmt-wide .chip{font-size:44px}
+.fmt-tall .chip{font-size:46px}
+.chip b{display:grid;place-items:center;width:62px;height:62px;border-radius:14px;font-style:normal;font-size:42px;flex:none}
+.chip .sw{background:linear-gradient(135deg,var(--lime) 50%,var(--orange) 50%)}
+.chip .up{background:var(--lime);color:#0b0d0a}
+.chip .dn{background:var(--yellow);color:#0b0d0a}
+.chip .eq{background:#fff;color:#0b0d0a}
+
+/* ---------- meter ---------- */
+.meter{position:absolute;display:flex;flex-direction:column;gap:14px;pointer-events:none}
+.fmt-wide .meter{left:1040px;top:745px;align-items:flex-start}
+.fmt-tall .meter{left:0;right:0;top:1318px;align-items:center}
+.mlabs{position:relative;height:34px;width:760px}
+.mlab{position:absolute;inset:0;font:800 28px/34px var(--display);letter-spacing:.16em;text-transform:uppercase;color:rgba(244,246,239,.82);white-space:nowrap}
+.fmt-tall .mlab{text-align:center}
+.mrow{display:flex;align-items:center;gap:12px}
+.pip{width:76px;height:76px;border-radius:16px;display:grid;place-items:center;font:italic 900 46px/1 var(--display);background:rgba(255,255,255,.06);color:rgba(244,246,239,.3);border:2px solid rgba(255,255,255,.1)}
+.marr{width:84px;height:84px;margin-left:6px;display:grid;place-items:center}
+.marr svg{width:100%;height:100%}
+
+/* ---------- score ---------- */
+.score{position:absolute;left:0;top:0;display:flex;align-items:center;gap:16px;padding:12px 14px 12px 28px;border-radius:999px;background:rgba(11,13,10,.88);border:2px solid rgba(255,255,255,.14);font:italic 900 32px/1 var(--display);text-transform:uppercase;white-space:nowrap;box-shadow:0 14px 40px rgba(0,0,0,.45)}
+.score .n{position:relative;width:56px;height:56px;border-radius:14px;background:var(--lime);color:#0b0d0a;overflow:hidden;font-size:40px}
+.score .n.o{background:var(--orange)}
+.score .n span{position:absolute;inset:0;display:grid;place-items:center}
+.score .t{font-size:22px;letter-spacing:.14em;font-style:normal;color:rgba(244,246,239,.7);padding:0 14px}
+
+/* ---------- die ---------- */
+.die{position:absolute;left:0;top:0;filter:drop-shadow(0 26px 30px rgba(0,0,0,.55))}
+.die img{position:absolute;inset:0;width:100%;height:100%;border-radius:12%}
+
+/* ---------- wipe ---------- */
+.wipe{position:absolute;top:-15%;height:130%;left:0;width:62%;background:var(--lime);z-index:40}
+.wipe .orb{position:absolute;right:-90px;top:50%;width:180px;height:180px;margin-top:-90px;border-radius:50%;overflow:hidden;box-shadow:0 0 50px rgba(0,0,0,.4)}
+.wipe .orb img{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);max-width:none;height:155%}
+
+/* ---------- captions ---------- */
+.capwrap{position:absolute;display:flex;pointer-events:none;z-index:50}
+.fmt-wide .capwrap{left:1040px;right:60px;top:892px;justify-content:flex-start}
+.fmt-tall .capwrap{left:34px;right:34px;top:1458px;justify-content:center;text-align:center}
+.cap{font:600 36px/1.3 var(--body);background:rgba(5,6,4,.82);padding:12px 24px 13px;border-radius:16px;color:#fff;opacity:0;transform:translateY(8px);transition:opacity .18s,transform .18s;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.fmt-tall .cap{font-size:35px}
+.cap.on{opacity:1;transform:none}
+.cap em{font-style:normal;color:var(--lime)}
+.nocc .capwrap{display:none}
+.sprog{position:absolute;left:0;right:0;bottom:0;height:8px;background:rgba(255,255,255,.08);z-index:45}
+.sprog i{position:absolute;inset:0;background:linear-gradient(90deg,var(--lime),var(--yellow));transform-origin:0 50%;transform:scaleX(0)}
+
+/* quiz feedback */
+.qfb{position:absolute;z-index:60;left:50%;transform:translateX(-50%);font:italic 800 40px/1 var(--display);text-transform:uppercase;background:var(--red);color:#fff;padding:18px 28px;border-radius:16px;opacity:0;visibility:hidden;white-space:nowrap;box-shadow:0 14px 40px rgba(0,0,0,.45)}
+.fmt-wide .qfb{top:300px;left:1160px}
+.fmt-tall .qfb{top:1110px}
+.qhint{position:absolute;z-index:55;font:800 26px/1 var(--display);letter-spacing:.18em;text-transform:uppercase;color:#0b0d0a;background:#fff;padding:12px 18px;border-radius:999px;opacity:0;visibility:hidden;white-space:nowrap}
+.fmt-wide .qhint{left:1160px;top:900px;transform:translateX(-50%)}
+.fmt-tall .qhint{left:540px;top:1490px;transform:translateX(-50%)}
+.quiz .qhint{opacity:1;visibility:visible;animation:qh 1s ease-in-out infinite alternate}
+.quiz .capwrap{opacity:0}
+@keyframes qh{to{transform:translateX(-50%) scale(1.06)}}
+
+/* ---------- controls ---------- */
+.bar{position:fixed;left:0;right:0;bottom:0;height:var(--barh);display:flex;align-items:center;gap:10px;padding:0 14px;background:#0b0d0a;border-top:1px solid rgba(255,255,255,.08);z-index:20;font:600 13px/1 var(--body)}
+body.record .bar{display:none}
+body.embed .bar{background:linear-gradient(transparent,rgba(5,6,4,.92) 40%);border:0;height:76px;padding-top:12px;opacity:0;transition:opacity .25s}
+body.embed:hover .bar,body.embed.paused .bar{opacity:1}
+.b{height:38px;min-width:38px;padding:0 12px;border-radius:999px;display:inline-grid;place-items:center;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);white-space:nowrap;font:700 12.5px/1 var(--display);letter-spacing:.06em;text-transform:uppercase}
+.b:hover{background:rgba(255,255,255,.13)}
+.b.on{background:var(--lime);color:#0b0d0a;border-color:var(--lime)}
+.b svg{width:16px;height:16px}
+.seg{display:inline-flex;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);padding:3px}
+.seg .b{height:30px;border:0;background:none}
+.seg .b.on{background:var(--lime)}
+.prog{position:relative;flex:1;height:38px;cursor:pointer;min-width:80px}
+.prog .tr{position:absolute;left:0;right:0;top:50%;height:6px;margin-top:-3px;border-radius:9px;background:rgba(255,255,255,.12);overflow:hidden}
+.prog .fl{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--lime)}
+.prog .tk{position:absolute;top:50%;width:2px;height:14px;margin-top:-7px;background:rgba(255,255,255,.4)}
+.prog .nm{position:absolute;bottom:100%;transform:translateX(-50%);font:700 11px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;color:#0b0d0a;background:var(--lime);padding:5px 7px;border-radius:6px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s}
+.prog:hover .nm{opacity:1}
+.tm{font:600 12.5px/1 var(--body);color:rgba(244,246,239,.7);min-width:86px;text-align:center;font-variant-numeric:tabular-nums}
+.chap{font:700 12px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--lime);min-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:720px){.chap,.tm{display:none}.bar{gap:6px;padding:0 8px}.b{padding:0 9px}}
+
+.start{position:fixed;inset:0 0 var(--barh) 0;z-index:30;display:grid;place-items:center;background:rgba(5,6,4,.45);cursor:pointer;transition:opacity .3s}
+body.record .start,body.embed .start{bottom:0}
+.start.gone{opacity:0;pointer-events:none}
+.start .pl{display:flex;align-items:center;gap:16px;padding:18px 30px 18px 20px;border-radius:999px;background:var(--lime);color:#0b0d0a;font:italic 900 24px/1 var(--display);font-stretch:110%;text-transform:uppercase;box-shadow:0 14px 50px rgba(198,244,50,.35);transition:transform .2s}
+.start:hover .pl{transform:scale(1.05)}
+.start .pl i{width:52px;height:52px;border-radius:50%;background:#0b0d0a;display:grid;place-items:center}
+.start .pl svg{width:20px;height:20px;margin-left:3px}
+.start small{display:block;font:600 13px/1 var(--body);font-style:normal;letter-spacing:.02em;text-transform:none;opacity:.7;margin-top:6px}
+
+.sp{position:fixed;inset:0;z-index:70;background:rgba(5,6,4,.82);backdrop-filter:blur(8px);display:none;overflow:auto;padding:40px 20px}
+.sp.open{display:block}
+.sp .in{max-width:760px;margin:0 auto;background:#10130e;border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:28px 30px 34px}
+.sp h2{font:italic 900 34px/1 var(--display);text-transform:uppercase;margin:0 0 4px}
+.sp p.m{color:rgba(244,246,239,.6);margin:0 0 22px;font-size:14px}
+.sp h3{font:800 13px/1 var(--display);letter-spacing:.18em;text-transform:uppercase;color:var(--lime);margin:26px 0 10px}
+.sp .row{display:grid;grid-template-columns:62px 1fr;gap:12px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:16px;line-height:1.45}
+.sp .row b{font:600 13px/1.6 var(--body);color:rgba(244,246,239,.5);font-variant-numeric:tabular-nums}
+.sp .row.os{color:rgba(244,246,239,.55);font-size:13.5px}
+.sp .x{float:right}
+</style>
+</head>
+<body>
+<div id="host">
+  <div id="stage" class="fmt-wide">
+    <div class="bg">
+      <div class="blob l" id="blobL"></div>
+      <div class="blob o" id="blobO"></div>
+      <svg class="court" id="court" viewBox="0 0 1000 700" fill="none" stroke="#fff" stroke-width="5">
+        <path d="M200 80H800L980 680H20Z"/><path d="M125 330H875" stroke-width="9"/><path d="M164 200H836M74 500H926M500 200V500"/>
+      </svg>
+      <div class="rays" id="rays"></div>
+      <div class="grain"></div>
+    </div>
+    <div id="cards"></div>
+    <div id="fx"></div>
+    <div class="meter" id="meter">
+      <div class="mlabs" id="mlabs"></div>
+      <div class="mrow"><div class="pip">1</div><div class="pip">2</div><div class="pip">3</div><div class="pip">4</div><div class="pip">5</div><div class="pip">6</div><div class="pip">7</div>
+        <div class="marr" id="marr"><svg viewBox="0 0 64 64"><path d="M32 4 58 34H42V60H22V34H6Z" fill="#c6f432" stroke="#0b0d0a" stroke-width="3" stroke-linejoin="round"/></svg></div>
+      </div>
+    </div>
+    <div class="score" id="score">You <div class="n"><span>0</span><span>1</span></div><div class="n o"><span>0</span></div> Opp <span class="t">First to 7</span></div>
+    <div class="die" id="die">
+      <img src="assets/dice/01_TOPSPIN_4_OR_HIGHER.png" alt=""><img src="assets/dice/02_TOPSPIN_5_OR_HIGHER.png" alt=""><img src="assets/dice/03_SLICE_4_OR_LOWER.png" alt="">
+      <img src="assets/dice/04_SLICE_3_OR_LOWER.png" alt=""><img src="assets/dice/05_LET_PLUS_1.png" alt=""><img src="assets/dice/06_FAULT_RED_GREEN_RIM.png" alt="">
+    </div>
+    <div id="txt"></div>
+    <div class="logo" id="logo"><div class="lg" id="lg"></div></div>
+    <div class="wipe" id="wipe"><div class="orb"><img src="assets/LIME_1.png" alt=""></div></div>
+    <div class="capwrap"><div class="cap" id="cap"></div></div>
+    <div class="sprog"><i id="sprog"></i></div>
+    <div class="qhint">Tap the card that returns it</div>
+    <div class="qfb" id="qfb"></div>
+  </div>
+</div>
+
+<div class="start" id="start"><div class="pl"><i><svg viewBox="0 0 20 20"><path d="M3 1.5v17L18 10z" fill="#c6f432"/></svg></i><div>Learn SLICE!<small>Two-minute how to play</small></div></div></div>
+
+<div class="bar" id="bar">
+  <button class="b" id="bPlay" aria-label="Play / pause"><svg viewBox="0 0 20 20" id="icPlay"><path d="M4 2v16l14-8z" fill="currentColor"/></svg></button>
+  <button class="b" id="bRe" aria-label="Restart"><svg viewBox="0 0 20 20"><path d="M10 3a7 7 0 1 1-6.6 4.7" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M2 2v6h6z" fill="currentColor"/></svg></button>
+  <span class="chap" id="chap">Intro</span>
+  <div class="prog" id="prog"><div class="tr"><div class="fl" id="fill"></div></div></div>
+  <span class="tm" id="tm">0:00 / 0:00</span>
+  <div class="seg"><button class="b" data-fmt="wide">16:9</button><button class="b" data-fmt="tall">9:16</button></div>
+  <button class="b on" id="bCC">CC</button>
+  <button class="b" id="bScript">Script</button>
+</div>
+
+<div class="sp" id="sp"><div class="in"><button class="b x" id="spX">Close</button><h2>SLICE! How to Play</h2><p class="m">Voice-over script — timecodes come straight from the animation, so they always match.</p><div id="spBody"></div></div></div>
+
+<script>
+(() => {
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const P = new URLSearchParams(location.search);
+const RECORD = P.has('record'), EMBED = P.has('embed');
+if (RECORD) document.body.classList.add('record');
+if (EMBED) document.body.classList.add('embed');
+let FMT = P.get('format') || 'auto';
+
+const stage = $('#stage'), host = $('#host'), cardsL = $('#cards'), fxL = $('#fx'), txtL = $('#txt');
+const logo = $('#logo'), lg = $('#lg'), meter = $('#meter'), mlabs = $('#mlabs'), pips = $$('.pip'), marr = $('#marr');
+const score = $('#score'), scoreYou = $$('#score .n:first-of-type span'), die = $('#die'), faces = $$('#die img');
+const marrPath = $('#marr path'), wipeEl = $('#wipe'), cap = $('#cap'), rays = $('#rays'), court = $('#court'), blobL = $('#blobL'), blobO = $('#blobO');
+
+// 3D logo layers
+lg.innerHTML = [10, 8, 6, 4, 2].map(z => `<img class="d" src="assets/slice-logo.png" alt="" style="transform:translateZ(-${z}px)">`).join('') +
+  '<img class="f" src="assets/slice-logo.png" alt="SLICE!">';
+
+/* ============================================================
+   Layouts (design pixels)
+   ============================================================ */
+const LAY = {
+  wide: { W: 1920, H: 1080, bug: [150, 84], bugW: 200, logo: [960, 430], logoW: 860, outLogo: [540, 470], outLogoW: 820,
+    pile: [560, 520], cw: 300, pair: [[390, 545], [745, 545]], pw: 330,
+    hand: [560, 968], hw: 190, hs: 118, opp: [560, 44], ow: 140, os: 70,
+    score: [1440, 58], bag: [150, 860], bw: 150, inTag: [560, 250],
+    qpile: [330, 580], qpw: 290, qcards: [[830, 640], [1170, 640], [1510, 640]], qw: 290,
+    serveL: [370, 520], serveR: [770, 520], dieW: 260, mini: [[1150, 782], [1450, 782]], miniW: 124, court: [560, 560] },
+  tall: { W: 1080, H: 1920, bug: [175, 262], bugW: 220, logo: [540, 860], logoW: 900, outLogo: [540, 610], outLogoW: 820,
+    pile: [540, 1078], cw: 280, pair: [[300, 1052], [780, 1052]], pw: 330,
+    hand: [540, 1835], hw: 190, hs: 112, opp: [540, 112], ow: 140, os: 66,
+    score: [730, 262], bag: [150, 1150], bw: 140, inTag: [540, 834],
+    qpile: [540, 815], qpw: 250, qcards: [[210, 1232], [540, 1232], [870, 1232]], qw: 290,
+    serveL: [320, 1075], serveR: [770, 1075], dieW: 240, mini: [[390, 1372], [690, 1372]], miniW: 130, court: [540, 1100] }
+};
+
+/* ============================================================
+   Build state
+   ============================================================ */
+let fmt, L, tl, cues = [], scenes = [], screenTxt = [], Z = 10, qRevealT = 0, qPauseT = 0, prevLab = null;
+const pickFmt = () => FMT !== 'auto' ? FMT : (host.clientWidth / Math.max(1, host.clientHeight) < .8 ? 'tall' : 'wide');
+
+function fit() {
+  const r = host.getBoundingClientRect();
+  const s = Math.min(r.width / L.W, r.height / L.H);
+  stage.style.width = L.W + 'px'; stage.style.height = L.H + 'px';
+  stage.style.transform = `translate(-50%,-50%) scale(${s})`;
+}
+
+/* ---------- helpers ---------- */
+const el = (cls, html = '', parent = fxL) => { const d = document.createElement('div'); d.className = cls; d.innerHTML = html; parent.appendChild(d); return d; };
+
+function C(name, w, { back = 'LIME', down = false } = {}) {
+  const c = el('card', `<div class="sh"></div><div class="ci"><img class="f" src="assets/cards/${name}.jpg" alt=""><img class="b" src="assets/cards/${back}_CARD_BACK.jpg" alt=""></div><div class="dim"></div><div class="glow"></div>`, cardsL);
+  c.style.width = w + 'px'; c.style.height = (w * 1048 / 676) + 'px'; c.style.setProperty('--u', (w / 100) + 'px');
+  c.ci = $('.ci', c); c.dimEl = $('.dim', c); c.glowEl = $('.glow', c);
+  gsap.set(c, { xPercent: -50, yPercent: -50, x: -2000, y: -2000, autoAlpha: 0 });
+  gsap.set(c.ci, { rotationY: down ? 180 : 0 });
+  return c;
+}
+function put(c, at, from, to, dur = .6, ease = 'power3.out') {
+  // visibility via a set (reverts cleanly when scrubbing back); motion via fromTo
+  const { autoAlpha: a0 = 1, ...f } = from;
+  tl.set(c, { zIndex: ++Z, autoAlpha: a0 }, at);
+  const t2 = { ...f, ...to }; // props only in 'from' stay constant (GSAP drops from-only props when re-rendering)
+  tl.fromTo(c, f, { ...t2, duration: dur, ease, immediateRender: false }, at);
+}
+function mv(c, at, to, dur = .5, ease = 'power3.out') { tl.to(c, { ...to, duration: dur, ease }, at); }
+function flip(c, at, dur = .55) { tl.to(c.ci, { rotationY: 0, duration: dur, ease: 'power2.out' }, at); }
+function play(c, at, to, scale = 1, opp = false) {
+  tl.set(c, { zIndex: ++Z }, at);
+  tl.to(c, { x: to[0], y: to[1], rotation: to[2] || 0, scale, duration: .5, ease: 'power3.out' }, at);
+  if (opp) flip(c, at + .05, .45);
+  ring(at + .4, to, opp ? '#ffffff' : '#c6f432', 3, 1.8);
+}
+function out(list, at, dx = 0, dy = 0, rot = 0) {
+  tl.to(list, { x: `+=${dx}`, y: `+=${dy}`, rotation: `+=${rot}`, autoAlpha: 0, duration: .5, ease: 'power2.in', stagger: .03 }, at);
+}
+function show(x, at, d = .3) { tl.fromTo(x, { autoAlpha: 0 }, { autoAlpha: 1, duration: d, immediateRender: false }, at); }
+function hide(x, at, d = .25) { tl.to(x, { autoAlpha: 0, duration: d }, at); }
+function glow(c, at, on = true, color) { if (color) c.glowEl.style.setProperty('--gc', color); on ? show(c.glowEl, at) : hide(c.glowEl, at); }
+function dim(c, at, on = true) { on ? show(c.dimEl, at) : hide(c.dimEl, at); }
+function stamp(c, kind, label) {
+  const s = el('stamp ' + kind, `<i>${kind === 'ok' ? '✓' : '✕'}</i>${label ? `<span>${label}</span>` : ''}`, c);
+  return s;
+}
+function pop(x, at, rot = -20) { tl.set(x, { autoAlpha: 1 }, at); tl.fromTo(x, { scale: 0, rotation: rot }, { scale: 1, rotation: 0, duration: .45, ease: 'back.out(3)', immediateRender: false }, at); }
+function popAt(x, at, rot) { tl.set(x, { autoAlpha: 1 }, at); tl.fromTo(x, { scale: 0 }, { scale: 1, rotation: rot, duration: .45, ease: 'back.out(2.6)', immediateRender: false }, at); }
+function HL(c, [l, t, w, h], color) {
+  const b = el('hl', '', c); Object.assign(b.style, { left: l + '%', top: t + '%', width: w + '%', height: h + '%' });
+  if (color) b.style.borderColor = color; return b;
+}
+function hlPop(b, at) { tl.set(b, { autoAlpha: 1 }, at); tl.fromTo(b, { scale: 1.5 }, { scale: 1, duration: .4, ease: 'back.out(2)', immediateRender: false }, at); }
+function burst(text, x, y, cls = 'g', rot = -5) { const b = el('burst ' + cls, text); gsap.set(b, { xPercent: -50, yPercent: -50, x, y, rotation: rot, autoAlpha: 0 }); return b; }
+function ring(at, [x, y], color = '#c6f432', s0 = .3, s1 = 5) {
+  const r = el('ring'); r.style.borderColor = color; gsap.set(r, { x, y, autoAlpha: 0 });
+  tl.fromTo(r, { autoAlpha: 1, scale: s0 }, { autoAlpha: 0, scale: s1, duration: .7, ease: 'power3.out', immediateRender: false }, at);
+}
+function ball(src = 'LIME_1') { const b = el('ball', `<div class="trail"></div><div class="orb"><img src="assets/${src}.png" alt=""></div>`); gsap.set(b, { autoAlpha: 0 }); return b; }
+function fan(n, i, c = L.hand, sp = L.hs) { const m = i - (n - 1) / 2; return { x: c[0] + m * sp, y: c[1] + m * m * 7, rotation: m * 5 }; }
+function ofan(n, i) { const m = i - (n - 1) / 2; return { x: L.opp[0] + m * L.os, y: L.opp[1] - m * m * 4, rotation: 180 - m * 5 }; }
+
+// text: tokens  g:WORD  o:WORD  r:WORD ; "_" = non-breaking space ; "|" = line break
+function TB(h, { k, s, cls = '' } = {}) {
+  const b = el('tb ' + cls, '', txtL);
+  const words = l => l.split(' ').filter(Boolean).map(w => {
+    const m = w.match(/^([gory]):(.*)$/); const t = (m ? m[2] : w).replace(/_/g, '&nbsp;');
+    return `<span class="wd${m ? ' c-' + m[1] : ''}">${t}</span>`;
+  }).join('');
+  b.innerHTML = (k ? `<div class="k">${k}</div>` : '') + `<div class="h">${h.split('|').map(l => `<span class="ln">${words(l)}</span>`).join('')}</div>` + (s ? `<div class="s">${s}</div>` : '');
+  // shrink the headline until every line fits the text box
+  const hd = $('.h', b), max = b.clientWidth;
+  const widest = () => Math.max(...$$('.ln', b).map(l => l.scrollWidth));
+  const w0 = widest();
+  if (w0 > max * .985) hd.style.fontSize = (parseFloat(getComputedStyle(hd).fontSize) * max / w0 * .97) + 'px';
+  b.plain = h.replace(/[gory]:/g, '').replace(/_/g, ' ').replace(/\|/g, ' ') + (s ? ' — ' + s : '');
+  gsap.set(b, { autoAlpha: 0 });
+  return b;
+}
+function tin(b, at) {
+  screenTxt.push({ t: at, text: b.plain });
+  tl.set(b, { autoAlpha: 1, x: 0, y: 0 }, at);
+  tl.fromTo($$('.wd', b), { yPercent: 115, rotation: 7, autoAlpha: 0 }, { yPercent: 0, rotation: 0, autoAlpha: 1, duration: .55, stagger: .055, ease: 'back.out(2)' }, at);
+  const o = $$('.k,.s', b); if (o.length) tl.fromTo(o, { y: 26, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: .45, stagger: .1, ease: 'power3.out' }, at + .18);
+}
+function tout(b, at) { tl.to(b, { autoAlpha: 0, x: fmt === 'wide' ? -50 : 0, y: fmt === 'tall' ? -36 : 0, duration: .28, ease: 'power2.in' }, at); }
+function T(h, at, end, o) { const b = TB(h, o); tin(b, at); if (end) tout(b, end); return b; }
+
+function vo(at, text, dur = 3.2) { cues.push({ t: at, d: dur, text }); }
+
+// meter
+function meterShow(at) { tl.fromTo(meter, { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: .4, ease: 'power3.out', immediateRender: false }, at); }
+function meterHide(at) { tl.to(meter, { autoAlpha: 0, y: 16, duration: .3 }, at); }
+function meterSet(at, label, lit, dir) {
+  const lab = el('mlab', label.replace(/([goy]):(\S+)/g, '<span class="c-$1">$2</span>').replace(/_/g, ' '), mlabs);
+  gsap.set(lab, { autoAlpha: 0 });
+  tl.fromTo(lab, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: .35, immediateRender: false }, at);
+  if (prevLab) tl.to(prevLab, { autoAlpha: 0, y: -12, duration: .25 }, at);
+  prevLab = lab;
+  const on = i => lit.includes(i + 1), col = dir === 'down' ? '#ffd23f' : '#c6f432';
+  tl.to(pips, {
+    backgroundColor: i => on(i) ? col : 'rgba(255,255,255,0.06)', color: i => on(i) ? '#0b0d0a' : 'rgba(244,246,239,0.3)',
+    borderColor: i => on(i) ? col : 'rgba(255,255,255,0.1)', scale: i => on(i) ? 1 : .86,
+    duration: .3, stagger: { each: .045, from: dir === 'down' ? 'end' : 'start' }, ease: 'back.out(2)'
+  }, at + .1);
+  tl.to(marr, { rotation: dir === 'down' ? 180 : 0, duration: .45, ease: 'back.out(2)' }, at + .1);
+  tl.to(marrPath, { fill: col, duration: .3 }, at + .1);
+  tl.fromTo(marr, { y: 0 }, { y: dir === 'down' ? 10 : -10, duration: .25, yoyo: true, repeat: 3, ease: 'sine.inOut', immediateRender: false }, at + .55);
+}
+let dieRot = 0;
+function roll(at, final, n = 9) {
+  const [, dy] = L.pile; dieRot += 720;
+  const seq = [2, 0, 5, 3, 1, 4, 2, 0, 3, 5, 1];
+  for (let k = 0; k < n; k++) { const f = k === n - 1 ? final : seq[(k + final) % seq.length]; tl.set(faces, { autoAlpha: (j) => j === f ? 1 : 0 }, at + k * .085); }
+  tl.to(die, { rotation: dieRot, duration: .8, ease: 'power3.out' }, at);
+  tl.to(die, { y: dy - 150, duration: .3, ease: 'power2.out' }, at).to(die, { y: dy, duration: .5, ease: 'bounce.out' }, at + .3);
+  tl.fromTo(die, { scale: 1.3 }, { scale: 1.42, duration: .12, yoyo: true, repeat: 1, immediateRender: false }, at + .8);
+}
+const MOODS = { lime: 'rgba(198,244,50,0.45)', yellow: 'rgba(255,210,63,0.5)', red: 'rgba(255,74,94,0.45)', orange: 'rgba(255,138,42,0.45)' };
+function mood(at, m) { tl.to(blobL, { '--c': MOODS[m], duration: .8, ease: 'power2.out' }, at); }
+function wipe(at, color = '#c6f432', src = 'LIME_1') {
+  tl.set(wipeEl, { backgroundColor: color }, at);
+  tl.set($('img', wipeEl), { attr: { src: `assets/${src}.png` } }, at);
+  tl.set(wipeEl, { autoAlpha: 1 }, at);
+  tl.fromTo(wipeEl, { x: -L.W * .62 - L.H * .4 }, { x: L.W + L.H * .4, duration: .8, ease: 'power2.inOut', immediateRender: false }, at);
+  tl.set(wipeEl, { autoAlpha: 0 }, at + .8);
+}
+
+/* ============================================================
+   THE PIECE
+   ============================================================ */
+function build(time = 0) {
+  if (tl) tl.kill();
+  fmt = pickFmt(); L = LAY[fmt];
+  stage.className = 'fmt-' + fmt;
+  $$('.seg .b').forEach(b => b.classList.toggle('on', b.dataset.fmt === fmt));
+  fit();
+  cardsL.innerHTML = fxL.innerHTML = txtL.innerHTML = mlabs.innerHTML = '';
+  const persist = [$('#sprog'), marrPath, logo, lg, meter, score, die, wipeEl, rays, court, blobL, blobO, marr, ...pips, ...faces, ...scoreYou];
+  gsap.killTweensOf(persist); gsap.set(persist, { clearProps: 'all' });
+  cues = []; scenes = []; screenTxt = []; Z = 10; prevLab = null; dieRot = 0;
+
+  gsap.set([logo, meter, score, die, wipeEl, rays], { autoAlpha: 0 });
+  gsap.set(logo, { width: L.logoW, xPercent: -50, yPercent: -50, x: L.logo[0], y: L.logo[1] });
+  gsap.set(die, { width: L.dieW, height: L.dieW, xPercent: -50, yPercent: -50, x: L.pile[0], y: L.pile[1] });
+  gsap.set(faces, { autoAlpha: 0 }); gsap.set(faces[0], { autoAlpha: 1 });
+  gsap.set(score, { xPercent: -50, yPercent: -50, x: L.score[0], y: L.score[1] });
+  gsap.set(scoreYou[1], { yPercent: 100 });
+  gsap.set(rays, { x: L.logo[0], y: L.logo[1] });
+  gsap.set(court, { x: L.court[0], y: L.court[1], rotationX: 0 });
+  gsap.set(blobL, { x: L.W * .3, y: L.H * .5 }); gsap.set(blobO, { x: L.W * .85, y: L.H * .15 });
+  gsap.set(wipeEl, { skewX: -14, x: -L.W });
+
+  tl = gsap.timeline({ paused: true, onUpdate: tick, onComplete: () => { setPlayIcon(false); } });
+  let S = 0;
+  const scene = (name, dur, fn) => { scenes.push({ name, t: S }); fn(S); S += dur; };
+  const [px, py] = L.pile, ch = c => c * 1048 / 676; // card height from width
+
+  /* ---------- 0 · INTRO ---------- */
+  scene('Intro', 5.6, s => {
+    tl.fromTo(rays, { autoAlpha: 0, scale: .5 }, { autoAlpha: 1, scale: 1, duration: 1, ease: 'power2.out', immediateRender: false }, s + .85);
+    tl.fromTo(rays, { rotation: 0 }, { rotation: 32, duration: 4.6, ease: 'none', immediateRender: false }, s + .85);
+    hide(rays, s + 5.0, .5);
+    const b = ball('LIME_1');
+    tl.set(b, { autoAlpha: 1 }, s + .15);
+    tl.fromTo(b, { x: -220, y: L.logo[1] + 280, scale: .6, rotation: -20 }, { x: L.logo[0], y: L.logo[1], scale: 1.5, rotation: -8, duration: .75, ease: 'power2.in', immediateRender: false }, s + .15);
+    tl.to(b, { scale: 3, autoAlpha: 0, duration: .22 }, s + .9);
+    ring(s + .9, L.logo, '#c6f432', .4, 9); ring(s + 1.0, L.logo, '#ff8a2a', .3, 7);
+    tl.fromTo(logo, { autoAlpha: 0, scale: .15 }, { autoAlpha: 1, scale: 1, duration: 1.2, ease: 'elastic.out(1,.5)', immediateRender: false }, s + .9);
+    tl.fromTo(lg, { rotationY: -220 }, { rotationY: 0, duration: 1.3, ease: 'power3.out', immediateRender: false }, s + .9);
+    tl.to(lg, { rotationY: 14, rotationX: -5, duration: 1.5, ease: 'sine.inOut' }, s + 2.2).to(lg, { rotationY: -10, rotationX: 3, duration: 1.3, ease: 'sine.inOut' }, s + 3.7);
+    T('TENNIS WITH A g:TWIST!', s + 3.0, s + 5.0, { cls: 'under' });
+    tl.to(lg, { rotationY: 0, rotationX: 0, duration: .5 }, s + 5.0);
+    tl.to(logo, { x: L.bug[0], y: L.bug[1], scale: L.bugW / L.logoW, duration: .8, ease: 'power3.inOut' }, s + 5.0);
+    vo(s + .3, 'Ladies and gentlemen… welcome to <em>SLICE!</em>', 2.6);
+    vo(s + 3.0, 'Tennis… with a twist!', 2.4);
+  });
+
+  /* ---------- 1 · THE GOAL ---------- */
+  scene('The Goal', 13.4, s => {
+    // preface: each player has a 70-card deck
+    const s0 = s; s = s + 3.2;
+    const dW = L.cw * .8, dY = [px - L.cw * .62, py], dO = [px + L.cw * .62, py];
+    const deckY = [0, 1, 2, 3, 4].map(i => C('FOREHAND_1', dW, { down: true })), deckO = [0, 1, 2, 3, 4].map(i => C('BACKHAND_1', dW, { back: 'ORANGE', down: true }));
+    deckY.forEach((c, i) => put(c, s0 + .2 + i * .05, { x: dY[0] - 260, y: dY[1] + 200, rotation: -30 }, { x: dY[0] - i * 3, y: dY[1] - i * 4, rotation: -4 + i }, .55, 'back.out(1.3)'));
+    deckO.forEach((c, i) => put(c, s0 + .3 + i * .05, { x: dO[0] + 260, y: dO[1] + 200, rotation: 30 }, { x: dO[0] + i * 3, y: dO[1] - i * 4, rotation: 4 - i }, .55, 'back.out(1.3)'));
+    const tY = burst('70 cards', dY[0], dY[1] + ch(dW) / 2 + 46, 'g', -4), tO = burst('70 cards', dO[0], dO[1] + ch(dW) / 2 + 46, 'w', 4);
+    [tY, tO].forEach(b => { b.style.fontSize = '40px'; b.style.padding = '12px 22px 10px'; });
+    popAt(tY, s0 + 1.0, -4); popAt(tO, s0 + 1.15, 4); hide([tY, tO], s0 + 3.1);
+    T('g:2_PLAYERS.|70_CARDS|EACH.', s0 + .3, s0 + 3.0, { s: 'Every player has their own deck.' });
+    vo(s0 + .3, 'Two players, and each one gets their own deck of <em>seventy cards</em>.', 2.8);
+    const mine = ['FOREHAND_4', 'BACKHAND_6', 'FOREHAND_SLICE_2', 'BACKHAND_SLICE_3', 'FOREHAND_7', 'BACKHAND_1', 'FOREHAND_SLICE_5'];
+    const theirs = ['BACKHAND_2', 'FOREHAND_3', 'FOREHAND_6', 'BACKHAND_4', 'BACKHAND_SLICE_7', 'FOREHAND_SLICE_1', 'BACKHAND_5'];
+    const H = mine.map(n => C(n, L.hw)), O = theirs.map(n => C(n, L.ow, { back: 'ORANGE', down: true }));
+    H.forEach((c, i) => put(c, s + .25 + i * .07, { x: dY[0], y: dY[1], rotation: -4, scale: dW / L.hw }, { ...fan(7, i), scale: 1 }, .6, 'back.out(1.2)'));
+    O.forEach((c, i) => put(c, s + .3 + i * .07, { x: dO[0], y: dO[1], rotation: 4, scale: dW / L.ow }, { ...ofan(7, i), scale: 1 }, .6, 'back.out(1.2)'));
+    out(deckY, s + 1.0, -120, L.H * .7, -20); out(deckO, s + 1.0, 120, L.H * .7, 20);
+    const tagY = burst('YOU', L.hand[0], L.hand[1] - ch(L.hw) / 2 - 40, 'k', 0), tagO = burst('OPPONENT', L.opp[0], L.opp[1] + ch(L.ow) / 2 + 36, 'k', 0);
+    tagO.style.color = '#fff'; tagO.style.borderColor = '#fff';
+    popAt(tagY, s + .9, 0); popAt(tagO, s + 1.0, 0); hide([tagY, tagO], s + 2.7);
+    T('DRAW A|HAND OF g:7.', s + .3, s + 2.6);
+    T('EVERY CARD|IS A g:SHOT.', s + 2.8, s + 5.0);
+    const sc = L.cw / L.hw, so = L.cw / L.ow;
+    play(H[0], s + 3.0, [px - 8, py + 6, -5], sc);
+    play(O[2], s + 3.8, [px + 10, py - 6, 5], so, true);
+    play(H[1], s + 4.6, [px - 12, py + 4, -3], sc);
+    play(O[4], s + 5.4, [px + 8, py - 4, 6], so, true);
+    const restH = [H[2], H[3], H[4], H[5], H[6]], restO = [O[0], O[1], O[3], O[5], O[6]];
+    restH.forEach((c, i) => mv(c, s + 5.9, fan(5, i), .5));
+    restO.forEach((c, i) => mv(c, s + 5.9, ofan(5, i), .5));
+    T('RETURN IT…|OR r:LOSE|r:THE r:POINT!', s + 5.2, s + 7.6);
+    tl.fromTo(score, { autoAlpha: 0, scale: .6 }, { autoAlpha: 1, scale: 1, duration: .5, ease: 'back.out(2)', immediateRender: false }, s + 7.7);
+    T('FIRST TO g:7|WINS!', s + 7.75, s + 9.7);
+    hide(score, s + 9.6);
+    out(restH, s + 9.5, 0, 420); out(restO, s + 9.5, 0, -420);
+    out([H[0], O[2], H[1], O[4]], s + 9.55, L.W * .7, -80, 40);
+    vo(s + .3, 'Each player draws a hand of <em>seven cards</em>.', 2.4);
+    vo(s + 2.8, 'Every card is a shot.', 2.2);
+    vo(s + 5.2, 'Return the shot… or lose the point!', 2.5);
+    vo(s + 7.75, 'First to <em>seven points</em> wins!', 2.3);
+  });
+
+  /* ---------- 2 · KNOW YOUR SHOT ---------- */
+  scene('Know Your Shot', 14.90, s => {
+    const K = 1.08;
+    wipe(s - .2);
+    const [[ax, ay], [bx, by]] = L.pair;
+    const A = C('FOREHAND_5', L.pw, { down: true }), B = C('BACKHAND_SLICE_6', L.pw, { down: true });
+    put(A, s + K * .25, { x: ax, y: ay + 120, rotation: -14, scale: .55 }, { x: ax, y: ay, rotation: -4, scale: 1 }, .7, 'back.out(1.5)'); flip(A, s + K * .3, .7);
+    T('KNOW YOUR|g:SHOT.', s + K * .3, s + K * 1.5);
+    T('g:GREEN_=|g:FOREHAND.', s + K * 1.6, s + K * 2.95);
+    glow(A, s + K * 1.6, true, '#c6f432'); mv(A, s + K * 1.6, { y: ay - 24, scale: 1.04 }, .4, 'back.out(2)'); glow(A, s + K * 2.95, false); mv(A, s + K * 2.95, { y: ay, scale: 1 }, .35);
+    put(B, s + K * 3.0, { x: L.W + 300, y: by - 60, rotation: 30 }, { x: bx, y: by, rotation: 4 }, .6, 'power3.out'); flip(B, s + K * 3.05, .6);
+    T('o:ORANGE_=|o:BACKHAND.', s + K * 3.05, s + K * 4.6);
+    glow(B, s + K * 3.5, true, '#ff8a2a'); glow(B, s + K * 4.6, false);
+    const spA = HL(A, [29, 35, 50, 11], '#c6f432'), spB = HL(B, [24, 52, 54, 12], '#ffd23f');
+    hlPop(spA, s + K * 4.8); hlPop(spB, s + K * 5.15); hide([spA, spB], s + K * 7.0);
+    T('SPIN:|g:TOPSPIN|OR y:SLICE.', s + K * 4.7, s + K * 7.0);
+    const paA = HL(A, [3, 2, 37, 23]), paB = HL(B, [3, 2, 37, 23]);
+    hlPop(paA, s + K * 7.2); hlPop(paB, s + K * 7.35); hide([paA, paB], s + K * 10.4);
+    // pace scale fills slow → fast, then previews the two directions
+    meterShow(s + K * 7.6); meterSet(s + K * 7.7, 'Pace: g:1 = slow · g:7 = rocket', [1, 2, 3, 4, 5, 6, 7], 'up');
+    meterSet(s + K * 10.7, 'g:Topspin: pace goes up', [5, 6, 7], 'up');
+    meterSet(s + K * 11.9, 'y:Slice: pace goes down', [1, 2, 3, 4, 5], 'down');
+    meterHide(s + K * 13.2);
+    T('NUMBERS|ARE g:PACE.', s + K * 7.1, s + K * 10.4, { s: 'The number is the speed, or pace, of your shot. The higher the number, the faster the pace.' });
+    const arA = HL(A, [26, 6, 15, 20], '#c6f432'), arB = HL(B, [24, 7, 16, 20], '#ffd23f');
+    hlPop(arA, s + K * 10.6); hlPop(arB, s + K * 10.85);
+    const bY = fmt === 'tall' ? ay + ch(L.pw) / 2 - 34 : ay - ch(L.pw) / 2 - 50;
+    const bA = burst('↑ Pace up', ax, bY, 'g', -5), bB = burst('↓ Pace down', bx, bY, 'y', 4);
+    [bA, bB].forEach(b => { b.style.fontSize = '38px'; b.style.padding = '12px 20px 10px'; });
+    popAt(bA, s + K * 10.7, -5); popAt(bB, s + K * 10.95, 4);
+    T('g:TOPSPIN_GOES_UP.|y:SLICE_GOES_DOWN.', s + K * 10.55, s + K * 13.3, { k: 'Arrows = pace direction', s: 'The arrow also shows which way the pace goes. Topspin speeds the rally up. Slice slows it down.' });
+    hide([arA, arB, bA, bB], s + K * 13.2);
+    out([A], s + K * 13.2, -500, 300, -30); out([B], s + K * 13.2, 500, 300, 30);
+    vo(s + K * .3, 'Know your shot!', 1.3);
+    vo(s + K * 1.6, '<em>Green</em> is your Forehand.', 1.4);
+    vo(s + K * 3.05, 'Orange is your Backhand.', 1.5);
+    vo(s + K * 4.7, 'Every shot has spin: Topspin… or Slice.', 2.4);
+    vo(s + K * 7.1, 'Each number is the <em>pace</em>, the speed of your shot. Higher numbers mean faster shots!', 3.4);
+    vo(s + K * 10.55, 'The arrows show the pace direction: Topspin goes <em>UP</em>, Slice goes <em>DOWN</em>!', 3.1);
+  });
+
+  /* ---------- 3-6 · THE RALLY RULES (one running rally) ---------- */
+  let pileTop, hand, oSlice6, inTag;
+  scene('Match the Color', 8.58, s => {
+    const K = 1.3;
+    pileTop = C('FOREHAND_5', L.cw, { back: 'ORANGE', down: true });
+    put(pileTop, s + K * .2, { x: px + 120, y: -350, rotation: -40 }, { x: px, y: py, rotation: -3 }, .6); flip(pileTop, s + K * .25);
+    ring(s + K * .7, L.pile, '#ffffff', .3, 2);
+    inTag = burst('OPPONENT’S SHOT', L.inTag[0], L.inTag[1], 'k', 0); popAt(inTag, s + K * .75, 0);
+    hand = ['FOREHAND_5', 'BACKHAND_3', 'FOREHAND_SLICE_6', 'BACKHAND_SLICE_5', 'FOREHAND_SLICE_2'].map(n => C(n, L.hw));
+    hand.forEach((c, i) => put(c, s + K * .8 + i * .07, { x: L.hand[0], y: L.H + 300, rotation: 0 }, fan(5, i), .55, 'back.out(1.3)'));
+    const fh = [hand[0], hand[2], hand[4]], bh = [hand[1], hand[3]];
+    T('MATCH THE|g:COLOR.', s + K * .3, s + K * 6.4, { k: 'Rule 1', s: 'If your opponent plays a Forehand, return it with a Forehand. Same for Backhands.' });
+    fh.forEach(c => { mv(c, s + K * 2.5, { y: '-=60' }, .45, 'back.out(2)'); glow(c, s + K * 2.5, true, '#c6f432'); });
+    bh.forEach(c => dim(c, s + K * 2.5));
+    vo(s + K * .3, 'Rule number one: <em>match the color!</em>', 2.5);
+    vo(s + K * 3.0, 'If your opponent plays a Forehand, return it with a Forehand. If they play a Backhand, return it with a Backhand.', 4.6);
+  });
+
+  scene('Topspin? Go Up', 10.92, s => {
+    const K = 1.3;
+    meterShow(s + K * .2); meterSet(s + K * .25, 'Opponent’s shot: g:Topspin · pace 5', [5, 6, 7], 'up');
+    T('g:TOPSPIN?|GO g:UP.', s + K * .3, s + K * 6.7, { k: 'Rule 2', s: 'Topspin speeds up the rally. Return it with equal or higher pace.' });
+    const [f5, b3, fs6, bs5, fs2] = hand;
+    const no2 = stamp(fs2, 'no', 'Too low'), ok5 = stamp(f5, 'ok'), ok6 = stamp(fs6, 'ok');
+    glow(fs2, s + K * 2.6, false); dim(fs2, s + K * 2.6); pop(no2, s + K * 2.6); mv(fs2, s + K * 2.6, { y: '+=60' }, .4);
+    pop(ok5, s + K * 2.9); pop(ok6, s + K * 3.05);
+    hide([ok5, ok6, no2], s + K * 4.7); glow(f5, s + K * 4.7, false); glow(fs6, s + K * 4.7, false);
+    play(f5, s + K * 4.7, [px + 10, py + 4, 4], L.cw / L.hw); hide(inTag, s + K * 4.7); show(inTag, s + K * 7.3);
+    const eq = burst('Same pace!', px + L.cw * .55, py - ch(L.cw) * .42, 'g', 7); popAt(eq, s + K * 5.15, 7); hide(eq, s + K * 6.6);
+    hand = [b3, fs6, bs5, fs2];
+    hand.forEach((c, i) => mv(c, s + K * 5.4, fan(4, i), .5));
+    oSlice6 = C('FOREHAND_SLICE_6', L.cw, { back: 'ORANGE', down: true });
+    put(oSlice6, s + K * 6.9, { x: px + 120, y: -350, rotation: -40 }, { x: px - 6, y: py - 6, rotation: -5 }, .55); flip(oSlice6, s + K * 6.95, .5);
+    ring(s + K * 7.4, L.pile, '#ffffff', .3, 2);
+    vo(s + K * .3, 'Rule two: the spin sets the pace of your return.', 2.1);
+    vo(s + K * 2.4, 'Topspin speeds the rally up, so return it with <em>equal or higher</em> pace.', 2.5);
+    vo(s + K * 4.95, 'Returning it at the same pace is legal too!', 1.9);
+    vo(s + K * 6.9, 'Your opponent returns it with a <em>Slice six!</em>', 1.5);
+  });
+
+  scene('Slice? Go Down', 11.25, s => {
+    const K = 1.25;
+    mood(s + K * .1, 'yellow');
+    meterSet(s + K * .1, 'Opponent’s shot: y:Slice · pace 6', [1, 2, 3, 4, 5, 6], 'down');
+    T('y:SLICE?|GO y:DOWN.', s + K * .2, s + K * 4.4, { s: 'Slice slows the rally down. Return it with equal or lower pace.' });
+    const [b3, fs6, bs5, fs2] = hand;
+    dim(fs2, s + K * 1.9, false);
+    [fs6, fs2].forEach((c, i) => { mv(c, s + K * 1.9 + i * .1, { y: '-=60' }, .45, 'back.out(2)'); glow(c, s + K * 1.9 + i * .1, true, '#c6f432'); });
+    const okA = stamp(fs6, 'ok', 'Equal'), okB = stamp(fs2, 'ok', 'Lower');
+    pop(okA, s + K * 2.3); pop(okB, s + K * 2.45);
+    hide([okA, okB], s + K * 3.8); glow(fs2, s + K * 3.8, false); glow(fs6, s + K * 3.8, false); mv(fs6, s + K * 3.8, { y: '+=60' }, .4);
+    play(fs2, s + K * 3.8, [px + 6, py + 6, 3], L.cw / L.hw); hide(inTag, s + K * 3.8);
+    T('YOUR SHOT|SETS UP|g:THEIR_RETURN.', s + K * 4.6, s + K * 8.8, { s: 'Now they have to return it with pace 2 or lower.' });
+    meterSet(s + K * 4.9, 'Their return: vs y:Slice · pace 2', [1, 2], 'down');
+    hand = [b3, fs6, bs5];
+    hand.forEach((c, i) => mv(c, s + K * 4.4, fan(3, i), .5));
+    vo(s + K * .2, 'Slice slows the rally down, so return it with <em>equal or lower</em> pace.', 3.4);
+    vo(s + K * 3.7, 'Return it with a Slice two…', 1.1);
+    vo(s + K * 4.9, '…and now they have to return it with pace two or lower. Your shot sets up their return!', 3.8);
+    pileTop = fs2;
+  });
+
+  scene('Switch Colors', 9.88, s => {
+    const K = 1.3;
+    meterHide(s + K * .1); mood(s + K * .1, 'lime');
+    const bs2 = C('BACKHAND_SLICE_2', L.cw, { back: 'ORANGE', down: true });
+    const dx = L.cw * .4;
+    mv(pileTop, s + K * .3, { x: px - dx, rotation: -8 }, .5);
+    put(bs2, s + K * .3, { x: px + 200, y: -350, rotation: -40 }, { x: px + dx, y: py + 10, rotation: 7 }, .6); flip(bs2, s + K * .35, .5);
+    ring(s + K * .85, [px + dx, py], '#ffffff', .3, 2);
+    T('SWITCH|COLORS?', s + K * .3, s + K * 1.8, { s: 'Forehand to Backhand, or back again.' });
+    const hA = HL(pileTop, [3, 2, 37, 23]), hB = HL(bs2, [3, 2, 37, 23]);
+    hlPop(hA, s + K * 1.9); hlPop(hB, s + K * 2.05);
+    // badge sits above both cards, same pill style as the other callouts
+    const eq = burst('Pace 2 = Pace 2', px, py - ch(L.cw) / 2 - (fmt === 'tall' ? 44 : 64), 'g', -4); popAt(eq, s + K * 2.1, -4);
+    T('MATCH THE|g:PACE!', s + K * 1.9, s + K * 7.1, { s: 'Return with the same pace in the other color. Works with Topspin or Slice.' });
+    const m1 = C('FOREHAND_4', L.miniW), m2 = C('BACKHAND_4', L.miniW);
+    put(m1, s + K * 4.1, { x: L.mini[0][0], y: L.mini[0][1] + 80, rotation: 0, scale: .5, autoAlpha: 0 }, { y: L.mini[0][1], rotation: -5, scale: 1, autoAlpha: 1 }, .45, 'back.out(2)');
+    put(m2, s + K * 4.3, { x: L.mini[1][0], y: L.mini[1][1] + 80, rotation: 0, scale: .5, autoAlpha: 0 }, { y: L.mini[1][1], rotation: 5, scale: 1, autoAlpha: 1 }, .45, 'back.out(2)');
+    const eq2 = burst('=', (L.mini[0][0] + L.mini[1][0]) / 2, L.mini[0][1], 'g', -4); eq2.style.fontSize = '60px'; eq2.style.padding = '4px 22px 8px'; popAt(eq2, s + K * 4.5, -4);
+    const ok = stamp(m2, 'ok'); pop(ok, s + K * 4.7);
+    hide([hA, hB, eq, eq2], s + K * 7.0);
+    out([m1, m2], s + K * 7.0, 0, 60);
+    out(hand, s + K * 6.9, 0, 420); hide(inTag, s + K * 6.9);
+    out($$('.card', cardsL).filter(c => ![m1, m2, ...hand].includes(c) && c !== bs2 && c !== pileTop).concat([pileTop, bs2]), s + K * 7.0, L.W * .6, -60, 35);
+    vo(s + K * .3, 'Want to switch from Forehand to Backhand?', 1.5);
+    vo(s + K * 1.9, 'Just <em>match the pace!</em>', 1.8);
+    vo(s + K * 3.8, 'Return it at the same pace with the other color. It works with Topspin or Slice!', 3.2);
+  });
+
+  /* ---------- 7 · NOPE ---------- */
+  scene('Nope!', 7.02, s => {
+    const K = 1.35;
+    const top = C('BACKHAND_7', L.cw, { back: 'ORANGE', down: true });
+    put(top, s + K * .2, { x: px + 120, y: -350, rotation: -40 }, { x: px, y: py, rotation: -3 }, .55); flip(top, s + K * .25, .5);
+    meterShow(s + K * .3); meterSet(s + K * .35, 'Opponent’s shot: g:Topspin · pace 7', [7], 'up');
+    T('y:SLICE_4 ON A|g:TOPSPIN_7?', s + K * .3, s + K * 1.9);
+    const bad = C('BACKHAND_SLICE_4', L.cw);
+    put(bad, s + K * 1.4, { x: px - 80, y: L.H + 340, rotation: -25 }, { x: px + 16, y: py + 40, rotation: 8 }, .45, 'power3.in');
+    tl.to(bad, { x: px - L.cw * .95, y: py + ch(L.cw) * (fmt === 'tall' ? -.04 : .45), rotation: -22, duration: .6, ease: 'power3.out' }, s + K * 1.87);
+    tl.fromTo(top, { x: px }, { x: px + 16, duration: .05, repeat: 5, yoyo: true, immediateRender: false }, s + K * 1.87);
+    ring(s + K * 1.85, [px, py + 30], '#ff4a5e', .3, 3);
+    mood(s + K * 1.85, 'red');
+    const no = stamp(bad, 'no', 'Too low'); pop(no, s + K * 2.0); dim(bad, s + K * 2.1);
+    T('r:NOPE!', s + K * 2.0, s + K * 4.7, { s: 'You can’t return a Topspin 7 with less than pace 7.' });
+    out([top, bad], s + K * 4.7, L.W * .6, -60, 35); meterHide(s + K * 4.7);
+    vo(s + K * .3, 'Return a Topspin seven with a Slice four?', 1.6);
+    vo(s + K * 2.0, '<em>No way!</em> Topspin needs equal or higher pace!', 2.6);
+  });
+
+  /* ---------- 8 · YOUR TURN (quiz) ---------- */
+  scene('Your Turn', 12.42, s => {
+    const K = 1.15;
+    wipe(s - .2, '#ffd23f', 'LIME_2'); mood(s + K * .2, 'yellow');
+    const [qx, qy] = L.qpile;
+    const top = C('BACKHAND_SLICE_5', L.qpw, { back: 'ORANGE', down: true });
+    put(top, s + K * .2, { x: qx + 120, y: -350, rotation: -40 }, { x: qx, y: qy, rotation: -3 }, .55); flip(top, s + K * .25, .5);
+    const t1 = T('YOUR g:SHOT!', s + K * .3, null, { cls: 'quiz', s: 'Your opponent plays a <b>Backhand Slice 5</b>. Which card returns it?' });
+    const opts = [['BACKHAND_6', 0, 'Slice → go down'], ['BACKHAND_3', 1, ''], ['FOREHAND_SLICE_4', 0, 'Switch? Match pace 5']];
+    const Q = opts.map(([n, ok, why], i) => {
+      const c = C(n, L.qw); c.classList.add('q'); if (ok) c.dataset.ok = 1; c.dataset.why = why;
+      put(c, s + K * .9 + i * .12, { x: L.qcards[i][0], y: L.H + 400, rotation: 0 }, { y: L.qcards[i][1], rotation: (i - 1) * 3 }, .6, 'back.out(1.4)');
+      return c;
+    });
+    qPauseT = s + K * 2.2;
+    const cd = ['3', '2', '1'].map((n, i) => { const b = burst(n, L.qcards[1][0], L.qcards[1][1] - ch(L.qw) / 2 - 10, 'w', 0); b.classList.add('count'); b.style.fontSize = '120px'; return b; });
+    cd.forEach((b, i) => { popAt(b, s + K * 2.4 + i * .8, 0); hide(b, s + K * 3.0 + i * .8, .15); });
+    qRevealT = s + K * 4.85;
+    const r = qRevealT;
+    tout(t1, r);
+    Q.forEach((c, i) => {
+      if (opts[i][1]) { glow(c, r, true, '#c6f432'); pop(stamp(c, 'ok', 'Same color, lower'), r + .1); }
+      else { dim(c, r + .05); pop(stamp(c, 'no', opts[i][2]), r + .1 + i * .08); }
+    });
+    T('g:BACKHAND_3!', r + .1, s + K * 10.4, { cls: 'quiz', s: 'Same color, lower pace. Great return!' });
+    const win = Q[1];
+    tl.set(win, { zIndex: 999 }, r + 1.5);
+    mv(win, r + 1.5, { x: qx + 14, y: qy + 8, rotation: 5, scale: L.qpw / L.qw }, .55);
+    ring(r + 1.95, L.qpile, '#c6f432', .3, 3);
+    tl.to($$('.stamp', win), { autoAlpha: 0, duration: .2 }, r + 1.5); glow(win, r + 1.5, false);
+    out([top, win], s + K * 10.3, L.W * .6, -60, 35); out([Q[0], Q[2]], s + K * 10.3, 0, 500);
+    vo(s + K * .3, 'Your turn! Your opponent plays a Backhand Slice five.', 1.9);
+    vo(s + K * 2.2, 'Which card returns it?', 2.5);
+    vo(r + .1, 'Return it with a <em>Backhand three!</em> Same color, lower pace. Great return!', 3.6);
+  });
+
+  /* ---------- 9 · THE SERVE ---------- */
+  scene('The Serve', 21.06, s => {
+    const K = 1.12;
+    mood(s, 'lime');
+    T('EVERY POINT|STARTS WITH|A g:SERVE.', s + K * .2, s + K * 2.4);
+    T('TWO WAYS|TO g:SERVE.', s + K * 2.5, s + K * 5.8, { s: '1 · Play a groundstroke from your hand<br>2 · Roll the Service Die' });
+    const sv = C('FOREHAND_3', L.hw);
+    put(sv, s + K * 2.6, { x: L.hand[0], y: L.H + 300, rotation: 0 }, { x: L.serveL[0], y: L.serveL[1], rotation: -4, scale: L.cw * .8 / L.hw }, .6);
+    const c1 = burst('1 · Play a card', L.serveL[0], L.serveL[1] + ch(L.cw * .8) / 2 + 50, 'k', 0); popAt(c1, s + K * 3.0, 0);
+    tl.set(die, { autoAlpha: 1 }, s + K * 4.4);
+    tl.fromTo(die, { x: L.serveR[0], y: L.serveR[1], scale: 0, rotation: -180 }, { x: L.serveR[0], y: L.serveR[1], scale: 1, rotation: 0, duration: .6, ease: 'back.out(1.6)', immediateRender: false }, s + K * 4.4);
+    const c2 = burst('2 · Roll the die', L.serveR[0], L.serveR[1] + ch(L.cw * .8) / 2 + 50, 'k', 0); popAt(c2, s + K * 4.7, 0);
+    out([sv], s + K * 5.8, -300, 0, -20); hide([c1, c2], s + K * 5.8);
+    mv(die, s + K * 5.9, { x: px, y: py, scale: 1.3 }, .5);
+    roll(s + K * 6.3, 5);
+    T('r:FAULT!', s + K * 7.15, s + K * 9.4, { s: 'Second serve. Two faults? Lose the point.' });
+    ring(s + K * 7.1, L.pile, '#ff4a5e', .4, 3.5);
+    roll(s + K * 9.5, 4);
+    T('LET! g:+1', s + K * 10.35, s + K * 12.8, { s: 'Both players draw a card. Roll again.' });
+    ring(s + K * 10.3, L.pile, '#c6f432', .4, 3.5);
+    const d1 = C('FOREHAND_1', L.hw, { down: true }), d2 = C('BACKHAND_1', L.ow, { back: 'ORANGE', down: true });
+    put(d1, s + K * 10.6, { x: px, y: py, rotation: 0, scale: .4 }, { x: L.hand[0], y: L.H + 260, rotation: 10, scale: 1 }, .7, 'power2.in');
+    put(d2, s + K * 10.7, { x: px, y: py, rotation: 0, scale: .4 }, { x: L.opp[0], y: -260, rotation: 190, scale: 1 }, .7, 'power2.in');
+    roll(s + K * 12.9, 0);
+    ring(s + K * 13.7, L.pile, '#c6f432', .4, 4);
+    T('g:TOPSPIN_4 ↑', s + K * 13.75, s + K * 18.5, { s: 'Return any groundstroke — Forehand <b>or</b> Backhand — pace 4 or higher.' });
+    meterShow(s + K * 14.0); meterSet(s + K * 14.05, 'Receiver: g:Topspin · pace 4', [4, 5, 6, 7], 'up');
+    mv(die, s + K * 16.1, { x: px - L.cw * .62, rotation: dieRot - 10, scale: 1 }, .45);
+    const r5 = C('BACKHAND_5', L.cw);
+    put(r5, s + K * 16.2, { x: px + 200, y: L.H + 340, rotation: 25 }, { x: px + L.cw * .58, y: py + 10, rotation: 6 }, .55);
+    ring(s + K * 16.7, [px + L.cw * .58, py], '#ff8a2a', .3, 2);
+    const ok = stamp(r5, 'ok', 'Either color'); pop(ok, s + K * 16.8);
+    out([r5], s + K * 18.4, L.W * .6, -60, 35); hide(die, s + K * 18.4); meterHide(s + K * 18.4);
+    vo(s + K * .2, 'There are two ways to serve every point.', 2.4);
+    vo(s + K * 2.6, 'Play a groundstroke from your hand…', 1.8);
+    vo(s + K * 4.45, '…or roll the <em>Service Die!</em>', 2.4);
+    vo(s + K * 7.15, 'A Fault? Take a second serve. Two Faults and you lose the point!', 2.3);
+    vo(s + K * 10.35, 'A Let? Both players draw a card, and you roll again!', 2.5);
+    vo(s + K * 13.75, '<em>Topspin four!</em> The receiver returns the serve with a Forehand or a Backhand, at pace four or higher!', 4.6);
+  });
+
+  /* ---------- 10 · STUCK & SCORING ---------- */
+  scene('Stuck? & Scoring', 13.78, s => {
+    const K = 1.3;
+    const top = C('FOREHAND_6', L.cw, { back: 'ORANGE', down: true });
+    put(top, s + K * .2, { x: px + 120, y: -350, rotation: -40 }, { x: px, y: py, rotation: -3 }, .55); flip(top, s + K * .25, .5);
+    meterShow(s + K * .3); meterSet(s + K * .35, 'Opponent’s shot: g:Topspin · pace 6', [6, 7], 'up');
+    const H = ['BACKHAND_2', 'FOREHAND_SLICE_3', 'BACKHAND_SLICE_4'].map(n => C(n, L.hw));
+    H.forEach((c, i) => put(c, s + K * .4 + i * .07, { x: L.hand[0], y: L.H + 300, rotation: 0 }, fan(3, i), .5, 'back.out(1.3)'));
+    H.forEach((c, i) => dim(c, s + K * 1.3 + i * .08));
+    T('NO r:RETURN?', s + K * .3, s + K * 1.8);
+    T('LAST DITCH|g:EFFORT!', s + K * 1.9, s + K * 5.8, { s: 'Draw 1 card. If it works, play it!' });
+    const bag = [0, 1, 2].map(i => { const c = C('FOREHAND_1', L.bw, { down: true }); put(c, s + K * 1.6 + i * .05, { x: L.bag[0] - 200, y: L.bag[1], rotation: 0 }, { x: L.bag[0] + i * 4, y: L.bag[1] - i * 4, rotation: -6 + i * 2 }, .5); return c; });
+    const bagTag = burst('Your deck', L.bag[0], L.bag[1] + ch(L.bw) / 2 + 34, 'k', 0); bagTag.style.fontSize = '22px'; popAt(bagTag, s + K * 2.0, 0);
+    const dc = C('FOREHAND_7', L.bw, { down: true });
+    const mid = fmt === 'wide' ? [(L.bag[0] + px) / 2, py + 140] : [850, py + 10];
+    put(dc, s + K * 2.8, { x: L.bag[0] + 8, y: L.bag[1] - 8, rotation: -2 }, { x: mid[0], y: mid[1], rotation: 0, scale: 1.4 }, .5, 'back.out(1.4)');
+    flip(dc, s + K * 3.2, .5);
+    const ok = stamp(dc, 'ok', 'Saved!'); pop(ok, s + K * 3.7);
+    tl.to(ok, { autoAlpha: 0, duration: .2 }, s + K * 4.4);
+    play(dc, s + K * 4.4, [px + 10, py + 6, 5], L.cw / L.bw);
+    tl.fromTo(score, { autoAlpha: 0, scale: .6 }, { autoAlpha: 1, scale: 1, duration: .5, ease: 'back.out(2)', immediateRender: false }, s + K * 5.9);
+    tl.to(scoreYou, { yPercent: '-=100', duration: .45, ease: 'back.out(2)' }, s + K * 6.4);
+    tl.fromTo(score, { scale: 1 }, { scale: 1.12, duration: .15, yoyo: true, repeat: 1, immediateRender: false }, s + K * 6.4);
+    T('WIN THE|POINT: g:+1!', s + K * 5.9, s + K * 8.0);
+    out([top, dc], s + K * 7.6, L.W * .6, -60, 35); meterHide(s + K * 7.6);
+    T('REFILL|TO g:7!', s + K * 8.1, s + K * 10.4, { s: 'Then switch servers and serve the next point.' });
+    H.forEach(c => dim(c, s + K * 8.1, false));
+    H.forEach((c, i) => mv(c, s + K * 8.2, fan(7, i), .45));
+    ['FOREHAND_2', 'BACKHAND_SLICE_6', 'FOREHAND_SLICE_7', 'BACKHAND_4'].forEach((n, i) => {
+      const c = C(n, L.hw, { down: true });
+      put(c, s + K * 8.3 + i * .12, { x: L.bag[0], y: L.bag[1], rotation: 0, scale: L.bw / L.hw }, { ...fan(7, i + 3), scale: 1 }, .55, 'back.out(1.2)');
+      flip(c, s + K * 8.55 + i * .12, .45); H.push(c);
+    });
+    out(H, s + K * 10.3, 0, 420); out(bag, s + K * 10.3, -300, 0); hide([bagTag, score], s + K * 10.3);
+    vo(s + K * .3, 'No legal return? <em>Last Ditch Effort!</em> Draw one card.', 3.0);
+    vo(s + K * 3.4, 'If that card works, play it. If not, you lose the point.', 2.4);
+    vo(s + K * 5.9, 'Win the point, and you score one!', 2.0);
+    vo(s + K * 8.1, 'Then both players refill to <em>seven</em> cards, switch servers, and play the next point!', 2.4);
+  });
+
+  /* ---------- 11 · RECAP ---------- */
+  scene('Recap', 11.52, s => {
+    const K = 1.2;
+    wipe(s - .2);
+    tl.to(logo, { x: L.outLogo[0], y: L.outLogo[1], scale: L.outLogoW / L.logoW, duration: .9, ease: 'power3.inOut' }, s + K * .1);
+    tl.fromTo(lg, { rotationY: 0 }, { rotationY: 360, duration: 1.1, ease: 'power3.inOut', immediateRender: false }, s + K * .1);
+    tl.set(rays, { x: L.outLogo[0], y: L.outLogo[1] }, s + K * .1);
+    tl.fromTo(rays, { autoAlpha: 0, scale: .5, rotation: 0 }, { autoAlpha: 1, scale: .9, rotation: 40, duration: 9, ease: 'none', immediateRender: false }, s + K * .2);
+    const rc = el('recap', [
+      '<div class="chip"><b class="sw"></b>Match the color</div>',
+      '<div class="chip"><b class="up">↑</b><span class="c-g">Topspin</span>&nbsp;speeds it up</div>',
+      '<div class="chip"><b class="dn">↓</b><span class="c-y">Slice</span>&nbsp;slows it down</div>',
+      '<div class="chip"><b class="eq">=</b>Switch? Match the pace</div>'].join(''), txtL);
+    const chips = $$('.chip', rc);
+    [.3, 1.8, 3.2, 4.6].forEach((t, i) => tl.fromTo(chips[i], { autoAlpha: 0, x: fmt === 'wide' ? -80 : 0, y: fmt === 'tall' ? 40 : 0, scale: .8 }, { autoAlpha: 1, x: 0, y: 0, scale: 1, duration: .5, ease: 'back.out(2)', immediateRender: false }, s + t));
+    gsap.set(chips, { autoAlpha: 0 });
+    screenTxt.push({ t: s + K * .3, text: 'Match the color · Topspin ↑ speeds it up · Slice ↓ slows it down · Switch? Match the pace' });
+    tl.to(chips, { autoAlpha: 0, x: fmt === 'wide' ? 60 : 0, duration: .3, stagger: .05 }, s + K * 6.1);
+    T('FIRST TO g:7|WINS!', s + K * 6.3, null, { cls: 'low', k: 'Serve it · Slice it · Win it', s: 'SLICE! — the tennis card game. Coming soon.' });
+    tl.fromTo(logo, { scale: L.outLogoW / L.logoW }, { scale: L.outLogoW / L.logoW * 1.06, duration: .18, yoyo: true, repeat: 3, ease: 'power2.out', immediateRender: false }, s + K * 6.4);
+    vo(s + K * .3, 'Match the color.', 1.4);
+    vo(s + K * 1.8, 'Topspin speeds the rally up.', 1.3);
+    vo(s + K * 3.2, 'Slice slows the rally down.', 1.3);
+    vo(s + K * 4.6, 'To switch colors, match the pace.', 1.6);
+    vo(s + K * 6.3, 'That’s <em>SLICE!</em> Now get out there… and serve it up!', 3.2);
+  });
+
+  // background drift across the whole piece
+  tl.to(blobL, { keyframes: [{ x: L.W * .2, y: L.H * .7 }, { x: L.W * .55, y: L.H * .3 }, { x: L.W * .25, y: L.H * .55 }, { x: L.W * .5, y: L.H * .4 }], duration: S, ease: 'none' }, 0);
+  tl.to(blobO, { keyframes: [{ x: L.W * .9, y: L.H * .8 }, { x: L.W * .7, y: L.H * .2 }, { x: L.W * .95, y: L.H * .6 }, { x: L.W * .8, y: L.H * .15 }], duration: S, ease: 'none' }, 0);
+  tl.fromTo('#sprog', { scaleX: 0 }, { scaleX: 1, duration: S, ease: 'none', immediateRender: false }, 0);
+  tl.to({}, { duration: .01 }, S); // hold end
+
+  if (!RECORD) tl.addPause(qPauseT, startQuiz);
+  cues.sort((a, b) => a.t - b.t);
+  // a caption stays up long enough to be read (≈3 words/s), but never past the next line
+  cues.forEach((c, i) => { const n = cues[i + 1], w = c.text.replace(/<[^>]+>/g, '').split(' ').length; c.e = Math.min(c.t + Math.max(c.d, w / 3 + .4), n ? n.t - .05 : 1e9); });
+  buildProgress(); buildScript();
+  tl.seek(Math.min(time, tl.duration()));
+  tick();
+}
+
+/* ============================================================
+   Captions / progress / script
+   ============================================================ */
+let lastCue = null;
+const fmtT = t => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
+function tick() {
+  if (!tl) return;
+  const t = tl.time();
+  const c = cues.find(c => t >= c.t && t < c.e) || null;
+  if (c !== lastCue) { lastCue = c; if (c) { cap.innerHTML = c.text; cap.classList.add('on'); } else cap.classList.remove('on'); }
+  $('#fill').style.width = (t / tl.duration() * 100) + '%';
+  $('#tm').textContent = `${fmtT(t)} / ${fmtT(tl.duration())}`;
+  const sc = [...scenes].reverse().find(x => t >= x.t - .01);
+  if (sc) $('#chap').textContent = sc.name;
+}
+function buildProgress() {
+  const p = $('#prog'); $$('.tk,.nm', p).forEach(x => x.remove());
+  const D = tl.duration();
+  scenes.forEach(sc => {
+    if (sc.t > 0) { const k = document.createElement('div'); k.className = 'tk'; k.style.left = (sc.t / D * 100) + '%'; p.appendChild(k); }
+  });
+}
+function buildScript() {
+  const b = $('#spBody'); let h = '';
+  scenes.forEach((sc, i) => {
+    const end = scenes[i + 1] ? scenes[i + 1].t : tl.duration();
+    h += `<h3>${String(i).padStart(2, '0')} · ${sc.name} <span style="opacity:.5">(${fmtT(sc.t)})</span></h3>`;
+    cues.filter(c => c.t >= sc.t && c.t < end).forEach(c => h += `<div class="row"><b>${(c.t).toFixed(1)}s</b><div>${c.text.replace(/<\/?em>/g, '')}</div></div>`);
+    const os = screenTxt.filter(x => x.t >= sc.t && x.t < end).map(x => x.text.replace(/<[^>]+>/g, '')).join('  ·  ');
+    if (os) h += `<div class="row os"><b>Screen</b><div>${os}</div></div>`;
+  });
+  b.innerHTML = h;
+  window.__SLICE_SCRIPT = { scenes, cues: cues.map(c => ({ t: +c.t.toFixed(2), e: +c.e.toFixed(2), text: c.text.replace(/<\/?em>/g, '') })), screen: screenTxt.map(x => ({ t: +x.t.toFixed(2), text: x.text.replace(/<[^>]+>/g, '') })), duration: tl.duration(), format: fmt };
+}
+
+/* ============================================================
+   Quiz interaction
+   ============================================================ */
+let quizOn = false, quizTimer = 0;
+const qfb = $('#qfb');
+function startQuiz() {
+  quizOn = true; stage.classList.add('quiz'); setPlayIcon(false);
+  clearTimeout(quizTimer); quizTimer = setTimeout(() => endQuiz(false), 12000);
+}
+function endQuiz(correct) {
+  if (!quizOn) return;
+  quizOn = false; stage.classList.remove('quiz'); clearTimeout(quizTimer);
+  gsap.to(qfb, { autoAlpha: 0, duration: .2 });
+  if (correct) tl.seek(qRevealT - .02);
+  tl.play(); setPlayIcon(true);
+}
+function clearQuiz() { quizOn = false; stage.classList.remove('quiz'); clearTimeout(quizTimer); gsap.set(qfb, { autoAlpha: 0 }); }
+cardsL.addEventListener('click', e => {
+  if (!quizOn) return;
+  const c = e.target.closest('.card.q'); if (!c) return;
+  if (c.dataset.ok) return endQuiz(true);
+  clearTimeout(quizTimer); quizTimer = setTimeout(() => endQuiz(false), 12000);
+  gsap.fromTo(c.ci, { rotation: 0 }, { rotation: 4, duration: .06, yoyo: true, repeat: 5, clearProps: 'rotation' });
+  qfb.textContent = '✕ Nope — ' + c.dataset.why;
+  gsap.killTweensOf(qfb);
+  gsap.timeline().fromTo(qfb, { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: .2 }).to(qfb, { autoAlpha: 0, duration: .3 }, '+=1.6');
+});
+
+/* ============================================================
+   Controls
+   ============================================================ */
+const setPlayIcon = playing => {
+  $('#icPlay').innerHTML = playing ? '<path d="M4 2h4v16H4zM12 2h4v16h-4z" fill="currentColor"/>' : '<path d="M4 2v16l14-8z" fill="currentColor"/>';
+  document.body.classList.toggle('paused', !playing);
+};
+let started = false;
+function start() {
+  if (started) return; started = true;
+  $('#start').classList.add('gone');
+  clearQuiz(); tl.seek(0); tick(); tl.play(); setPlayIcon(true);
+}
+function toggle() {
+  if (!started) return start();
+  if (quizOn) return endQuiz(false);
+  if (tl.paused() || !tl.isActive()) { if (tl.progress() >= 1) tl.seek(0); tl.play(); setPlayIcon(true); }
+  else { tl.pause(); setPlayIcon(false); }
+}
+$('#start').addEventListener('click', start);
+$('#bPlay').addEventListener('click', toggle);
+$('#bRe').addEventListener('click', () => { started = true; $('#start').classList.add('gone'); clearQuiz(); tl.seek(0); tl.play(); setPlayIcon(true); });
+stage.addEventListener('click', e => { if (!quizOn && !e.target.closest('.card.q')) toggle(); });
+$('#prog').addEventListener('click', e => {
+  const r = e.currentTarget.getBoundingClientRect(); const t = (e.clientX - r.left) / r.width * tl.duration();
+  if (!started) { started = true; $('#start').classList.add('gone'); }
+  clearQuiz(); const was = !tl.paused(); tl.seek(t); tick(); if (!was) { tl.pause(); setPlayIcon(false); }
+});
+$$('.seg .b').forEach(b => b.addEventListener('click', () => { FMT = b.dataset.fmt; const t = tl.time(), p = tl.paused(); clearQuiz(); build(t); if (!p && started) tl.play(); }));
+$('#bCC').addEventListener('click', e => { e.currentTarget.classList.toggle('on'); stage.classList.toggle('nocc', !e.currentTarget.classList.contains('on')); document.body.classList.toggle('nocc'); });
+$('#bScript').addEventListener('click', () => { $('#sp').classList.add('open'); if (!tl.paused()) { tl.pause(); setPlayIcon(false); } });
+$('#spX').addEventListener('click', () => $('#sp').classList.remove('open'));
+addEventListener('keydown', e => {
+  if (e.code === 'Space') { e.preventDefault(); toggle(); }
+  if (e.key === 'ArrowRight') { clearQuiz(); tl.seek(Math.min(tl.duration(), tl.time() + 5)); tick(); }
+  if (e.key === 'ArrowLeft') { clearQuiz(); tl.seek(Math.max(0, tl.time() - 5)); tick(); }
+});
+let rz;
+addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (FMT === 'auto' && pickFmt() !== fmt) { const t = tl.time(), p = tl.paused(); build(t); if (!p) tl.play(); } else fit(); }, 120); });
+
+// parent page control (website embed)
+let pending = null;
+addEventListener('message', e => {
+  const m = e.data && e.data.slice; if (!m) return;
+  if (!tl) { pending = m; return; }
+  if (m === 'play') { if (!started) start(); else if (!quizOn && tl.progress() < 1) { tl.play(); setPlayIcon(true); } }
+  if (m === 'pause' && !quizOn) { tl.pause(); setPlayIcon(false); }
+});
+
+if (P.has('nocc')) { $('#bCC').classList.remove('on'); stage.classList.add('nocc'); }
+
+/* ============================================================
+   Boot: preload images + fonts, then build
+   ============================================================ */
+const IMG = ['assets/slice-logo.png', 'assets/LIME_1.png', 'assets/ORANGE_1.png', 'assets/cards/LIME_CARD_BACK.jpg', 'assets/cards/ORANGE_CARD_BACK.jpg',
+  ...['FOREHAND_1','FOREHAND_2','FOREHAND_3','FOREHAND_4','FOREHAND_5','FOREHAND_6','FOREHAND_7','BACKHAND_1','BACKHAND_2','BACKHAND_3','BACKHAND_4','BACKHAND_5','BACKHAND_6','BACKHAND_7',
+    'FOREHAND_SLICE_1','FOREHAND_SLICE_2','FOREHAND_SLICE_3','FOREHAND_SLICE_4','FOREHAND_SLICE_5','FOREHAND_SLICE_6','FOREHAND_SLICE_7','BACKHAND_SLICE_2','BACKHAND_SLICE_3','BACKHAND_SLICE_4','BACKHAND_SLICE_5','BACKHAND_SLICE_6','BACKHAND_SLICE_7'].map(n => `assets/cards/${n}.jpg`)];
+const loadImg = src => new Promise(r => { const i = new Image(); i.onload = i.onerror = r; i.src = src; });
+const FONTS = ['italic 900 100px Archivo', 'italic 800 40px Archivo', '800 28px Archivo', '700 13px Archivo', '500 40px Rubik', '600 36px Rubik'];
+const fontsReady = () => Promise.all(FONTS.map(f => document.fonts.load(f).catch(() => {}))).then(() => document.fonts.ready);
+let booted = false;
+document.fonts.addEventListener && document.fonts.addEventListener('loadingdone', () => {
+  if (!booted || !tl) return;
+  const t = tl.time(), p = tl.paused(); build(t); if (!p) tl.play();
+});
+Promise.race([Promise.all([...IMG.map(loadImg), fontsReady()]), new Promise(r => setTimeout(r, 8000))]).then(() => {
+  booted = true;
+  build(0);
+  const t0 = parseFloat(P.get('t'));
+  if (RECORD) { started = true; $('#start').classList.add('gone'); setTimeout(() => { tl.seek(t0 || 0); tl.play(); }, 1200); }
+  else if (!isNaN(t0)) { started = true; $('#start').classList.add('gone'); tl.seek(t0); tick(); setPlayIcon(false); }
+  else { tl.seek(2.6); tick(); if (pending === 'play') start(); } // poster frame behind the start button
+});
+window.__slice = { get tl() { return tl; }, build };
+})();
+</script>
+</body>
+</html>
