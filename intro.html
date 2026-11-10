@@ -31,7 +31,7 @@ body.record #host,body.embed #host{bottom:0}
 .blob{position:absolute;left:0;top:0;width:1300px;height:1300px;margin:-650px;border-radius:50%;filter:blur(40px);opacity:.55}
 .blob.l{--c:rgba(198,244,50,.45);background:radial-gradient(closest-side,var(--c),transparent)}
 .blob.o{background:radial-gradient(closest-side,rgba(255,138,42,.38),rgba(255,138,42,0))}
-.court{position:absolute;left:0;top:0;width:1250px;margin-left:-625px;margin-top:-430px;opacity:.10;overflow:visible}
+.court{position:absolute;left:0;top:0;width:1250px;margin-left:-625px;margin-top:-430px;opacity:.14;overflow:visible}
 .fmt-tall .court{width:1150px;margin-left:-575px;margin-top:-400px}
 .rays{position:absolute;left:0;top:0;width:2800px;height:2800px;margin:-1400px;
   background:repeating-conic-gradient(from 0deg,rgba(198,244,50,.13) 0deg 5deg,transparent 5deg 15deg);
@@ -222,8 +222,12 @@ body.record .sndchip{display:none!important}
     <div class="bg">
       <div class="blob l" id="blobL"></div>
       <div class="blob o" id="blobO"></div>
-      <svg class="court" id="court" viewBox="0 0 1000 700" fill="none" stroke="#fff" stroke-width="5">
-        <path d="M200 80H800L980 680H20Z"/><path d="M125 330H875" stroke-width="9"/><path d="M164 200H836M74 500H926M500 200V500"/>
+      <svg class="court" id="court" viewBox="0 0 1000 700" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="square">
+        <path d="M200.0 80.0L800.0 80.0 M800.0 80.0L980.0 680.0 M980.0 680.0L20.0 680.0 M20.0 680.0L200.0 80.0 M275.0 80.0L140.0 680.0 M725.0 80.0L860.0 680.0 M253.7 174.7L746.3 174.7 M183.8 485.4L816.2 485.4 M500.0 174.7L500.0 485.4 M500.0 80.0L500.0 85.8 M500.0 680.0L500.0 665.4"/>
+        <path d="M100.0 253.2V310.8 M130.8 253.2V310.8 M161.5 253.2V310.8 M192.3 253.2V310.8 M223.1 253.2V310.8 M253.8 253.2V310.8 M284.6 253.2V310.8 M315.4 253.2V310.8 M346.2 253.2V310.8 M376.9 253.2V310.8 M407.7 253.2V310.8 M438.5 253.2V310.8 M469.2 253.2V310.8 M500.0 253.2V310.8 M530.8 253.2V310.8 M561.5 253.2V310.8 M592.3 253.2V310.8 M623.1 253.2V310.8 M653.8 253.2V310.8 M684.6 253.2V310.8 M715.4 253.2V310.8 M746.2 253.2V310.8 M776.9 253.2V310.8 M807.7 253.2V310.8 M838.5 253.2V310.8 M869.2 253.2V310.8 M900.0 253.2V310.8 M69.2 261.5H930.8 M69.2 273.8H930.8 M69.2 286.2H930.8 M69.2 298.5H930.8" stroke-width="1.6" opacity=".55"/>
+        <path d="M69.2 310.8H930.8" stroke-width="4" opacity=".7"/>
+        <path d="M69.2 239.0Q500 252.2 930.8 239.0" stroke-width="9"/>
+        <path d="M69.2 235.0V314.8M930.8 235.0V314.8" stroke-width="8"/>
       </svg>
       <div class="rays" id="rays"></div>
       <div class="grain"></div>
@@ -441,21 +445,32 @@ function wipe(at, color = '#c6f432', src = 'LIME_1') {
    Voice-over (ElevenLabs, one clip per caption)
    ============================================================ */
 const VO_DUR = [3.43, 2.04, 4.16, 2.78, 1.86, 2.58, 2.17, 4.27, 3.48, 1.3, 1.66, 1.65, 3.75, 5.41, 5.41, 2.59, 6.54, 3.57, 4.68, 2.55, 3.28, 4.77, 2.38, 5.72, 2.25, 1.39, 6.79, 4.02, 3.6, 3.74, 1.34, 6.13, 2.67, 4.15, 4.98, 2.49, 1.99, 1.89, 4.55, 3.64, 6.65, 4.17, 3.97, 2.39, 5.22, 2.39, 2.31, 3.72, 2.5, 5.22, 3.27, 5.07, 6.27, 4.17, 1.27, 2.07, 2.34, 2.23, 3.8];
-const VO = { ctx: null, gain: null, bufs: [], on: false, src: null, idx: -1, lastT: 0, ok: false };
+const VO = { ctx: null, gain: null, bufs: [], on: false, src: null, idx: -1, lastT: 0, ok: false, song: null, songSrc: null };
+// background music (Pixel Funk, looped): quiet bed, dips further while the narrator talks
+const MUSIC_BED = .22, MUSIC_DUCK = .07;
+function musicStart() {
+  if (!VO.ctx || !VO.song || VO.songSrc) return;
+  const m = VO.ctx.createBufferSource(); m.buffer = VO.song; m.loop = true; m.connect(VO.music); m.start(); VO.songSrc = m;
+}
+function duck(on) { if (!VO.music) return; const g = VO.music.gain, t = VO.ctx.currentTime; g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.linearRampToValueAtTime(on ? MUSIC_DUCK : MUSIC_BED, t + (on ? .15 : .6)); }
 function voInit() {
   if (VO.ctx) return;
   const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
-  VO.ctx = new AC(); VO.gain = VO.ctx.createGain(); VO.gain.connect(VO.ctx.destination);
+  VO.ctx = new AC(); VO.gain = VO.ctx.createGain(); VO.gain.connect(VO.ctx.destination); VO.gain.gain.value = VO.on ? 1 : 0;
+  VO.voice = VO.ctx.createGain(); VO.voice.connect(VO.gain);
+  VO.music = VO.ctx.createGain(); VO.music.gain.value = MUSIC_BED; VO.music.connect(VO.gain);
+  fetch('assets/music/pixel-funk.mp3').then(r => r.arrayBuffer()).then(b => new Promise((res, rej) => VO.ctx.decodeAudioData(b, res, rej)))
+    .then(buf => { VO.song = buf; if (VO.on) musicStart(); }).catch(() => {});
   VO_DUR.forEach((_, i) => fetch(`assets/vo/VO_${String(i + 1).padStart(2, '0')}.m4a`)
     .then(r => r.arrayBuffer()).then(b => new Promise((res, rej) => VO.ctx.decodeAudioData(b, res, rej)))
     .then(buf => { VO.bufs[i] = buf; }).catch(() => {}));
 }
-function voStop() { if (VO.src) { try { VO.src.stop(); } catch (e) {} VO.src = null; VO.idx = -1; } }
+function voStop() { if (VO.src) { try { VO.src.stop(); } catch (e) {} VO.src = null; VO.idx = -1; duck(false); } }
 function voStart(i, offset = 0) {
   if (!VO.on || !VO.ctx || !VO.bufs[i] || offset >= VO.bufs[i].duration - .05) return;
   voStop();
-  const s = VO.ctx.createBufferSource(); s.buffer = VO.bufs[i]; s.connect(VO.gain); s.start(0, Math.max(0, offset));
-  s.onended = () => { if (VO.src === s) { VO.src = null; VO.idx = -1; } };
+  const s = VO.ctx.createBufferSource(); s.buffer = VO.bufs[i]; s.connect(VO.voice); s.start(0, Math.max(0, offset)); duck(true);
+  s.onended = () => { if (VO.src === s) { VO.src = null; VO.idx = -1; duck(false); } };
   VO.src = s; VO.idx = i;
 }
 // call from a click/tap: browsers only allow sound after one
@@ -463,11 +478,12 @@ function voUnlock() { voInit(); if (VO.ctx && VO.ctx.state !== 'running') VO.ctx
 function voSay() { if (!VO.ok) return -1; const t = tl.time(); return cues.findIndex(c => t >= c.t && t < c.t + c.vd); }
 function voSetOn(on) {
   VO.on = on; $('#bSnd').classList.toggle('on', on); document.body.classList.toggle('muted', !on);
+  if (VO.gain) VO.gain.gain.setTargetAtTime(on ? 1 : 0, VO.ctx.currentTime, .08);
   if (!on) voStop();
-  else { voUnlock(); const i = voSay(); if (i >= 0 && !tl.paused()) voStart(i, tl.time() - cues[i].t); }
+  else { voUnlock(); musicStart(); const i = voSay(); if (i >= 0 && !tl.paused()) voStart(i, tl.time() - cues[i].t); }
   voPost();
 }
-function voPost() { try { parent !== window && parent.postMessage({ sliceVO: VO.on && !tl.paused() && !quizOn }, '*'); } catch (e) {} }
+function voPost() {}
 function voTick(t) {
   if (!VO.ok) return;
   const dt = t - VO.lastT;

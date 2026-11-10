@@ -111,16 +111,6 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
 .nav.scrolled .brand img{height:28px}
 .brand:hover img{transform:rotate(-6deg) scale(1.06)}
 .links{display:flex;gap:4px;margin-left:auto}
-.snd{width:38px;height:38px;border-radius:50%;border:1px solid rgba(244,246,239,.22);display:grid;place-items:center;flex:none;color:rgba(244,246,239,.75);background:none;cursor:pointer;transition:color .25s,border-color .25s}
-.snd:hover{color:var(--lime);border-color:var(--lime)}
-.snd .eq{display:flex;gap:2px;align-items:flex-end;height:14px}
-.snd .eq i{display:block;width:3px;height:3px;border-radius:1px;background:currentColor;transition:height .3s}
-.snd.on{color:var(--lime);border-color:var(--lime)}
-.snd.on .eq i{animation:sndeq .8s ease-in-out infinite alternate}
-.snd.on .eq i:nth-child(2){animation-delay:-.25s}.snd.on .eq i:nth-child(3){animation-delay:-.5s}.snd.on .eq i:nth-child(4){animation-delay:-.65s}
-@keyframes sndeq{from{height:3px}to{height:14px}}
-@media (prefers-reduced-motion:reduce){.snd.on .eq i{animation:none;height:10px}}
-@media (max-width:900px){.nav-inner .snd{margin-left:auto}.nav-inner .burger{margin-left:6px}}
 .links a{position:relative;padding:6px 10px;font-family:var(--display);font-weight:700;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);transition:color .2s}
 .links a::after{content:"";position:absolute;left:10px;right:10px;bottom:0;height:2px;border-radius:2px;background:var(--lime);transform:scaleX(0);transform-origin:0 50%;transition:transform .35s var(--ease)}
 .links a:hover,.links a.active{color:var(--fg)}
@@ -554,7 +544,6 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
       <a href="#cards" data-nav="cards">The Deck</a>
       <a href="#rules" data-nav="rules">How to Play</a>
     </div>
-    <button class="snd" type="button" id="snd" aria-pressed="false" aria-label="Turn music on" title="Music"><span class="eq"><i></i><i></i><i></i><i></i></span></button>
     <a href="#footer-waitlist" class="btn btn-primary">Join the Team</a>
     <button class="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu" id="burger"><i></i></button>
   </div>
@@ -1168,10 +1157,10 @@ function heroCanvas() {
 /* hero: impact -> logo -> deal -> headline -> endless (slowing) ball rally */
 /* modals (restored: this block went missing after the v4 site) */
 let openModalEl = null;
-function openModal(m) { openModalEl = m; m.classList.add('open'); lockScroll(true); if (m.id === 'video-modal') window.sliceMusicHold && window.sliceMusicHold(true); const x = $('.modal-x', m); x && x.focus({ preventScroll: true }); }
+function openModal(m) { openModalEl = m; m.classList.add('open'); lockScroll(true); const x = $('.modal-x', m); x && x.focus({ preventScroll: true }); }
 function closeModal(m = openModalEl) {
   if (!m) return; m.classList.remove('open'); lockScroll(false); openModalEl = null;
-  if (m.id === 'video-modal') { setTimeout(() => { $('#yt').src = 'about:blank'; }, 350); window.sliceMusicHold && window.sliceMusicHold(false); }
+  if (m.id === 'video-modal') { setTimeout(() => { $('#yt').src = 'about:blank'; }, 350); }
 }
 $$('.modal').forEach(m => m.addEventListener('click', e => { if (e.target === m || e.target.closest('[data-close]')) closeModal(m); }));
 $$('[data-video]').forEach(b => {
@@ -1209,31 +1198,6 @@ document.addEventListener('keydown', e => {
   if (openModalEl === gm) { if (e.key === 'ArrowRight') goPage(page + 1); if (e.key === 'ArrowLeft') goPage(page - 1); }
 });
 
-/* background music: off until the visitor turns it on (browsers block sound before a click) */
-(() => {
-  const btn = $('#snd'); if (!btn) return;
-  const a = new Audio('assets/music/pixel-funk.mp3'); a.loop = true; a.preload = 'none'; a.volume = 0;
-  const LEVEL = .3;
-  let on = false, held = false;
-  const fade = (to, d, done) => gsap.to(a, { volume: to, duration: d, ease: 'none', overwrite: true, onComplete: done });
-  const start = () => { const p = a.play(); if (p) p.then(() => fade(LEVEL, 1)).catch(() => {}); };
-  const stop = () => fade(0, .5, () => a.pause());
-  const ui = () => { btn.classList.toggle('on', on && !held); btn.setAttribute('aria-pressed', on); btn.setAttribute('aria-label', on ? 'Turn music off' : 'Turn music on'); };
-  const set = v => { on = v; try { localStorage.setItem('sliceMusic', v ? '1' : '0'); } catch (e) {} (on && !held) ? start() : stop(); ui(); };
-  btn.addEventListener('click', e => { e.stopPropagation(); set(!on); });
-  // a visitor who turned it on before: resume on their first click or key press
-  let pref = null; try { pref = localStorage.getItem('sliceMusic'); } catch (e) {}
-  if (pref === '1') {
-    on = true; ui();
-    const first = e => { if (e.target.closest && e.target.closest('#snd')) return; removeEventListener('pointerdown', first, true); removeEventListener('keydown', first, true); if (on && !held) start(); };
-    addEventListener('pointerdown', first, true); addEventListener('keydown', first, true);
-  }
-  const holds = new Set();
-  window.sliceMusicHold = (h, why = 'trailer') => { h ? holds.add(why) : holds.delete(why); held = holds.size > 0; if (on) held ? stop() : start(); ui(); };
-  // the walkthrough tells us when its voice-over is talking
-  addEventListener('message', e => { if (e.data && typeof e.data === 'object' && 'sliceVO' in e.data) window.sliceMusicHold(!!e.data.sliceVO, 'walkthrough'); });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) a.pause(); else if (on && !held && a.volume > 0) a.play().catch(() => {}); });
-})();
 
 function hero() {
   const hero = $('.hero'), visual = $('#hero-visual'), logo = $('#hero-logo'), ring = $('#impact-ring'), rays = $('#hero-rays');
