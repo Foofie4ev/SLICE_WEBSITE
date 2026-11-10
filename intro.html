@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SLICE! — Learn to Play</title>
-<meta name="description" content="Learn SLICE! in under two minutes: match the color, topspin goes up, slice goes down, match the pace to switch.">
+<meta name="description" content="Learn SLICE! in about three minutes: groundstrokes, the rally, modifiers, the serve, Last Ditch Effort, Dig Deep and the power shots.">
 <link rel="icon" type="image/png" href="assets/slice-logo-sm.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -246,7 +246,7 @@ body.record .start,body.embed .start{bottom:0}
   </div>
 </div>
 
-<div class="start" id="start"><div class="pl"><i><svg viewBox="0 0 20 20"><path d="M3 1.5v17L18 10z" fill="#c6f432"/></svg></i><div>Learn SLICE!<small>Two-minute how to play</small></div></div></div>
+<div class="start" id="start"><div class="pl"><i><svg viewBox="0 0 20 20"><path d="M3 1.5v17L18 10z" fill="#c6f432"/></svg></i><div>Learn SLICE!<small>Three-minute how to play</small></div></div></div>
 
 <div class="bar" id="bar">
   <button class="b" id="bPlay" aria-label="Play / pause"><svg viewBox="0 0 20 20" id="icPlay"><path d="M4 2v16l14-8z" fill="currentColor"/></svg></button>
@@ -524,10 +524,23 @@ function build(time = 0) {
     vo(s + 7.75, 'First to <em>seven points</em> wins!', 2.3);
   });
 
+  /* ---------- 1b · GROUNDSTROKES ---------- */
+  scene('Groundstrokes', 5.4, s => {
+    wipe(s - .2);
+    const names = ['FOREHAND_2', 'FOREHAND_SLICE_4', 'FOREHAND_6', 'BACKHAND_3', 'BACKHAND_SLICE_5', 'BACKHAND_7'];
+    const n = names.length, w = L.hw * 1.1, sp = fmt === 'wide' ? 112 : 128;
+    const G = names.map(nm => C(nm, w));
+    G.forEach((c, i) => { const m = i - (n - 1) / 2; put(c, s + .3 + i * .08, { x: px, y: L.H + 300, rotation: 0 }, { x: px + m * sp, y: py + 20 + m * m * 9, rotation: m * 6 }, .6, 'back.out(1.3)'); });
+    [0, 1, 2].forEach(i => glow(G[i], s + 2.9, true, '#c6f432')); [3, 4, 5].forEach(i => glow(G[i], s + 3.1, true, '#ff8a2a'));
+    T('g:GROUNDSTROKES', s + .3, s + 5.0, { k: 'The basic shot', s: 'Just like in tennis. Most of your deck is groundstrokes: Forehands and Backhands.' });
+    out(G, s + 4.8, 0, 500);
+    vo(s + .3, 'Most of your deck is <em>groundstrokes</em>, the basic shot, just like in tennis.', 2.5);
+    vo(s + 2.9, 'There are two kinds: Forehands… and Backhands.', 1.9);
+  });
+
   /* ---------- 2 · KNOW YOUR SHOT ---------- */
   scene('Know Your Shot', 14.90, s => {
     const K = 1.08;
-    wipe(s - .2);
     const [[ax, ay], [bx, by]] = L.pair;
     const A = C('FOREHAND_5', L.pw, { down: true }), B = C('BACKHAND_SLICE_6', L.pw, { down: true });
     put(A, s + K * .25, { x: ax, y: ay + 120, rotation: -14, scale: .55 }, { x: ax, y: ay, rotation: -4, scale: 1 }, .7, 'back.out(1.5)'); flip(A, s + K * .3, .7);
@@ -602,7 +615,7 @@ function build(time = 0) {
     vo(s + K * .3, 'Rule two: the spin sets the pace of your return.', 2.1);
     vo(s + K * 2.4, 'Topspin speeds the rally up, so return it with <em>equal or higher</em> pace.', 2.5);
     vo(s + K * 4.95, 'Returning it at the same pace is legal too!', 1.9);
-    vo(s + K * 6.9, 'Your opponent returns it with a <em>Slice six!</em>', 1.5);
+    vo(s + K * 6.9, 'Your opponent returns it with a <em>Forehand Slice six!</em>', 1.5);
   });
 
   scene('Slice? Go Down', 11.25, s => {
@@ -622,7 +635,7 @@ function build(time = 0) {
     hand = [b3, fs6, bs5];
     hand.forEach((c, i) => mv(c, s + K * 4.4, fan(3, i), .5));
     vo(s + K * .2, 'Slice slows the rally down, so return it with <em>equal or lower</em> pace.', 3.4);
-    vo(s + K * 3.7, 'Return it with a Slice two…', 1.1);
+    vo(s + K * 3.7, 'Return it with a Forehand Slice two…', 1.1);
     vo(s + K * 4.9, '…and now they have to return it with pace two or lower. Your shot sets up their return!', 3.8);
     pileTop = fs2;
   });
@@ -640,7 +653,7 @@ function build(time = 0) {
     hlPop(hA, s + K * 1.9); hlPop(hB, s + K * 2.05);
     // badge sits above both cards, same pill style as the other callouts
     const eq = burst('Pace 2 = Pace 2', px, py - ch(L.cw) / 2 - (fmt === 'tall' ? 44 : 64), 'g', -4); popAt(eq, s + K * 2.1, -4);
-    T('MATCH THE|g:PACE!', s + K * 1.9, s + K * 7.1, { s: 'Return with the same pace in the other color. Works with Topspin or Slice.' });
+    T('MATCH THE|g:PACE!', s + K * 1.9, s + K * 7.1, { s: 'Return a groundstroke with the same pace in the other color. Topspin or Slice. Groundstrokes only!' });
     const m1 = C('FOREHAND_4', L.miniW), m2 = C('BACKHAND_4', L.miniW);
     put(m1, s + K * 4.1, { x: L.mini[0][0], y: L.mini[0][1] + 80, rotation: 0, scale: .5, autoAlpha: 0 }, { y: L.mini[0][1], rotation: -5, scale: 1, autoAlpha: 1 }, .45, 'back.out(2)');
     put(m2, s + K * 4.3, { x: L.mini[1][0], y: L.mini[1][1] + 80, rotation: 0, scale: .5, autoAlpha: 0 }, { y: L.mini[1][1], rotation: 5, scale: 1, autoAlpha: 1 }, .45, 'back.out(2)');
@@ -652,7 +665,7 @@ function build(time = 0) {
     out($$('.card', cardsL).filter(c => ![m1, m2, ...hand].includes(c) && c !== bs2 && c !== pileTop).concat([pileTop, bs2]), s + K * 7.0, L.W * .6, -60, 35);
     vo(s + K * .3, 'Want to switch from Forehand to Backhand?', 1.5);
     vo(s + K * 1.9, 'Just <em>match the pace!</em>', 1.8);
-    vo(s + K * 3.8, 'Return it at the same pace with the other color. It works with Topspin or Slice!', 3.2);
+    vo(s + K * 3.8, 'Return a groundstroke at the same pace with the other color. Topspin or Slice, it works with any groundstroke!', 3.2);
   });
 
   /* ---------- 7 · NOPE ---------- */
@@ -671,7 +684,7 @@ function build(time = 0) {
     const no = stamp(bad, 'no', 'Too low'); pop(no, s + K * 2.0); dim(bad, s + K * 2.1);
     T('r:NOPE!', s + K * 2.0, s + K * 4.7, { s: 'You can’t return a Topspin 7 with less than pace 7.' });
     out([top, bad], s + K * 4.7, L.W * .6, -60, 35); meterHide(s + K * 4.7);
-    vo(s + K * .3, 'Return a Topspin seven with a Slice four?', 1.6);
+    vo(s + K * .3, 'Return a Topspin Backhand seven with a Backhand Slice four?', 1.6);
     vo(s + K * 2.0, '<em>No way!</em> Topspin needs equal or higher pace!', 2.6);
   });
 
@@ -699,7 +712,7 @@ function build(time = 0) {
       if (opts[i][1]) { glow(c, r, true, '#c6f432'); pop(stamp(c, 'ok', 'Same color, lower'), r + .1); }
       else { dim(c, r + .05); pop(stamp(c, 'no', opts[i][2]), r + .1 + i * .08); }
     });
-    T('g:BACKHAND_3!', r + .1, s + K * 10.4, { cls: 'quiz', s: 'Same color, lower pace. Great return!' });
+    T('g:TOPSPIN|g:BACKHAND_3!', r + .1, s + K * 10.4, { cls: 'quiz', s: 'Same color, lower pace. Great return!' });
     const win = Q[1];
     tl.set(win, { zIndex: 999 }, r + 1.5);
     mv(win, r + 1.5, { x: qx + 14, y: qy + 8, rotation: 5, scale: L.qpw / L.qw }, .55);
@@ -708,7 +721,35 @@ function build(time = 0) {
     out([top, win], s + K * 10.3, L.W * .6, -60, 35); out([Q[0], Q[2]], s + K * 10.3, 0, 500);
     vo(s + K * .3, 'Your turn! Your opponent plays a Backhand Slice five.', 1.9);
     vo(s + K * 2.2, 'Which card returns it?', 2.5);
-    vo(r + .1, 'Return it with a <em>Backhand three!</em> Same color, lower pace. Great return!', 3.6);
+    vo(r + .1, 'Return it with a <em>Topspin Backhand three!</em> Same color, lower pace. Great return!', 3.6);
+  });
+
+  /* ---------- 8b · MODIFIERS ---------- */
+  scene('Modifiers', 10.6, s => {
+    mood(s, 'lime');
+    const top = C('FOREHAND_6', L.cw, { back: 'ORANGE', down: true });
+    put(top, s + .2, { x: px + 120, y: -350, rotation: -40 }, { x: px, y: py, rotation: -3 }, .55); flip(top, s + .25, .5);
+    ring(s + .7, L.pile, '#ffffff', .3, 2);
+    meterShow(s + .3); meterSet(s + .35, 'Opponent’s shot: g:Topspin · pace 6', [6, 7], 'up');
+    const f5 = C('FOREHAND_5', L.hw), es = C('EXTRA_SPIN', L.hw);
+    put(f5, s + .9, { x: L.hand[0] - 75, y: L.H + 300, rotation: 0 }, { x: L.hand[0] - 75, y: L.hand[1], rotation: -5 }, .55, 'back.out(1.3)');
+    put(es, s + 1.0, { x: L.hand[0] + 75, y: L.H + 300, rotation: 0 }, { x: L.hand[0] + 75, y: L.hand[1], rotation: 5 }, .55, 'back.out(1.3)');
+    T('NEED_A_6?|ADD g:EXTRA|g:SPIN!', s + .3, s + 5.7, { k: 'Modifier cards', s: 'Play a modifier with your card. Extra Spin adds 1 to its pace.' });
+    play(f5, s + 2.6, [px - 14, py + 8, -6], L.cw / L.hw);
+    play(es, s + 2.95, [px + L.cw * .66, py + 70, 10], L.cw / L.hw * .8);
+    const eq = burst('5 + 1 = 6', px, fmt === 'tall' ? py + ch(L.cw) / 2 + 70 : py - ch(L.cw) / 2 - 64, 'g', -4); popAt(eq, s + 3.5, -4);
+    if (fmt === 'tall') meterHide(s + 3.3);
+    const ok = stamp(es, 'ok', 'Counts as 6'); pop(ok, s + 3.7);
+    hide([eq, ok], s + 5.6); if (fmt !== 'tall') meterHide(s + 5.6);
+    out([top, f5, es], s + 5.7, L.W * .6, -60, 35);
+    const st = C('SOFT_TOUCH', L.pw);
+    put(st, s + 6.0, { x: L.pair[0][0], y: L.H + 340, rotation: -20 }, { x: (L.pair[0][0] + L.pair[1][0]) / 2, y: L.pair[0][1], rotation: -4 }, .6, 'back.out(1.3)');
+    const m1 = burst('−1 pace', (L.pair[0][0] + L.pair[1][0]) / 2, fmt === 'tall' ? L.pair[0][1] + ch(L.pw) / 2 + 60 : L.pair[0][1] - ch(L.pw) / 2 - 50, 'w', 4); popAt(m1, s + 6.5, 4);
+    T('y:SOFT_TOUCH|TAKES_1_OFF.', s + 5.9, s + 10.0, { s: 'One modifier per shot. Then draw a card to replace it.' });
+    hide(m1, s + 9.9); out([st], s + 9.9, 0, 500);
+    vo(s + .3, 'Need a little more pace? Use a <em>modifier!</em>', 2.2);
+    vo(s + 2.6, 'Play Extra Spin with your Forehand five, and it counts as a six!', 2.9);
+    vo(s + 5.9, 'Soft Touch takes one off. One modifier per shot, then draw a card.', 3.6);
   });
 
   /* ---------- 9 · THE SERVE ---------- */
@@ -716,7 +757,7 @@ function build(time = 0) {
     const K = 1.12;
     mood(s, 'lime');
     T('EVERY POINT|STARTS WITH|A g:SERVE.', s + K * .2, s + K * 2.4);
-    T('TWO WAYS|TO g:SERVE.', s + K * 2.5, s + K * 5.8, { s: '1 · Play a groundstroke from your hand<br>2 · Roll the Service Die' });
+    T('TWO WAYS|TO g:SERVE.', s + K * 2.5, s + K * 5.8, { s: '1 · Play a groundstroke from your hand<br>2 · Roll the Serve Die' });
     const sv = C('FOREHAND_3', L.hw);
     put(sv, s + K * 2.6, { x: L.hand[0], y: L.H + 300, rotation: 0 }, { x: L.serveL[0], y: L.serveL[1], rotation: -4, scale: L.cw * .8 / L.hw }, .6);
     const c1 = burst('1 · Play a card', L.serveL[0], L.serveL[1] + ch(L.cw * .8) / 2 + 50, 'k', 0); popAt(c1, s + K * 3.0, 0);
@@ -746,7 +787,7 @@ function build(time = 0) {
     out([r5], s + K * 18.4, L.W * .6, -60, 35); hide(die, s + K * 18.4); meterHide(s + K * 18.4);
     vo(s + K * .2, 'There are two ways to serve every point.', 2.4);
     vo(s + K * 2.6, 'Play a groundstroke from your hand…', 1.8);
-    vo(s + K * 4.45, '…or roll the <em>Service Die!</em>', 2.4);
+    vo(s + K * 4.45, '…or roll the <em>Serve Die!</em>', 2.4);
     vo(s + K * 7.15, 'A Fault? Take a second serve. Two Faults and you lose the point!', 2.3);
     vo(s + K * 10.35, 'A Let? Both players draw a card, and you roll again!', 2.5);
     vo(s + K * 13.75, '<em>Topspin four!</em> The receiver returns the serve with a Forehand or a Backhand, at pace four or higher!', 4.6);
@@ -792,6 +833,69 @@ function build(time = 0) {
     vo(s + K * 8.1, 'Then both players refill to <em>seven</em> cards, switch servers, and play the next point!', 2.4);
   });
 
+  /* ---------- 10b · DIG DEEP ---------- */
+  scene('Dig Deep', 9.4, s => {
+    mood(s, 'orange');
+    const top = C('BACKHAND_4', L.cw, { back: 'ORANGE', down: true });
+    put(top, s + .2, { x: px + 120, y: -350, rotation: -40 }, { x: px, y: py, rotation: -3 }, .55); flip(top, s + .25, .5);
+    const last = C('BACKHAND_5', L.hw);
+    put(last, s + .5, { x: L.hand[0], y: L.H + 300, rotation: 0 }, { x: L.hand[0], y: L.hand[1], rotation: 0 }, .5, 'back.out(1.3)');
+    const tagL = burst('Last card', L.hand[0], L.hand[1] - ch(L.hw) / 2 - 40, 'k', 0); popAt(tagL, s + .9, 0); hide(tagL, s + 2.0);
+    play(last, s + 2.0, [px + 10, py + 6, 5], L.cw / L.hw);
+    T('LAST CARD?|g:DIG_DEEP!', s + .3, s + 8.9, { k: 'Played your last card', s: 'Draw 3 cards and keep playing. Next time, draw 2. After that, 1.' });
+    const bag = [0, 1, 2].map(i => { const c = C('FOREHAND_1', L.bw, { down: true }); put(c, s + 2.2 + i * .05, { x: L.bag[0] - 200, y: L.bag[1], rotation: 0 }, { x: L.bag[0] + i * 4, y: L.bag[1] - i * 4, rotation: -6 + i * 2 }, .5); return c; });
+    const drawn = ['FOREHAND_3', 'BACKHAND_SLICE_2', 'FOREHAND_6'].map(n => C(n, L.hw, { down: true }));
+    drawn.forEach((c, i) => { put(c, s + 3.0 + i * .25, { x: L.bag[0], y: L.bag[1], rotation: 0, scale: L.bw / L.hw }, { ...fan(3, i), scale: 1 }, .55, 'back.out(1.2)'); flip(c, s + 3.3 + i * .25, .45); });
+    const d3 = burst('Draw 3!', L.hand[0], L.hand[1] - ch(L.hw) / 2 - 50, 'g', -4); popAt(d3, s + 3.9, -4);
+    const d21 = burst('Then 2 · then 1', L.hand[0], L.hand[1] - ch(L.hw) / 2 - 50, 'w', 3); popAt(d21, s + 6.0, 3); hide(d3, s + 5.9);
+    hide(d21, s + 8.8);
+    out(drawn, s + 8.8, 0, 420); out(bag, s + 8.8, -300, 0); out([top, last], s + 8.8, L.W * .6, -60, 35);
+    vo(s + .3, 'Played your <em>last card?</em> Dig Deep!', 2.2);
+    vo(s + 2.9, 'Draw three cards and keep playing.', 2.0);
+    vo(s + 5.9, 'Run out again in the same point? Draw two, then one.', 2.8);
+  });
+
+  /* ---------- 10c · POWER SHOTS ---------- */
+  scene('Power Shots', 20.4, s => {
+    wipe(s - .2, '#a45cff', 'LIME_2'); mood(s + .2, 'orange');
+    const names = ['VOLLEY', 'DROP_SHOT', 'SMASH_7', 'LOB_1', 'APPROACH_5', 'APPROACH_3', 'WINNER', 'ERROR', 'GOOD_GET'];
+    const gw = fmt === 'wide' ? 180 : 172;
+    const pos = names.map((_, i) => fmt === 'wide'
+      ? [330 + (i % 3) * 230, 215 + Math.floor(i / 3) * 322]
+      : (i < 5 ? [540 + (i - 2) * 200, 1010] : [540 + (i - 6.5) * 200, 1300]));
+    const G = names.map(n => C(n, gw));
+    G.forEach((c, i) => put(c, s + .3 + i * .07, { x: pos[i][0], y: L.H + 340, rotation: 0 }, { x: pos[i][0], y: pos[i][1], rotation: (i % 2 ? 3 : -3) }, .6, 'back.out(1.3)'));
+    const focus = (idx, at, end, color) => {
+      G.forEach((c, i) => { if (idx.includes(i)) glow(c, at, true, color); else dim(c, at); });
+      G.forEach((c, i) => { if (idx.includes(i)) glow(c, end, false); else dim(c, end, false); });
+    };
+    T('POWER|g:SHOTS!', s + .3, s + 3.3, { k: 'The rest of your deck', s: 'Every one is explained in the Rule Book.' });
+    focus([0, 1], s + 3.5, s + 6.6, '#a45cff');
+    T('VOLLEY_&|y:DROP-SHOT', s + 3.5, s + 6.6, { k: 'Net cards', s: 'Roll a die for your pace. Roll NET or OUT and you lose the point!' });
+    focus([2, 3], s + 6.8, s + 9.8, '#ff4f9a');
+    T('r:SMASH_&|LOB', s + 6.8, s + 9.8, { k: 'Tactical cards', s: 'Smash a weak 1 or 2. Lob a big 6 or 7.' });
+    // Approach: both cards step forward
+    focus([4, 5], s + 10.0, s + 15.4, '#ff8a2a');
+    const aw = fmt === 'tall' ? 270 : L.pw, ay = fmt === 'tall' ? 1090 : L.pair[0][1];
+    [4, 5].forEach((i, k) => { tl.set(G[i], { zIndex: 900 + k }, s + 10.0); mv(G[i], s + 10.0, { x: L.pair[k][0], y: ay, scale: aw / gw, rotation: k ? 4 : -4 }, .6, 'back.out(1.3)'); });
+    const lb5 = burst('Topspin 5', L.pair[0][0], ay + ch(aw) / 2 + 36, 'g', -3), lb3 = burst('Slice 3', L.pair[1][0], ay + ch(aw) / 2 + 36, 'y', 3);
+    [lb5, lb3].forEach(b => { b.style.fontSize = '36px'; b.style.padding = '10px 18px 8px'; });
+    popAt(lb5, s + 10.5, -3); popAt(lb3, s + 10.65, 3);
+    const steal = burst('Steal a card!', (L.pair[0][0] + L.pair[1][0]) / 2, fmt === 'tall' ? ay + ch(aw) / 2 + 120 : ay - ch(aw) / 2 - 40, 'o', -4); popAt(steal, s + 12.0, -4);
+    T('g:APPROACH!', s + 10.0, s + 15.4, { k: 'Topspin 5 · Slice 3', s: 'Match their pace exactly, then steal a random card. Steal their last card and they can’t Dig Deep!' });
+    hide([lb5, lb3, steal], s + 15.2);
+    [4, 5].forEach((i, k) => mv(G[i], s + 15.3, { x: pos[i][0], y: pos[i][1], scale: 1, rotation: k ? 3 : -3 }, .5));
+    focus([6, 7, 8], s + 15.6, s + 19.4, '#ffffff');
+    T('WIN IT…|OR r:LOSE_IT!', s + 15.6, s + 19.4, { k: 'Special cards', s: 'Winner wins the point. Error loses it. Good Get returns anything.' });
+    out(G, s + 19.6, 0, 520);
+    vo(s + .3, 'The rest of your deck is <em>power shots!</em>', 2.6);
+    vo(s + 3.5, 'Volleys and Drop-Shots: roll the die for your pace… just don’t hit it out!', 3.0);
+    vo(s + 6.8, 'Smash a weak ball. Lob a rocket!', 2.6);
+    vo(s + 10.0, 'And the <em>Approach!</em> Topspin Approach five, or Approach Slice three.', 2.9);
+    vo(s + 12.9, 'Match the pace exactly… and steal a card! Steal their last card, and they can’t Dig Deep.', 2.4);
+    vo(s + 15.6, 'Winner, Error and Good Get can end the point… or save it!', 3.2);
+  });
+
   /* ---------- 11 · RECAP ---------- */
   scene('Recap', 11.52, s => {
     const K = 1.2;
@@ -810,7 +914,7 @@ function build(time = 0) {
     gsap.set(chips, { autoAlpha: 0 });
     screenTxt.push({ t: s + K * .3, text: 'Match the color · Topspin ↑ speeds it up · Slice ↓ slows it down · Switch? Match the pace' });
     tl.to(chips, { autoAlpha: 0, x: fmt === 'wide' ? 60 : 0, duration: .3, stagger: .05 }, s + K * 6.1);
-    T('FIRST TO g:7|WINS!', s + K * 6.3, null, { cls: 'low', k: 'Serve it · Slice it · Win it', s: 'SLICE! — the tennis card game. Coming soon.' });
+    T('FIRST TO g:7|WINS!', s + K * 6.3, null, { cls: 'low', k: 'Serve it · Slice it · Win it', s: 'SLICE! — the tennis card game. Coming to Kickstarter.' });
     tl.fromTo(logo, { scale: L.outLogoW / L.logoW }, { scale: L.outLogoW / L.logoW * 1.06, duration: .18, yoyo: true, repeat: 3, ease: 'power2.out', immediateRender: false }, s + K * 6.4);
     vo(s + K * .3, 'Match the color.', 1.4);
     vo(s + K * 1.8, 'Topspin speeds the rally up.', 1.3);

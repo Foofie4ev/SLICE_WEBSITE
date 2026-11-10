@@ -431,7 +431,7 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
    ============================================================ */
 .guide-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(32px,6vw,90px);align-items:center}
 .guide-fan{position:relative;height:clamp(340px,40vw,480px);cursor:pointer}
-.gp{position:absolute;left:50%;top:50%;width:clamp(150px,15vw,210px);aspect-ratio:1116/1999;border-radius:12px;overflow:hidden;box-shadow:0 40px 70px -26px rgba(0,0,0,.85);border:1px solid var(--line);transition:transform .8s var(--ease)}
+.gp{position:absolute;left:50%;top:50%;width:clamp(170px,18vw,250px);aspect-ratio:7/10;border-radius:12px;overflow:hidden;box-shadow:0 40px 70px -26px rgba(0,0,0,.85);border:1px solid var(--line);transition:transform .8s var(--ease)}
 .gp img{width:100%;height:100%;object-fit:cover}
 .gp:nth-child(1){transform:translate(-50%,-50%) rotate(-9deg) translateX(-34%)}
 .gp:nth-child(2){transform:translate(-50%,-50%) rotate(8deg) translateX(34%)}
@@ -554,7 +554,7 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
   <a href="#gameplay"><small>02</small>Gameplay</a>
   <a href="#cards"><small>03</small>The Deck</a>
   <a href="#rules"><small>04</small>How to Play</a>
-  <button type="button" data-guide><small>05</small>Pocket Guide</button>
+  <button type="button" data-guide><small>05</small>Rule Book</button>
   <a href="#footer-waitlist" class="btn btn-primary btn-sm">Join the Team</a>
 </div>
 <div id="balls" aria-hidden="true"></div>
@@ -612,7 +612,7 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
 <section class="learn" id="learn" aria-label="Learn to play">
   <div class="wrap">
     <div class="learn-head">
-      <span class="label">Learn to play &middot; 2 minutes</span>
+      <span class="label">Learn to play &middot; 3 minutes</span>
       <h2 class="title display" data-split>Pick it up. <span class="accent">Play tonight.</span></h2>
       <p class="lede" data-reveal>Match the color. Topspin pace goes up, Slice pace goes down. Match the pace to switch colors. That&rsquo;s the whole game to start.</p>
     </div>
@@ -793,13 +793,13 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
         <div class="step" data-reveal>
           <div class="n">02</div>
           <div><h3>Build the rally</h3>
-            <p><b>Match the color.</b> Topspin coming in? Play <b>equal or higher</b>. Slice coming in? Play <b>equal or lower</b>. To switch colors, <b>match the pace</b> (the number is the speed of the ball).</p></div>
+            <p><b>Match the color.</b> Topspin coming in? Play <b>equal or higher</b>. Slice coming in? Play <b>equal or lower</b>. To switch colors with a groundstroke, <b>match the pace</b> (the number is the speed of the ball).</p></div>
         </div>
 
         <div class="step" data-reveal>
           <div class="n">03</div>
           <div><h3>Slice it up</h3>
-            <p>Play a Slice card to reverse the momentum. Your opponent must answer with a <b>lower</b> pace card.</p></div>
+            <p>Play a Slice card to reverse the momentum. Your opponent must answer with <b>equal or lower</b> pace.</p></div>
         </div>
 
         <div class="step" data-reveal>
@@ -839,7 +839,7 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
         <div class="step" data-reveal>
           <div class="n">05</div>
           <div><h3>Smash it down</h3>
-            <p>Punish a weak shot with a Smash, or defend against an aggressive attack with a Lob.</p></div>
+            <p>Punish a weak shot with a Smash, defend against an aggressive attack with a Lob, or match their pace with an Approach and steal a card.</p></div>
         </div>
 
         <div class="step" data-reveal>
@@ -868,18 +868,18 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
 </section>
 
 <!-- ============ 06 POCKET GUIDE ============ -->
-<section class="section" id="pocket-guide" data-sec="05" data-name="Pocket Guide">
+<section class="section" id="pocket-guide" data-sec="05" data-name="Rule Book">
   <div class="wrap guide-grid">
     <div class="guide-copy">
-      <div class="sec-idx"><b>05</b><i></i><span class="label">Pocket Guide</span></div>
+      <div class="sec-idx"><b>05</b><i></i><span class="label">Rule Book</span></div>
       <h2 class="title display" data-split>Learn it in <span class="accent">minutes.</span></h2>
-      <p class="lede" data-reveal style="margin-top:18px">The quick-start Pocket Guide walks through the serve, the rally, every card type and scoring in eight short pages.</p>
-      <div data-reveal><button type="button" class="btn btn-primary" data-guide>Open the guide <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
+      <p class="lede" data-reveal style="margin-top:18px">The pocket Rule Book that comes in the box. Part 1 gets you playing: groundstrokes, modifiers, the serve, the rally and scoring. Part 2 covers the power shots, and Part 3 is doubles.</p>
+      <div data-reveal style="display:flex;gap:12px;flex-wrap:wrap;align-items:center"><button type="button" class="btn btn-primary" data-guide>Read the Rule Book <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
     </div>
-    <div class="guide-fan" data-guide data-reveal role="button" tabindex="0" aria-label="Open the Pocket Guide">
-      <div class="gp"><img src="assets/guide/PAGE1_DRAW_AND_SERVE.jpg" alt="" loading="lazy"></div>
-      <div class="gp"><img src="assets/guide/PAGE2_THE_RALLY_GS.jpg" alt="" loading="lazy"></div>
-      <div class="gp"><img src="assets/guide/POCKET_GUIDE_COVER.jpg" alt="Pocket Guide cover" loading="lazy"></div>
+    <div class="guide-fan" data-guide data-reveal role="button" tabindex="0" aria-label="Open the Rule Book">
+      <div class="gp"><img src="assets/rulebook/page_04.jpg" alt="" loading="lazy"></div>
+      <div class="gp"><img src="assets/rulebook/page_08.jpg" alt="" loading="lazy"></div>
+      <div class="gp"><img src="assets/rulebook/page_01.jpg" alt="Rule Book cover" loading="lazy"></div>
     </div>
   </div>
 </section>
@@ -960,7 +960,7 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
     <div class="foot-top">
       <img src="assets/slice-logo-sm.png" alt="SLICE!">
       <div class="foot-cols">
-        <div><span class="label">Explore</span><a href="#rally">The Rally</a><a href="#cards">The Deck</a><a href="#rules">How to Play</a><button type="button" data-guide>Pocket Guide</button></div>
+        <div><span class="label">Explore</span><a href="#rally">The Rally</a><a href="#cards">The Deck</a><a href="#rules">How to Play</a><button type="button" data-guide>Rule Book</button></div>
         <div><span class="label">Follow</span><a href="https://www.instagram.com/slice_thetenniscardgame" target="_blank" rel="noopener">Instagram</a><a href="https://discord.gg/rs7NV8xy" target="_blank" rel="noopener">Discord</a><button type="button" data-video>Trailer</button></div>
       </div>
     </div>
@@ -975,12 +975,12 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
   <div class="video-box"><iframe id="yt" title="SLICE! — The Tennis Card Game trailer" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
 </div>
 
-<div class="modal guide-modal" id="pocket-guide-modal" role="dialog" aria-modal="true" aria-label="Pocket Guide">
+<div class="modal guide-modal" id="pocket-guide-modal" role="dialog" aria-modal="true" aria-label="Rule Book">
   <button class="modal-x" type="button" data-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-  <div class="label guide-count" id="page-counter">1 / 8</div>
+  <div class="label guide-count" id="page-counter">1 / 20</div>
   <div class="guide-view">
     <button class="circle-btn g-arrow g-prev" type="button" id="g-prev" aria-label="Previous page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
-    <img id="guide-image" src="assets/guide/POCKET_GUIDE_COVER.jpg" alt="Pocket Guide page">
+    <img id="guide-image" src="assets/rulebook/page_01.jpg" alt="Rule Book page">
     <button class="circle-btn g-arrow g-next" type="button" id="g-next" aria-label="Next page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
   </div>
   <div class="thumbs" id="thumbs"></div>
@@ -1155,6 +1155,49 @@ function heroCanvas() {
 }
 
 /* hero: impact -> logo -> deal -> headline -> endless (slowing) ball rally */
+/* modals (restored: this block went missing after the v4 site) */
+let openModalEl = null;
+function openModal(m) { openModalEl = m; m.classList.add('open'); lockScroll(true); const x = $('.modal-x', m); x && x.focus({ preventScroll: true }); }
+function closeModal(m = openModalEl) {
+  if (!m) return; m.classList.remove('open'); lockScroll(false); openModalEl = null;
+  if (m.id === 'video-modal') setTimeout(() => { $('#yt').src = 'about:blank'; }, 350);
+}
+$$('.modal').forEach(m => m.addEventListener('click', e => { if (e.target === m || e.target.closest('[data-close]')) closeModal(m); }));
+$$('[data-video]').forEach(b => {
+  const go = e => { e.preventDefault(); $('#yt').src = 'https://www.youtube.com/embed/uNLHcn-lsC4?autoplay=1&rel=0&modestbranding=1'; openModal($('#video-modal')); };
+  b.addEventListener('click', go); b.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') go(e); });
+});
+
+/* rule book viewer */
+const guidePages = Array.from({ length: 20 }, (_, i) => `assets/rulebook/page_${String(i + 1).padStart(2, '0')}.jpg`);
+let page = 0;
+try { page = Math.min(guidePages.length - 1, parseInt(localStorage.getItem('rulebookPage')) || 0); } catch (e) {}
+const gImg = $('#guide-image'), thumbs = $('#thumbs'), gm = $('#pocket-guide-modal');
+guidePages.forEach((src, i) => { const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', `Page ${i + 1}`); b.innerHTML = `<img src="${src}" alt="" loading="lazy">`; b.addEventListener('click', () => goPage(i)); thumbs.appendChild(b); });
+function renderPage(dir = 0) {
+  gImg.src = guidePages[page];
+  $('#page-counter').textContent = `${page + 1} / ${guidePages.length}`;
+  $('#g-prev').disabled = page === 0; $('#g-next').disabled = page === guidePages.length - 1;
+  $$('button', thumbs).forEach((b, i) => b.classList.toggle('on', i === page));
+  if (dir) gsap.fromTo(gImg, { x: dir * 50, opacity: 0 }, { x: 0, opacity: 1, duration: .45, ease: 'power3.out' });
+  try { localStorage.setItem('rulebookPage', page); } catch (e) {}
+}
+function goPage(i) { if (i < 0 || i >= guidePages.length || i === page) return; const d = i > page ? 1 : -1; page = i; renderPage(d); }
+$('#g-prev').addEventListener('click', () => goPage(page - 1));
+$('#g-next').addEventListener('click', () => goPage(page + 1));
+$$('[data-guide]').forEach(b => {
+  const go = e => { e.preventDefault(); if (document.body.classList.contains('menu-open')) setMenu(false); renderPage(); openModal(gm); };
+  b.addEventListener('click', go); b.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') go(e); });
+});
+let tsx = 0;
+gm.addEventListener('touchstart', e => { tsx = e.changedTouches[0].screenX; }, { passive: true });
+gm.addEventListener('touchend', e => { const dx = e.changedTouches[0].screenX - tsx; if (dx < -50) goPage(page + 1); if (dx > 50) goPage(page - 1); });
+document.addEventListener('keydown', e => {
+  if (!openModalEl) return;
+  if (e.key === 'Escape') closeModal();
+  if (openModalEl === gm) { if (e.key === 'ArrowRight') goPage(page + 1); if (e.key === 'ArrowLeft') goPage(page - 1); }
+});
+
 function hero() {
   const hero = $('.hero'), visual = $('#hero-visual'), logo = $('#hero-logo'), ring = $('#impact-ring'), rays = $('#hero-rays');
   const cards = $$('#hand .hc'), inners = $$('#hand .hc-inner');
