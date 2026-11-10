@@ -623,7 +623,7 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
 <section class="learn" id="learn" aria-label="Learn to play">
   <div class="wrap">
     <div class="learn-head">
-      <span class="label">Learn to play &middot; 3 minutes</span>
+      <span class="label">Learn to play &middot; 4 minutes</span>
       <h2 class="title display" data-split>Pick it up. <span class="accent">Play tonight.</span></h2>
       <p class="lede" data-reveal>Match the color. Topspin pace goes up, Slice pace goes down. Match the pace to switch colors. That&rsquo;s the whole game to start.</p>
     </div>
@@ -1228,7 +1228,10 @@ document.addEventListener('keydown', e => {
     const first = e => { if (e.target.closest && e.target.closest('#snd')) return; removeEventListener('pointerdown', first, true); removeEventListener('keydown', first, true); if (on && !held) start(); };
     addEventListener('pointerdown', first, true); addEventListener('keydown', first, true);
   }
-  window.sliceMusicHold = h => { held = h; if (on) h ? stop() : start(); ui(); };
+  const holds = new Set();
+  window.sliceMusicHold = (h, why = 'trailer') => { h ? holds.add(why) : holds.delete(why); held = holds.size > 0; if (on) held ? stop() : start(); ui(); };
+  // the walkthrough tells us when its voice-over is talking
+  addEventListener('message', e => { if (e.data && typeof e.data === 'object' && 'sliceVO' in e.data) window.sliceMusicHold(!!e.data.sliceVO, 'walkthrough'); });
   document.addEventListener('visibilitychange', () => { if (document.hidden) a.pause(); else if (on && !held && a.volume > 0) a.play().catch(() => {}); });
 })();
 

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SLICE! — Learn to Play</title>
-<meta name="description" content="Learn SLICE! in about three minutes: groundstrokes, the rally, modifiers, the serve, Last Ditch Effort, Dig Deep and the power shots.">
+<meta name="description" content="Learn SLICE! in about four minutes: groundstrokes, the rally, modifiers, the serve, Last Ditch Effort, Dig Deep and the power shots.">
 <link rel="icon" type="image/png" href="assets/slice-logo-sm.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -199,6 +199,11 @@ body.record .start,body.embed .start{bottom:0}
 .start .pl svg{width:20px;height:20px;margin-left:3px}
 .start small{display:block;font:600 13px/1 var(--body);font-style:normal;letter-spacing:.02em;text-transform:none;opacity:.7;margin-top:6px}
 
+.sndchip{position:fixed;left:16px;top:16px;z-index:35;display:none;align-items:center;gap:10px;padding:10px 16px 10px 12px;border-radius:999px;background:rgba(5,6,4,.82);border:1px solid rgba(198,244,50,.6);color:#f4f6ef;font:800 14px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.sndchip svg{width:20px;height:20px;color:var(--lime)}
+body.muted.playing .sndchip{display:inline-flex;animation:chip 1.2s ease-in-out infinite alternate}
+@keyframes chip{to{box-shadow:0 0 0 6px rgba(198,244,50,.18),0 10px 30px rgba(0,0,0,.4)}}
+body.record .sndchip{display:none!important}
 .sp{position:fixed;inset:0;z-index:70;background:rgba(5,6,4,.82);backdrop-filter:blur(8px);display:none;overflow:auto;padding:40px 20px}
 .sp.open{display:block}
 .sp .in{max-width:760px;margin:0 auto;background:#10130e;border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:28px 30px 34px}
@@ -246,8 +251,9 @@ body.record .start,body.embed .start{bottom:0}
   </div>
 </div>
 
-<div class="start" id="start"><div class="pl"><i><svg viewBox="0 0 20 20"><path d="M3 1.5v17L18 10z" fill="#c6f432"/></svg></i><div>Learn SLICE!<small>Three-minute how to play</small></div></div></div>
+<div class="start" id="start"><div class="pl"><i><svg viewBox="0 0 20 20"><path d="M3 1.5v17L18 10z" fill="#c6f432"/></svg></i><div>Learn SLICE!<small>Four-minute how to play</small></div></div></div>
 
+<button class="sndchip" id="sndChip" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>Tap for sound</button>
 <div class="bar" id="bar">
   <button class="b" id="bPlay" aria-label="Play / pause"><svg viewBox="0 0 20 20" id="icPlay"><path d="M4 2v16l14-8z" fill="currentColor"/></svg></button>
   <button class="b" id="bRe" aria-label="Restart"><svg viewBox="0 0 20 20"><path d="M10 3a7 7 0 1 1-6.6 4.7" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M2 2v6h6z" fill="currentColor"/></svg></button>
@@ -255,6 +261,7 @@ body.record .start,body.embed .start{bottom:0}
   <div class="prog" id="prog"><div class="tr"><div class="fl" id="fill"></div></div></div>
   <span class="tm" id="tm">0:00 / 0:00</span>
   <div class="seg"><button class="b" data-fmt="wide">16:9</button><button class="b" data-fmt="tall">9:16</button></div>
+  <button class="b on" id="bSnd" aria-label="Voice on/off">Sound</button>
   <button class="b on" id="bCC">CC</button>
   <button class="b" id="bScript">Script</button>
 </div>
@@ -428,6 +435,45 @@ function wipe(at, color = '#c6f432', src = 'LIME_1') {
   tl.set(wipeEl, { autoAlpha: 1 }, at);
   tl.fromTo(wipeEl, { x: -L.W * .62 - L.H * .4 }, { x: L.W + L.H * .4, duration: .8, ease: 'power2.inOut', immediateRender: false }, at);
   tl.set(wipeEl, { autoAlpha: 0 }, at + .8);
+}
+
+/* ============================================================
+   Voice-over (ElevenLabs, one clip per caption)
+   ============================================================ */
+const VO_DUR = [3.43, 2.04, 4.16, 2.78, 1.86, 2.58, 2.17, 4.27, 3.48, 1.3, 1.66, 1.65, 3.75, 5.41, 5.41, 2.59, 6.54, 3.57, 4.68, 2.55, 3.28, 4.77, 2.38, 5.72, 2.25, 1.39, 6.79, 4.02, 3.6, 3.74, 1.34, 6.13, 2.67, 4.15, 4.98, 2.49, 1.99, 1.89, 4.55, 3.64, 6.65, 4.17, 3.97, 2.39, 5.22, 2.39, 2.31, 3.72, 2.5, 5.22, 3.27, 5.07, 6.27, 4.17, 1.27, 2.07, 2.34, 2.23, 3.8];
+const VO = { ctx: null, gain: null, bufs: [], on: false, src: null, idx: -1, lastT: 0, ok: false };
+function voInit() {
+  if (VO.ctx) return;
+  const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+  VO.ctx = new AC(); VO.gain = VO.ctx.createGain(); VO.gain.connect(VO.ctx.destination);
+  VO_DUR.forEach((_, i) => fetch(`assets/vo/VO_${String(i + 1).padStart(2, '0')}.m4a`)
+    .then(r => r.arrayBuffer()).then(b => new Promise((res, rej) => VO.ctx.decodeAudioData(b, res, rej)))
+    .then(buf => { VO.bufs[i] = buf; }).catch(() => {}));
+}
+function voStop() { if (VO.src) { try { VO.src.stop(); } catch (e) {} VO.src = null; VO.idx = -1; } }
+function voStart(i, offset = 0) {
+  if (!VO.on || !VO.ctx || !VO.bufs[i] || offset >= VO.bufs[i].duration - .05) return;
+  voStop();
+  const s = VO.ctx.createBufferSource(); s.buffer = VO.bufs[i]; s.connect(VO.gain); s.start(0, Math.max(0, offset));
+  s.onended = () => { if (VO.src === s) { VO.src = null; VO.idx = -1; } };
+  VO.src = s; VO.idx = i;
+}
+// call from a click/tap: browsers only allow sound after one
+function voUnlock() { voInit(); if (VO.ctx && VO.ctx.state !== 'running') VO.ctx.resume().catch(() => {}); }
+function voSay() { if (!VO.ok) return -1; const t = tl.time(); return cues.findIndex(c => t >= c.t && t < c.t + c.vd); }
+function voSetOn(on) {
+  VO.on = on; $('#bSnd').classList.toggle('on', on); document.body.classList.toggle('muted', !on);
+  if (!on) voStop();
+  else { voUnlock(); const i = voSay(); if (i >= 0 && !tl.paused()) voStart(i, tl.time() - cues[i].t); }
+  voPost();
+}
+function voPost() { try { parent !== window && parent.postMessage({ sliceVO: VO.on && !tl.paused() && !quizOn }, '*'); } catch (e) {} }
+function voTick(t) {
+  if (!VO.ok) return;
+  const dt = t - VO.lastT;
+  if (dt < -.05 || dt > .6) { voStop(); }                      // seek or restart
+  else if (!tl.paused() || quizOn) cues.forEach((c, i) => { if (c.t > VO.lastT && c.t <= t) voStart(i, t - c.t); });
+  VO.lastT = t;
 }
 
 /* ============================================================
@@ -929,6 +975,27 @@ function build(time = 0) {
   tl.fromTo('#sprog', { scaleX: 0 }, { scaleX: 1, duration: S, ease: 'none', immediateRender: false }, 0);
   tl.to({}, { duration: .01 }, S); // hold end
 
+  // voice-over: where a recorded line is longer than its slot, hold the piece mid-line
+  cues.sort((a, b) => a.t - b.t);
+  VO.ok = cues.length === VO_DUR.length;
+  if (VO.ok) {
+    const holds = [];
+    cues.forEach((c, i) => {
+      const next = cues[i + 1] ? cues[i + 1].t : S, slot = next - c.t, need = VO_DUR[i] + .25;
+      c.vd = VO_DUR[i];
+      if (need > slot && c.t < qPauseT - .01 || need > slot && c.t > qRevealT - .01) holds.push({ at: c.t + slot * .6, extra: need - slot });
+    });
+    holds.sort((a, b) => b.at - a.at).forEach(h => tl.shiftChildren(h.extra, false, h.at));
+    const shift = t => t + holds.reduce((a, h) => a + (h.at <= t ? h.extra : 0), 0);
+    const S0 = S; S = shift(S);
+    cues.forEach(c => { c.t = shift(c.t); c.d = Math.max(c.d, c.vd + .1); });
+    scenes.forEach(sc => { sc.t = shift(sc.t); });
+    screenTxt.forEach(x => { x.t = shift(x.t); });
+    qPauseT = shift(qPauseT); qRevealT = shift(qRevealT);
+    // the background drift and progress bar span the whole piece: stretch them too
+    tl.getChildren(false, true, false).forEach(tw => { if (tw.startTime() === 0 && Math.abs(tw.duration() - S0) < .01) tw.duration(S); });
+  }
+
   if (!RECORD) tl.addPause(qPauseT, startQuiz);
   cues.sort((a, b) => a.t - b.t);
   // a caption stays up long enough to be read (≈3 words/s), but never past the next line
@@ -946,6 +1013,7 @@ const fmtT = t => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2
 function tick() {
   if (!tl) return;
   const t = tl.time();
+  voTick(t);
   const c = cues.find(c => t >= c.t && t < c.e) || null;
   if (c !== lastCue) { lastCue = c; if (c) { cap.innerHTML = c.text; cap.classList.add('on'); } else cap.classList.remove('on'); }
   $('#fill').style.width = (t / tl.duration() * 100) + '%';
@@ -1005,25 +1073,32 @@ cardsL.addEventListener('click', e => {
    Controls
    ============================================================ */
 const setPlayIcon = playing => {
+  document.body.classList.toggle('playing', playing);
+  if (VO.ctx) { if (playing) { if (VO.on) VO.ctx.resume().catch(() => {}); } else if (!quizOn) VO.ctx.suspend().catch(() => {}); }
+  setTimeout(voPost, 0);
   $('#icPlay').innerHTML = playing ? '<path d="M4 2h4v16H4zM12 2h4v16h-4z" fill="currentColor"/>' : '<path d="M4 2v16l14-8z" fill="currentColor"/>';
   document.body.classList.toggle('paused', !playing);
 };
 let started = false;
-function start() {
+function start(fromClick) {
   if (started) return; started = true;
+  if (fromClick) voSetOn(true);
   $('#start').classList.add('gone');
   clearQuiz(); tl.seek(0); tick(); tl.play(); setPlayIcon(true);
 }
 function toggle() {
-  if (!started) return start();
+  voUnlock();
+  if (!started) return start(true);
   if (quizOn) return endQuiz(false);
   if (tl.paused() || !tl.isActive()) { if (tl.progress() >= 1) tl.seek(0); tl.play(); setPlayIcon(true); }
   else { tl.pause(); setPlayIcon(false); }
 }
-$('#start').addEventListener('click', start);
+$('#start').addEventListener('click', () => start(true));
 $('#bPlay').addEventListener('click', toggle);
-$('#bRe').addEventListener('click', () => { started = true; $('#start').classList.add('gone'); clearQuiz(); tl.seek(0); tl.play(); setPlayIcon(true); });
-stage.addEventListener('click', e => { if (!quizOn && !e.target.closest('.card.q')) toggle(); });
+$('#bRe').addEventListener('click', () => { voUnlock(); started = true; $('#start').classList.add('gone'); clearQuiz(); tl.seek(0); tl.play(); setPlayIcon(true); });
+stage.addEventListener('click', e => { if (quizOn || e.target.closest('.card.q')) return voUnlock(); if (!VO.on && started && !tl.paused()) return voSetOn(true); toggle(); });
+$('#sndChip').addEventListener('click', () => voSetOn(true));
+$('#bSnd').addEventListener('click', () => voSetOn(!VO.on));
 $('#prog').addEventListener('click', e => {
   const r = e.currentTarget.getBoundingClientRect(); const t = (e.clientX - r.left) / r.width * tl.duration();
   if (!started) { started = true; $('#start').classList.add('gone'); }
@@ -1069,12 +1144,14 @@ document.fonts.addEventListener && document.fonts.addEventListener('loadingdone'
 Promise.race([Promise.all([...IMG.map(loadImg), fontsReady()]), new Promise(r => setTimeout(r, 8000))]).then(() => {
   booted = true;
   build(0);
+  if (!RECORD) voInit();
+  document.body.classList.toggle('muted', !VO.on);
   const t0 = parseFloat(P.get('t'));
   if (RECORD) { started = true; $('#start').classList.add('gone'); setTimeout(() => { tl.seek(t0 || 0); tl.play(); }, 1200); }
   else if (!isNaN(t0)) { started = true; $('#start').classList.add('gone'); tl.seek(t0); tick(); setPlayIcon(false); }
   else { tl.seek(2.6); tick(); if (pending === 'play') start(); } // poster frame behind the start button
 });
-window.__slice = { get tl() { return tl; }, build };
+window.__slice = { get tl() { return tl; }, build, vo: VO };
 })();
 </script>
 </body>
