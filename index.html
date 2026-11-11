@@ -1477,10 +1477,10 @@ function gameplay() {
 /* deck ring */
 function deckRing() {
   const deck = [
-    ['FOREHAND_7', 'Forehand Topspin', 'Groundstroke', 0], ['FOREHAND_SLICE_5', 'Forehand Slice', 'Groundstroke', 0], ['BACKHAND_6', 'Backhand Topspin', 'Groundstroke', 1], ['BACKHAND_SLICE_3', 'Backhand Slice', 'Groundstroke', 1],
-    ['APPROACH_5', 'Approach', 'Tactical', 1], ['VOLLEY_7', 'Volley', 'Net card', 0], ['DROP_SHOT_2', 'Drop-Shot', 'Net card', 1], ['LOB_2', 'Lob', 'Tactical', 0],
+    ['FOREHAND_7', 'Topspin Forehand', 'Groundstroke', 0], ['FOREHAND_SLICE_5', 'Forehand Slice', 'Groundstroke', 0], ['BACKHAND_6', 'Topspin Backhand', 'Groundstroke', 1], ['BACKHAND_SLICE_3', 'Backhand Slice', 'Groundstroke', 1],
+    ['APPROACH_5', 'Topspin Approach', 'Tactical', 1], ['APPROACH_3', 'Approach Slice', 'Tactical', 0], ['VOLLEY_7', 'Volley', 'Net card', 0], ['DROP_SHOT_2', 'Drop-Shot', 'Net card', 1], ['LOB_2', 'Lob', 'Tactical', 0],
     ['SMASH_7', 'Smash', 'Tactical', 1], ['WINNER', 'Winner', 'Special', 0], ['GOOD_GET', 'Good Get', 'Special', 1], ['ERROR', 'Error', 'Special', 0],
-    ['SOFT_TOUCH', 'Soft Touch', 'Modifier', 1], ['EXTRA_SPIN', 'Extra Spin', 'Modifier', 0], ['FOREHAND_4', 'Forehand Topspin', 'Groundstroke', 0], ['BACKHAND_SLICE_7', 'Backhand Slice', 'Groundstroke', 1]
+    ['SOFT_TOUCH', 'Soft Touch', 'Modifier', 1], ['EXTRA_SPIN', 'Extra Spin', 'Modifier', 0], ['FOREHAND_4', 'Topspin Forehand', 'Groundstroke', 0], ['BACKHAND_SLICE_7', 'Backhand Slice', 'Groundstroke', 1]
   ];
   const ring = $('#ring'), stage = $('#ring-stage'), nameEl = $('#ring-name'), typeEl = $('#ring-type');
   const N = deck.length, step = 360 / N;
