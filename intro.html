@@ -1071,7 +1071,7 @@ function build(time = 0) {
     tl.getChildren(false, true, false).forEach(tw => { if (tw.startTime() === 0 && Math.abs(tw.duration() - S0) < .01) tw.duration(S); });
   }
 
-  if (!RECORD) tl.addPause(qPauseT, startQuiz);
+  // the quiz plays straight through: question, 3-2-1 countdown, then the answer
   cues.sort((a, b) => a.t - b.t);
   // a caption stays up long enough to be read (≈3 words/s), but never past the next line
   cues.forEach((c, i) => { const n = cues[i + 1], w = c.text.replace(/<[^>]+>/g, '').split(' ').length; c.e = Math.min(c.t + Math.max(c.d, w / 3 + .4), n ? n.t - .05 : 1e9); });
