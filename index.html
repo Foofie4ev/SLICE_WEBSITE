@@ -400,17 +400,9 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
 .die-unit{display:flex;align-items:center;gap:16px}
 .die-unit .label{display:block;font-size:.6rem}
 .die-out{display:block;font-family:var(--display);font-weight:800;font-stretch:110%;text-transform:uppercase;font-size:.95rem;min-height:1.3em;margin-top:2px}
-.dice-container{width:52px;height:52px;perspective:600px;cursor:grab;touch-action:none;flex:none}
-.dice{width:100%;height:100%;position:relative;transform-style:preserve-3d}
-.dice-face{position:absolute;width:52px;height:52px;border-radius:8px;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--dc,#ddd)}
-.dice-face img{width:100%;height:100%;object-fit:cover;pointer-events:none}
-.dice-core{position:absolute;inset:4px;background:var(--dc,#ddd);transform-style:preserve-3d;pointer-events:none}
-.dice-core::before,.dice-core::after{content:"";position:absolute;inset:0;background:var(--dc,#ddd)}
-.dice-core::before{transform:rotateX(90deg)}.dice-core::after{transform:rotateY(90deg)}
-.dice-serve{--dc:#e9e9e2}.dice-yellow{--dc:#ffe11a}.dice-purple{--dc:#8b2fd0}
-.face-front{transform:translateZ(26px)}.face-back{transform:rotateY(180deg) translateZ(26px)}
-.face-right{transform:rotateY(90deg) translateZ(26px)}.face-left{transform:rotateY(-90deg) translateZ(26px)}
-.face-top{transform:rotateX(90deg) translateZ(26px)}.face-bottom{transform:rotateX(-90deg) translateZ(26px)}
+.dice-container{width:84px;height:84px;flex:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.die3d img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;user-select:none}
+.die3d:focus-visible{outline:2px solid var(--lime);outline-offset:4px;border-radius:14px}
 .dice-hint{font-size:.8rem;color:var(--faint)}
 
 .show-col{position:sticky;top:96px;height:min(640px,calc(100vh - 140px));display:grid;place-items:center}
@@ -775,18 +767,10 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
             <p>Open the point with the Serve Die. It sets the first shot your opponent has to return, like <b>Topspin 4&uarr;</b> or <b>Slice 3&darr;</b>. Or it calls a LET or a FAULT.</p>
             <div class="dice-row">
               <div class="die-unit">
-                <div class="dice-container"><div class="dice dice-serve" data-faces="Topspin 4↑,Topspin 5↑,Slice 4↓,Slice 3↓,Let +1,Fault!">
-                  <div class="dice-core"></div>
-                  <div class="dice-face face-front"><img src="assets/dice/01_TOPSPIN_4_OR_HIGHER.png" alt="Topspin 4 or higher"></div>
-                  <div class="dice-face face-back"><img src="assets/dice/02_TOPSPIN_5_OR_HIGHER.png" alt="Topspin 5 or higher"></div>
-                  <div class="dice-face face-right"><img src="assets/dice/03_SLICE_4_OR_LOWER.png" alt="Slice 4 or lower"></div>
-                  <div class="dice-face face-left"><img src="assets/dice/04_SLICE_3_OR_LOWER.png" alt="Slice 3 or lower"></div>
-                  <div class="dice-face face-top"><img src="assets/dice/05_LET_PLUS_1.png" alt="Let plus 1"></div>
-                  <div class="dice-face face-bottom"><img src="assets/dice/06_FAULT_RED_GREEN_RIM.png" alt="Fault"></div>
-                </div></div>
+                <div class="dice-container die3d" role="button" tabindex="0" aria-label="Roll the Serve die" data-faces="Topspin 4↑,Topspin 5↑,Slice 4↓,Slice 3↓,Let +1,Fault!" data-imgs="SERVE_1_TOPSPIN_4,SERVE_2_TOPSPIN_5,SERVE_3_SLICE_4,SERVE_4_SLICE_3,SERVE_5_LET,SERVE_6_FAULT"><img src="assets/dice3d/serve_hero.png" alt="Serve die" width="240" height="240"></div>
                 <div><span class="label">Serve die</span><span class="die-out" style="color:var(--lime)">&nbsp;</span></div>
               </div>
-              <span class="dice-hint">Tap to roll · drag to spin</span>
+              <span class="dice-hint">Tap to roll</span>
             </div>
           </div>
         </div>
@@ -810,27 +794,11 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
             <p>Attack the net with a Volley or Drop-Shot and roll for your pace. Just don&rsquo;t hit it out.</p>
             <div class="dice-row">
               <div class="die-unit">
-                <div class="dice-container"><div class="dice dice-yellow" data-faces="1,2,Net!,Out!,1,2">
-                  <div class="dice-core"></div>
-                  <div class="dice-face face-front"><img src="assets/dice/DROP_SHOT1_180.png" alt="1"></div>
-                  <div class="dice-face face-back"><img src="assets/dice/DROP_SHOT2_180.png" alt="2"></div>
-                  <div class="dice-face face-right"><img src="assets/dice/DROP_SHOT_NET_180.png" alt="Net"></div>
-                  <div class="dice-face face-left"><img src="assets/dice/DROP_SHOT_OUT_180.png" alt="Out"></div>
-                  <div class="dice-face face-top"><img src="assets/dice/DROP_SHOT1_180.png" alt="1"></div>
-                  <div class="dice-face face-bottom"><img src="assets/dice/DROP_SHOT2_180.png" alt="2"></div>
-                </div></div>
+                <div class="dice-container die3d" role="button" tabindex="0" aria-label="Roll the Drop-Shot die" data-faces="1,2,Net!,Out!,1,2" data-imgs="DROPSHOT_1_1,DROPSHOT_2_2,DROPSHOT_3_NET,DROPSHOT_4_OUT,DROPSHOT_1_1,DROPSHOT_2_2"><img src="assets/dice3d/dropshot_hero.png" alt="Drop-Shot die" width="240" height="240"></div>
                 <div><span class="label">Drop-shot</span><span class="die-out" style="color:var(--gold)">&nbsp;</span></div>
               </div>
               <div class="die-unit">
-                <div class="dice-container"><div class="dice dice-purple" data-faces="6↑,7,Net!,Out!,6↑,7">
-                  <div class="dice-core"></div>
-                  <div class="dice-face face-front"><img src="assets/dice/VOLLEY_6orHIGHER_180.png" alt="6 or higher"></div>
-                  <div class="dice-face face-back"><img src="assets/dice/VOLLLEY_7_180.png" alt="7"></div>
-                  <div class="dice-face face-right"><img src="assets/dice/VOLLEY_NET_180.png" alt="Net"></div>
-                  <div class="dice-face face-left"><img src="assets/dice/VOLLEY_OUT_180.png" alt="Out"></div>
-                  <div class="dice-face face-top"><img src="assets/dice/VOLLEY_6orHIGHER_180.png" alt="6 or higher"></div>
-                  <div class="dice-face face-bottom"><img src="assets/dice/VOLLLEY_7_180.png" alt="7"></div>
-                </div></div>
+                <div class="dice-container die3d" role="button" tabindex="0" aria-label="Roll the Volley die" data-faces="6↑,7,Net!,Out!,6↑,7" data-imgs="VOLLEY_1_6_OR_HIGHER,VOLLEY_2_7,VOLLEY_3_NET,VOLLEY_4_OUT,VOLLEY_1_6_OR_HIGHER,VOLLEY_2_7"><img src="assets/dice3d/volley_hero.png" alt="Volley die" width="240" height="240"></div>
                 <div><span class="label">Volley</span><span class="die-out" style="color:var(--purple)">&nbsp;</span></div>
               </div>
             </div>
@@ -859,8 +827,8 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
           <div class="sc"><img src="assets/cards/VOLLEY_7.jpg" alt="" loading="lazy"></div>
           <div class="sc"><img src="assets/cards/SMASH_7.jpg" alt="" loading="lazy"></div>
           <div class="sc"><img src="assets/cards/WINNER.jpg" alt="" loading="lazy"></div>
-          <img class="show-die d1" src="assets/dice/volley-die-3d.png" alt="">
-          <img class="show-die d2" src="assets/dice/dropshot-die-3d.png" alt="">
+          <img class="show-die d1" src="assets/dice3d/volley_hero.png" alt="">
+          <img class="show-die d2" src="assets/dice3d/dropshot_hero.png" alt="">
           <div class="show-cap"><span class="label" id="show-n">Step 01 / 06</span><b id="show-t">Serve it</b></div>
         </div>
       </div>
@@ -1536,29 +1504,27 @@ function deckRing() {
   im.addEventListener('pointermove', e => { const r = card.getBoundingClientRect(); const nx = (e.clientX - r.left) / r.width - .5, ny = (e.clientY - r.top) / r.height - .5; tilt.style.transform = `rotateY(${nx * 16}deg) rotateX(${-ny * 16}deg)`; });
 }
 
-/* 3D dice */
+/* rendered dice: tap to roll */
 function dice() {
-  const faceRot = [[0, 0], [0, 180], [0, -90], [0, 90], [-90, 0], [90, 0]];
-  $$('.dice').forEach((d, idx) => {
-    const labels = d.dataset.faces.split(','), out = d.closest('.die-unit').querySelector('.die-out');
-    gsap.set(d, { rotationX: -22, rotationY: 32 });
-    const idle = gsap.to(d, { rotationY: '+=360', duration: 14 + idx * 3, repeat: -1, ease: 'none', paused: reduced });
-    d._roll = () => {
-      idle.pause();
-      const f = (Math.random() * 6) | 0, [rx, ry] = faceRot[f];
-      const cx = gsap.getProperty(d, 'rotationX'), cy = gsap.getProperty(d, 'rotationY');
-      const tx = Math.ceil(cx / 360) * 360 + 720 + rx, ty = Math.ceil(cy / 360) * 360 + 720 + ry;
-      out.innerHTML = '&nbsp;';
-      gsap.timeline()
-        .to(d.parentElement, { y: -18, duration: .3, ease: 'power2.out' }).to(d.parentElement, { y: 0, duration: .45, ease: 'bounce.out' })
-        .to(d, { rotationX: tx, rotationY: ty, duration: 1, ease: 'power3.out' }, 0)
-        .add(() => { out.textContent = labels[f]; gsap.from(out, { y: 6, opacity: 0, duration: .35 }); });
+  $$('.die3d').forEach(box => {
+    const labels = box.dataset.faces.split(','), imgs = box.dataset.imgs.split(',').map(n => `assets/dice3d/${n}.png`);
+    const img = $('img', box), out = box.closest('.die-unit').querySelector('.die-out');
+    imgs.forEach(src => { const i = new Image(); i.src = src; });
+    let busy = false;
+    const roll = () => {
+      if (busy) return; busy = true;
+      const f = (Math.random() * 6) | 0; out.innerHTML = '&nbsp;';
+      const tl = gsap.timeline({ onComplete: () => { busy = false; } });
+      for (let k = 0; k < 7; k++) tl.add(() => { img.src = imgs[(f + k * 2 + 1) % 6]; }, k * .08);
+      tl.add(() => { img.src = imgs[f]; out.textContent = labels[f]; gsap.from(out, { y: 6, opacity: 0, duration: .35 }); }, .6);
+      if (!reduced) {
+        tl.fromTo(box, { rotation: 0 }, { rotation: 360 + (Math.random() * 30 - 15), duration: .7, ease: 'power3.out' }, 0)
+          .to(box, { y: -22, duration: .25, ease: 'power2.out' }, 0).to(box, { y: 0, duration: .45, ease: 'bounce.out' }, .25)
+          .set(box, { rotation: 0 }, .72);
+      }
     };
-    const box = d.parentElement; let drag = false, sx = 0, sy = 0, mv = 0;
-    box.addEventListener('pointerdown', e => { drag = true; mv = 0; sx = e.clientX; sy = e.clientY; idle.pause(); box.setPointerCapture(e.pointerId); });
-    box.addEventListener('pointermove', e => { if (!drag) return; const dx = e.clientX - sx, dy = e.clientY - sy; sx = e.clientX; sy = e.clientY; mv += Math.abs(dx) + Math.abs(dy); gsap.set(d, { rotationX: gsap.getProperty(d, 'rotationX') - dy * .6, rotationY: gsap.getProperty(d, 'rotationY') + dx * .6 }); });
-    const up = () => { if (!drag) return; drag = false; if (mv < 5) d._roll(); };
-    box.addEventListener('pointerup', up); box.addEventListener('pointercancel', up);
+    box.addEventListener('click', roll);
+    box.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); roll(); } });
   });
 }
 
