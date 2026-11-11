@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SLICE! — Learn to Play</title>
-<meta name="description" content="Learn SLICE! in about four minutes: groundstrokes, the rally, modifiers, the serve, Last Ditch Effort, Dig Deep and the power shots.">
+<meta name="description" content="Learn SLICE! in about five minutes: groundstrokes, the rally, modifiers, the serve, Last Ditch Effort, Dig Deep, net cards, tactical cards and special cards.">
 <link rel="icon" type="image/png" href="assets/slice-logo-sm.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -255,7 +255,7 @@ body.record .sndchip{display:none!important}
   </div>
 </div>
 
-<div class="start" id="start"><div class="pl"><i><svg viewBox="0 0 20 20"><path d="M3 1.5v17L18 10z" fill="#c6f432"/></svg></i><div>Learn SLICE!<small>Four-minute how to play</small></div></div></div>
+<div class="start" id="start"><div class="pl"><i><svg viewBox="0 0 20 20"><path d="M3 1.5v17L18 10z" fill="#c6f432"/></svg></i><div>Learn SLICE!<small>Five-minute how to play</small></div></div></div>
 
 <button class="sndchip" id="sndChip" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>Tap for sound</button>
 <div class="bar" id="bar">
@@ -444,7 +444,9 @@ function wipe(at, color = '#c6f432', src = 'LIME_1') {
 /* ============================================================
    Voice-over (ElevenLabs, one clip per caption)
    ============================================================ */
-const VO_DUR = [3.43, 2.04, 4.16, 2.78, 1.86, 2.58, 2.17, 4.27, 3.48, 1.3, 1.66, 1.65, 3.75, 5.41, 5.41, 2.59, 6.54, 3.57, 4.68, 2.55, 3.28, 4.77, 2.38, 5.72, 2.25, 1.39, 6.79, 4.02, 3.6, 3.74, 1.34, 6.13, 2.67, 4.15, 4.98, 2.49, 1.99, 1.89, 4.55, 3.64, 6.65, 4.17, 3.97, 2.39, 5.22, 2.39, 2.31, 3.72, 2.5, 5.22, 3.27, 5.07, 6.27, 4.17, 1.27, 2.07, 2.34, 2.23, 3.8];
+// bump when any clip changes, so browsers don't play an old cached copy
+const VO_VERSION = '3';
+const VO_DUR = [3.43, 2.04, 4.16, 2.78, 1.86, 2.58, 2.17, 4.27, 3.48, 1.3, 1.66, 1.65, 3.75, 5.41, 5.41, 2.59, 6.54, 3.57, 4.68, 2.55, 3.28, 4.77, 2.38, 5.72, 2.25, 1.39, 6.79, 4.02, 3.6, 3.74, 1.34, 6.13, 2.67, 4.15, 8.13, 2.49, 1.99, 1.89, 4.55, 3.64, 6.65, 4.17, 3.97, 2.39, 5.22, 2.39, 2.31, 3.72, 3.87, 5.79, 9.28, 4.59, 3.45, 2.04, 3.76, 3.58, 3.63, 4.62, 4.71, 7.72, 3.06, 3.86, 3.27, 2.06, 1.27, 2.07, 2.34, 2.23, 3.8];
 const VO = { ctx: null, gain: null, bufs: [], on: false, src: null, idx: -1, lastT: 0, ok: false, song: null, songSrc: null };
 // background music (Pixel Funk, looped): quiet bed, dips further while the narrator talks
 const MUSIC_BED = .22, MUSIC_DUCK = .07;
@@ -459,10 +461,10 @@ function voInit() {
   VO.ctx = new AC(); VO.gain = VO.ctx.createGain(); VO.gain.connect(VO.ctx.destination); VO.gain.gain.value = VO.on ? 1 : 0;
   VO.voice = VO.ctx.createGain(); VO.voice.connect(VO.gain);
   VO.music = VO.ctx.createGain(); VO.music.gain.value = MUSIC_BED; VO.music.connect(VO.gain);
-  fetch('assets/music/pixel-funk.mp3').then(r => r.arrayBuffer()).then(b => new Promise((res, rej) => VO.ctx.decodeAudioData(b, res, rej)))
+  fetch('assets/music/pixel-funk.mp3').then(r => { if (!r.ok) throw new Error('missing'); return r.arrayBuffer(); }).then(b => new Promise((res, rej) => { const p = VO.ctx.decodeAudioData(b, res, rej); p && p.catch && p.catch(() => {}); }))
     .then(buf => { VO.song = buf; if (VO.on) musicStart(); }).catch(() => {});
-  VO_DUR.forEach((_, i) => fetch(`assets/vo/VO_${String(i + 1).padStart(2, '0')}.m4a`)
-    .then(r => r.arrayBuffer()).then(b => new Promise((res, rej) => VO.ctx.decodeAudioData(b, res, rej)))
+  VO_DUR.forEach((_, i) => fetch(`assets/vo/VO_${String(i + 1).padStart(2, '0')}.m4a?v=${VO_VERSION}`)
+    .then(r => { if (!r.ok) throw new Error('missing'); return r.arrayBuffer(); }).then(b => new Promise((res, rej) => { const p = VO.ctx.decodeAudioData(b, res, rej); p && p.catch && p.catch(() => {}); }))
     .then(buf => { VO.bufs[i] = buf; }).catch(() => {}));
 }
 function voStop() { if (VO.src) { try { VO.src.stop(); } catch (e) {} VO.src = null; VO.idx = -1; duck(false); } }
@@ -796,7 +798,7 @@ function build(time = 0) {
     const f5 = C('FOREHAND_5', L.hw), es = C('EXTRA_SPIN', L.hw);
     put(f5, s + .9, { x: L.hand[0] - 75, y: L.H + 300, rotation: 0 }, { x: L.hand[0] - 75, y: L.hand[1], rotation: -5 }, .55, 'back.out(1.3)');
     put(es, s + 1.0, { x: L.hand[0] + 75, y: L.H + 300, rotation: 0 }, { x: L.hand[0] + 75, y: L.hand[1], rotation: 5 }, .55, 'back.out(1.3)');
-    T('NEED_A_6?|ADD g:EXTRA|g:SPIN!', s + .3, s + 5.7, { k: 'Modifier cards', s: 'Play a modifier with your card. Extra Spin adds 1 to its pace.' });
+    T('NEED_A_6?|ADD g:EXTRA|g:SPIN!', s + .3, s + 5.7, { k: 'Modifier cards', s: 'Play a modifier with your card. Extra Spin raises your card’s pace by 1.' });
     play(f5, s + 2.6, [px - 14, py + 8, -6], L.cw / L.hw);
     play(es, s + 2.95, [px + L.cw * .66, py + 70, 10], L.cw / L.hw * .8);
     const eq = burst('5 + 1 = 6', px, fmt === 'tall' ? py + ch(L.cw) / 2 + 70 : py - ch(L.cw) / 2 - 64, 'g', -4); popAt(eq, s + 3.5, -4);
@@ -807,11 +809,15 @@ function build(time = 0) {
     const st = C('SOFT_TOUCH', L.pw);
     put(st, s + 6.0, { x: L.pair[0][0], y: L.H + 340, rotation: -20 }, { x: (L.pair[0][0] + L.pair[1][0]) / 2, y: L.pair[0][1], rotation: -4 }, .6, 'back.out(1.3)');
     const m1 = burst('−1 pace', (L.pair[0][0] + L.pair[1][0]) / 2, fmt === 'tall' ? L.pair[0][1] + ch(L.pw) / 2 + 60 : L.pair[0][1] - ch(L.pw) / 2 - 50, 'w', 4); popAt(m1, s + 6.5, 4);
-    T('y:SOFT_TOUCH|TAKES_1_OFF.', s + 5.9, s + 10.0, { s: 'One modifier per shot. Then draw a card to replace it.' });
+    T('y:SOFT_TOUCH|−1_PACE', s + 5.9, s + 10.0, { s: 'Soft Touch reduces your card’s pace by 1. One modifier per shot. After you play it, draw a card from your deck!' });
+    const dr = C('FOREHAND_1', L.bw, { down: true });
+    put(dr, s + 8.2, { x: L.bag[0], y: L.bag[1], rotation: -8 }, { x: L.hand[0], y: L.hand[1], rotation: 0, scale: L.hw / L.bw }, .6, 'back.out(1.2)');
+    const dtag = burst('+1 card!', L.hand[0] + (fmt === 'wide' ? 200 : 180), L.hand[1] - ch(L.hw) / 2 + 20, 'g', -3); dtag.style.fontSize = '34px'; dtag.style.padding = '10px 18px 8px'; popAt(dtag, s + 8.6, -3);
+    hide(dtag, s + 10.3); out([dr], s + 10.3, 0, 420);
     hide(m1, s + 9.9); out([st], s + 9.9, 0, 500);
     vo(s + .3, 'Need a little more pace? Use a <em>modifier!</em>', 2.2);
     vo(s + 2.6, 'Play Extra Spin with your Forehand five, and it counts as a six!', 2.9);
-    vo(s + 5.9, 'Soft Touch takes one off. One modifier per shot, then draw a card.', 3.6);
+    vo(s + 5.9, 'Soft Touch reduces your card’s pace by one. You can play one modifier per shot… and after you play it, draw a card from your deck!', 3.6);
   });
 
   /* ---------- 9 · THE SERVE ---------- */
@@ -917,45 +923,98 @@ function build(time = 0) {
     vo(s + 5.9, 'Run out again in the same point? Draw two, then one.', 2.8);
   });
 
-  /* ---------- 10c · POWER SHOTS ---------- */
-  scene('Power Shots', 20.4, s => {
+  /* ---------- 10c · NET CARDS ---------- */
+  scene('Net Cards', 21.4, s => {
     wipe(s - .2, '#a45cff', 'LIME_2'); mood(s + .2, 'orange');
-    const names = ['VOLLEY', 'DROP_SHOT', 'SMASH_7', 'LOB_1', 'APPROACH_5', 'APPROACH_3', 'WINNER', 'ERROR', 'GOOD_GET'];
-    const gw = fmt === 'wide' ? 180 : 172;
-    const pos = names.map((_, i) => fmt === 'wide'
-      ? [330 + (i % 3) * 230, 215 + Math.floor(i / 3) * 322]
-      : (i < 5 ? [540 + (i - 2) * 200, 1010] : [540 + (i - 6.5) * 200, 1300]));
+    const cw2 = fmt === 'tall' ? 270 : L.pw, cy = fmt === 'tall' ? 1090 : L.pair[0][1];
+    const V = C('VOLLEY', cw2), D = C('DROP_SHOT', cw2);
+    put(V, s + .3, { x: L.pair[0][0], y: L.H + 380, rotation: -18 }, { x: L.pair[0][0], y: cy, rotation: -4 }, .65, 'back.out(1.3)');
+    put(D, s + .45, { x: L.pair[1][0], y: L.H + 380, rotation: 18 }, { x: L.pair[1][0], y: cy, rotation: 4 }, .65, 'back.out(1.3)');
+    T('NET|g:CARDS!', s + .3, s + 5.9, { k: 'Volley · Drop-Shot', s: 'Net cards can return any groundstroke, at any pace. Then roll the die for your pace!' });
+    const lab = (txt, x, cls, rot) => { const b = burst(txt, x, cy + ch(cw2) / 2 + 40, cls, rot); b.style.fontSize = fmt === 'wide' ? '27px' : '28px'; b.style.padding = '9px 14px 7px'; return b; };
+    const any = burst('Returns any groundstroke', (L.pair[0][0] + L.pair[1][0]) / 2, cy - ch(cw2) / 2 - 44, 'w', -3); any.style.fontSize = '34px'; any.style.padding = '10px 18px 8px';
+    popAt(any, s + 3.0, -3); hide(any, s + 5.9);
+    const up = lab('↑ Equal or higher', L.pair[0][0], 'g', -3), dn = lab('↓ Equal or lower', L.pair[1][0], 'y', 3);
+    T('ROLL FOR|g:PACE!', s + 6.0, s + 10.4, { s: 'Volley: they must play a Groundstroke with pace equal or higher. Drop-Shot: equal or lower.' });
+    popAt(up, s + 6.6, -3); popAt(dn, s + 8.4, 3); glow(V, s + 6.6, true, '#a45cff'); glow(V, s + 8.3, false); glow(D, s + 8.4, true, '#ffd23f'); glow(D, s + 10.3, false);
+    hide([up, dn], s + 10.3);
+    // same card always returns it
+    const sv = lab('Volley ↔ Volley', L.pair[0][0], 'w', -3), sd = lab('Drop-Shot ↔ Drop-Shot', L.pair[1][0], 'w', 3);
+    gsap.set(sd, { y: cy - ch(cw2) / 2 - 40 });
+    T('SAME|g:CARD?', s + 10.5, s + 14.4, { k: 'Always legal', s: 'You can always return a Volley with a Volley, and a Drop-Shot with a Drop-Shot.' });
+    popAt(sv, s + 10.9, -3); popAt(sd, s + 11.6, 3); glow(V, s + 10.9, true, '#ffffff'); glow(D, s + 11.6, true, '#ffffff');
+    glow(V, s + 14.3, false); glow(D, s + 14.3, false); hide([sv, sd], s + 14.3);
+    T('r:NET? r:OUT?|r:POINT_LOST!', s + 14.6, s + 17.9, { s: 'Roll NET or OUT on the die and you lose the point.' });
+    T('r:HIGH_RISK!|g:HIGH_REWARD!', s + 18.0, s + 21.0);
+    mood(s + 18.0, 'lime'); ring(s + 18.1, [L.pair[0][0], cy], '#c6f432', .3, 3); ring(s + 18.3, [L.pair[1][0], cy], '#c6f432', .3, 3);
+    mood(s + 14.6, 'red'); ring(s + 14.7, [L.pair[0][0], cy], '#ff4a5e', .3, 3); ring(s + 14.9, [L.pair[1][0], cy], '#ff4a5e', .3, 3);
+    out([V, D], s + 20.9, 0, 520);
+    vo(s + .3, 'Next up: <em>net cards!</em> Volleys and Drop-Shots.', 2.6);
+    vo(s + 3.0, 'Net cards can return any groundstroke, at any pace. Then roll the die for your pace!', 2.9);
+    vo(s + 6.0, 'Roll a Volley, and your opponent must play a Groundstroke with pace <em>equal or higher.</em> Roll a Drop-Shot, and they must play a Groundstroke with pace <em>equal or lower.</em>', 4.4);
+    vo(s + 10.5, 'And you can always return a Volley with a Volley… or a Drop-Shot with a Drop-Shot!', 3.8);
+    vo(s + 14.6, 'But roll NET or OUT… and you lose the point!', 3.2);
+    vo(s + 18.0, 'High risk… <em>high reward!</em>', 2.6);
+  });
+
+  /* ---------- 10d · TACTICAL CARDS ---------- */
+  scene('Tactical Cards', 24.6, s => {
+    mood(s, 'orange');
+    const names = ['SMASH_7', 'LOB_1', 'APPROACH_5', 'APPROACH_3'];
+    const gw = fmt === 'wide' ? 200 : 215;
+    const pos = names.map((_, i) => fmt === 'wide' ? [240 + i * 215, 545] : [150 + i * 260, 1090]);
     const G = names.map(n => C(n, gw));
-    G.forEach((c, i) => put(c, s + .3 + i * .07, { x: pos[i][0], y: L.H + 340, rotation: 0 }, { x: pos[i][0], y: pos[i][1], rotation: (i % 2 ? 3 : -3) }, .6, 'back.out(1.3)'));
+    G.forEach((c, i) => put(c, s + .3 + i * .08, { x: pos[i][0], y: L.H + 380, rotation: 0 }, { x: pos[i][0], y: pos[i][1], rotation: i % 2 ? 3 : -3 }, .6, 'back.out(1.3)'));
     const focus = (idx, at, end, color) => {
       G.forEach((c, i) => { if (idx.includes(i)) glow(c, at, true, color); else dim(c, at); });
       G.forEach((c, i) => { if (idx.includes(i)) glow(c, end, false); else dim(c, end, false); });
     };
-    T('POWER|g:SHOTS!', s + .3, s + 3.3, { k: 'The rest of your deck', s: 'Every one is explained in the Rule Book.' });
-    focus([0, 1], s + 3.5, s + 6.6, '#a45cff');
-    T('VOLLEY_&|y:DROP-SHOT', s + 3.5, s + 6.6, { k: 'Net cards', s: 'Roll a die for your pace. Roll NET or OUT and you lose the point!' });
-    focus([2, 3], s + 6.8, s + 9.8, '#ff4f9a');
-    T('r:SMASH_&|LOB', s + 6.8, s + 9.8, { k: 'Tactical cards', s: 'Smash a weak 1 or 2. Lob a big 6 or 7.' });
-    // Approach: both cards step forward
-    focus([4, 5], s + 10.0, s + 15.4, '#ff8a2a');
-    const aw = fmt === 'tall' ? 270 : L.pw, ay = fmt === 'tall' ? 1090 : L.pair[0][1];
-    [4, 5].forEach((i, k) => { tl.set(G[i], { zIndex: 900 + k }, s + 10.0); mv(G[i], s + 10.0, { x: L.pair[k][0], y: ay, scale: aw / gw, rotation: k ? 4 : -4 }, .6, 'back.out(1.3)'); });
-    const lb5 = burst('Topspin 5', L.pair[0][0], ay + ch(aw) / 2 + 36, 'g', -3), lb3 = burst('Slice 3', L.pair[1][0], ay + ch(aw) / 2 + 36, 'y', 3);
-    [lb5, lb3].forEach(b => { b.style.fontSize = '36px'; b.style.padding = '10px 18px 8px'; });
-    popAt(lb5, s + 10.5, -3); popAt(lb3, s + 10.65, 3);
-    const steal = burst('Steal a card!', (L.pair[0][0] + L.pair[1][0]) / 2, fmt === 'tall' ? ay + ch(aw) / 2 + 120 : ay - ch(aw) / 2 - 40, 'o', -4); popAt(steal, s + 12.0, -4);
-    T('g:APPROACH!', s + 10.0, s + 15.4, { k: 'Topspin 5 · Slice 3', s: 'Match their pace exactly, then steal a random card. Steal their last card and they can’t Dig Deep!' });
-    hide([lb5, lb3, steal], s + 15.2);
-    [4, 5].forEach((i, k) => mv(G[i], s + 15.3, { x: pos[i][0], y: pos[i][1], scale: 1, rotation: k ? 3 : -3 }, .5));
-    focus([6, 7, 8], s + 15.6, s + 19.4, '#ffffff');
-    T('WIN IT…|OR r:LOSE_IT!', s + 15.6, s + 19.4, { k: 'Special cards', s: 'Winner wins the point. Error loses it. Good Get returns anything.' });
-    out(G, s + 19.6, 0, 520);
-    vo(s + .3, 'The rest of your deck is <em>power shots!</em>', 2.6);
-    vo(s + 3.5, 'Volleys and Drop-Shots: roll the die for your pace… just don’t hit it out!', 3.0);
-    vo(s + 6.8, 'Smash a weak ball. Lob a rocket!', 2.6);
-    vo(s + 10.0, 'And the <em>Approach!</em> Topspin Approach five, or Approach Slice three.', 2.9);
-    vo(s + 12.9, 'Match the pace exactly… and steal a card! Steal their last card, and they can’t Dig Deep.', 2.4);
-    vo(s + 15.6, 'Winner, Error and Good Get can end the point… or save it!', 3.2);
+    const tag = (txt, i, cls, at, end, rot = -3, below = false, x) => { const b = burst(txt, x !== undefined ? x : pos[i][0], below ? pos[i][1] + ch(gw) / 2 + 40 : pos[i][1] - ch(gw) / 2 - 40, cls, rot); b.style.fontSize = '30px'; b.style.padding = '9px 14px 7px'; popAt(b, at, rot); hide(b, end); return b; };
+    T('TACTICAL|g:CARDS', s + .3, s + 3.3, { k: 'Specific pace only', s: 'Tactical cards can only return shots of a specific pace.' });
+    focus([0], s + 3.4, s + 6.4, '#ff4a5e'); tag('1s & 2s', 0, 'r', s + 3.6, s + 6.4);
+    T('r:SMASH', s + 3.4, s + 6.4, { k: 'Low pace', s: 'A Smash returns low pace shots: 1s and 2s.' });
+    focus([1], s + 6.6, s + 9.6, '#ff4f9a'); tag('6s & 7s', 1, 'w', s + 6.8, s + 9.6, 3);
+    T('LOB', s + 6.6, s + 9.6, { k: 'High pace', s: 'A Lob returns high pace shots: 6s and 7s.' });
+    // smash <-> lob, then what they return from the net
+    focus([0, 1], s + 9.8, s + 17.0, '#ffffff');
+    tag('Smash ↔ Lob', 0, 'w', s + 14.1, s + 16.9, -2, false, (pos[0][0] + pos[1][0]) / 2);
+    T('r:SMASH_↔|LOB', s + 13.9, s + 17.0, { s: 'A Smash can always return a Lob, and a Lob can always return a Smash.' });
+    tag('Returns Drop-Shots', 0, 'y', s + 10.4, s + 13.7, -3, true, pos[0][0] + (fmt === 'tall' ? 80 : 0)); tag('Returns Volleys', 1, 'o', s + 11.4, s + 13.7, 3, false, pos[1][0] + (fmt === 'wide' ? 20 : 30));
+    T('LOB_→_VOLLEY|r:SMASH_→_DROP-SHOT', s + 9.8, s + 13.8, { s: 'Volleys are high pace, so a Lob returns them. Drop-Shots are low, so a Smash returns them.' });
+    focus([2, 3], s + 17.2, s + 24.0, '#ff8a2a'); tag('Equal pace', 2, 'o', s + 17.4, s + 23.9); tag('Steal a card!', 3, 'g', s + 19.0, s + 23.9, 3, true);
+    T('g:APPROACH', s + 17.2, s + 20.9, { k: 'Topspin 5 · Slice 3', s: 'The final Tactical card. Returns any shot of equal pace, and steals a card from your opponent’s hand!' });
+    T('STEAL THEIR|g:LAST_CARD?', s + 21.0, s + 24.0, { s: 'Then they can’t Dig Deep!' });
+    out(G, s + 24.1, 0, 520);
+    vo(s + .3, 'Tactical cards can only return shots of a <em>specific pace.</em>', 2.9);
+    vo(s + 3.4, 'A Smash returns low pace shots: ones and twos.', 3.0);
+    vo(s + 6.6, 'A Lob returns high pace shots: sixes and sevens.', 3.0);
+    vo(s + 13.9, 'A Smash can always return a Lob… and a Lob can always return a Smash!', 2.9);
+    vo(s + 9.8, 'And that means a Lob can return a Volley… and a Smash can return a Drop-Shot!', 3.8);
+    vo(s + 17.2, 'The final Tactical card is an <em>Approach</em>, which can return any shot of equal pace… and steals a card from your opponent’s hand!', 3.6);
+    vo(s + 21.0, 'Steal their last card, and they can’t Dig Deep!', 2.8);
+  });
+
+  /* ---------- 10e · SPECIAL CARDS (tease) ---------- */
+  scene('Special Cards', 10.4, s => {
+    wipe(s - .2, '#ff4a5e', 'ORANGE_1'); mood(s + .2, 'red');
+    const names = [['ERROR', 'r', 'Error!'], ['GOOD_GET', 'y', 'Good Get!'], ['WINNER', 'g', 'Winner!']];
+    const gw = fmt === 'wide' ? 230 : 250;
+    const pos = names.map((_, i) => fmt === 'wide' ? [300 + i * 260, 560] : [190 + i * 350, 1110]);
+    const G = names.map(([n]) => C(n, gw, { down: true }));
+    G.forEach((c, i) => put(c, s + .4 + i * .1, { x: pos[i][0], y: L.H + 380, rotation: 0 }, { x: pos[i][0], y: pos[i][1], rotation: (i - 1) * 4 }, .6, 'back.out(1.3)'));
+    T('SPECIAL|g:CARDS…', s + .3, s + 3.6, { k: 'Rally changers', s: 'And of course, we can’t forget the rally-changing Special Cards…' });
+    names.forEach(([, cls, label], i) => {
+      const at = s + 3.8 + i * .9;
+      flip(G[i], at, .5); ring(at + .4, pos[i], '#ffffff', .3, 2.5);
+      const b = burst(label, pos[i][0], pos[i][1] + ch(gw) / 2 + 42, cls, i % 2 ? 3 : -3); b.style.fontSize = '36px'; b.style.padding = '10px 18px 8px';
+      popAt(b, at + .35, i % 2 ? 3 : -3); hide(b, s + 9.9);
+    });
+    T('r:ERROR!|y:GOOD_GET!|g:WINNER!', s + 3.7, s + 7.0);
+    T('IT’S ALL IN THE|g:RULE_BOOK', s + 7.1, s + 10.0, { s: 'Every card is explained in the Rule Book that comes in the box.' });
+    out(G, s + 9.9, 0, 520);
+    vo(s + .3, 'And of course, we can’t forget the rally-changing <em>Special Cards…</em>', 3.2);
+    vo(s + 3.7, 'Error! Good Get! And… <em>Winner!</em>', 3.2);
+    vo(s + 7.1, 'You’ll find them all in the Rule Book!', 2.6);
   });
 
   /* ---------- 11 · RECAP ---------- */
