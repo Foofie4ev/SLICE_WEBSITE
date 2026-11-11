@@ -20,6 +20,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <style>
 /* ============================================================
@@ -402,6 +403,9 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
 .die-out{display:block;font-family:var(--display);font-weight:800;font-stretch:110%;text-transform:uppercase;font-size:.95rem;min-height:1.3em;margin-top:2px}
 .dice-container{width:84px;height:84px;flex:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .die3d img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;user-select:none}
+.die3d{position:relative}
+.die-canvas{position:absolute;left:50%;top:50%;width:168px!important;height:168px!important;transform:translate(-50%,-50%);cursor:grab;touch-action:none}
+.die3d.grab .die-canvas{cursor:grabbing}
 .die3d:focus-visible{outline:2px solid var(--lime);outline-offset:4px;border-radius:14px}
 .dice-hint{font-size:.8rem;color:var(--faint)}
 
@@ -770,7 +774,7 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
                 <div class="dice-container die3d" role="button" tabindex="0" aria-label="Roll the Serve die" data-faces="Topspin 4↑,Topspin 5↑,Slice 4↓,Slice 3↓,Let +1,Fault!" data-imgs="SERVE_1_TOPSPIN_4,SERVE_2_TOPSPIN_5,SERVE_3_SLICE_4,SERVE_4_SLICE_3,SERVE_5_LET,SERVE_6_FAULT"><img src="assets/dice3d/serve_hero.png" alt="Serve die" width="240" height="240"></div>
                 <div><span class="label">Serve die</span><span class="die-out" style="color:var(--lime)">&nbsp;</span></div>
               </div>
-              <span class="dice-hint">Tap to roll</span>
+              <span class="dice-hint">Tap to roll · drag to spin</span>
             </div>
           </div>
         </div>
@@ -1504,26 +1508,108 @@ function deckRing() {
   im.addEventListener('pointermove', e => { const r = card.getBoundingClientRect(); const nx = (e.clientX - r.left) / r.width - .5, ny = (e.clientY - r.top) / r.height - .5; tilt.style.transform = `rotateY(${nx * 16}deg) rotateX(${-ny * 16}deg)`; });
 }
 
-/* rendered dice: tap to roll */
+/* real 3D dice (three.js): drag to spin, tap to roll */
 function dice() {
+  if (!window.THREE) return;
+  const T = THREE;
+  // rounded-edge cube: start from a subdivided box and pull its vertices toward a rounded box shape
+  function roundedBox(size, r, seg) {
+    const g = new T.BoxGeometry(size, size, size, seg, seg, seg);
+    const p = g.attributes.position, h = size / 2 - r, v = new T.Vector3(), c = new T.Vector3();
+    for (let i = 0; i < p.count; i++) {
+      v.fromBufferAttribute(p, i);
+      c.set(Math.max(-h, Math.min(h, v.x)), Math.max(-h, Math.min(h, v.y)), Math.max(-h, Math.min(h, v.z)));
+      v.sub(c).normalize().multiplyScalar(r).add(c);
+      p.setXYZ(i, v.x, v.y, v.z);
+    }
+    g.computeVertexNormals();
+    return g;
+  }
+  const loader = new T.TextureLoader();
+  // face order in three.js materials: +x, -x, +y, -y, +z, -z
+  // and the rotation that brings each face toward the camera (+z) with its art upright
+  const FACE_ROT = [[0, -Math.PI / 2], [0, Math.PI / 2], [Math.PI / 2, 0], [-Math.PI / 2, 0], [0, 0], [0, Math.PI]];
   $$('.die3d').forEach(box => {
-    const labels = box.dataset.faces.split(','), imgs = box.dataset.imgs.split(',').map(n => `assets/dice3d/${n}.png`);
-    const img = $('img', box), out = box.closest('.die-unit').querySelector('.die-out');
-    imgs.forEach(src => { const i = new Image(); i.src = src; });
-    let busy = false;
-    const roll = () => {
-      if (busy) return; busy = true;
-      const f = (Math.random() * 6) | 0; out.innerHTML = '&nbsp;';
-      const tl = gsap.timeline({ onComplete: () => { busy = false; } });
-      for (let k = 0; k < 7; k++) tl.add(() => { img.src = imgs[(f + k * 2 + 1) % 6]; }, k * .08);
-      tl.add(() => { img.src = imgs[f]; out.textContent = labels[f]; gsap.from(out, { y: 6, opacity: 0, duration: .35 }); }, .6);
-      if (!reduced) {
-        tl.fromTo(box, { rotation: 0 }, { rotation: 360 + (Math.random() * 30 - 15), duration: .7, ease: 'power3.out' }, 0)
-          .to(box, { y: -22, duration: .25, ease: 'power2.out' }, 0).to(box, { y: 0, duration: .45, ease: 'bounce.out' }, .25)
-          .set(box, { rotation: 0 }, .72);
-      }
+    const labels = box.dataset.faces.split(','), names = box.dataset.imgs.split(',');
+    const out = box.closest('.die-unit').querySelector('.die-out');
+    const S = 168; // canvas size (CSS px); the die sits in an 84px slot and is allowed to overflow while it rolls
+    const renderer = new T.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1));
+    renderer.setSize(S, S);
+    if ('outputEncoding' in renderer) renderer.outputEncoding = T.sRGBEncoding;
+    const cv = renderer.domElement; cv.className = 'die-canvas';
+    box.innerHTML = ''; box.appendChild(cv);
+    const scene = new T.Scene();
+    const cam = new T.PerspectiveCamera(30, 1, .1, 50); cam.position.set(0, 0, 6.2);
+    scene.add(new T.HemisphereLight(0xffffff, 0x445533, .85));
+    const key = new T.DirectionalLight(0xffffff, .75); key.position.set(-2, 3, 4); scene.add(key);
+    const rim = new T.DirectionalLight(0xc6f432, .25); rim.position.set(3, -1, -2); scene.add(rim);
+    const mats = names.map(n => {
+      const tx = loader.load(`assets/dicefaces/${n}.jpg`, () => draw());
+      if ('encoding' in tx) tx.encoding = T.sRGBEncoding;
+      tx.anisotropy = 4;
+      return new T.MeshStandardMaterial({ map: tx, roughness: .45, metalness: 0 });
+    });
+    const cube = new T.Mesh(roundedBox(1.55, .16, 6), mats);
+    scene.add(cube);
+    // soft contact shadow
+    const sc = document.createElement('canvas'); sc.width = sc.height = 64;
+    const sx = sc.getContext('2d'), gr = sx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gr.addColorStop(0, 'rgba(0,0,0,.55)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); sx.fillStyle = gr; sx.fillRect(0, 0, 64, 64);
+    const shadow = new T.Mesh(new T.PlaneGeometry(2.4, 2.4), new T.MeshBasicMaterial({ map: new T.CanvasTexture(sc), transparent: true, depthWrite: false }));
+    shadow.rotation.x = -Math.PI / 2; shadow.position.y = -1.15; scene.add(shadow);
+    const rest = new T.Euler(-.42, .62, 0);           // resting tilt that shows three faces
+    cube.rotation.copy(rest);
+    const draw = () => renderer.render(scene, cam);
+    draw();
+
+    let busy = false, dragging = false, moved = 0, lx = 0, ly = 0, vx = 0, vy = 0, idle = null;
+    const q = new T.Quaternion(), qa = new T.Quaternion(), axX = new T.Vector3(1, 0, 0), axY = new T.Vector3(0, 1, 0);
+    const spinBy = (dx, dy) => {           // trackball-style: rotate around screen axes
+      qa.setFromAxisAngle(axY, dx * .012); cube.quaternion.premultiply(qa);
+      qa.setFromAxisAngle(axX, dy * .012); cube.quaternion.premultiply(qa);
+      draw();
     };
-    box.addEventListener('click', roll);
+    const coast = () => {
+      if (dragging || busy) return;
+      if (Math.abs(vx) + Math.abs(vy) < .3) return;
+      vx *= .93; vy *= .93; spinBy(vx, vy); idle = requestAnimationFrame(coast);
+    };
+    const roll = () => {
+      if (busy) return; busy = true; cancelAnimationFrame(idle);
+      const f = (Math.random() * 6) | 0; out.innerHTML = '&nbsp;';
+      // target: chosen face toward the viewer, tilted a little so it still looks 3D
+      const [rx, ry] = FACE_ROT[f];
+      const target = new T.Quaternion().setFromEuler(new T.Euler(rx, ry, 0, 'XYZ'));
+      const tilt = new T.Quaternion().setFromEuler(new T.Euler(-.38, .5, 0));
+      target.premultiply(tilt);
+      const start = cube.quaternion.clone();
+      // tumble: a couple of full extra turns around a random axis, blended into the target
+      const axis = new T.Vector3(Math.random() - .5, Math.random() - .5, Math.random() - .5).normalize();
+      const turns = 2 + Math.random();
+      const st = { t: 0 }, tmp = new T.Quaternion();
+      const tl = gsap.timeline({ onComplete: () => { busy = false; out.textContent = labels[f]; gsap.from(out, { y: 6, opacity: 0, duration: .35 }); } });
+      tl.to(st, {
+        t: 1, duration: reduced ? .01 : 1.15, ease: 'power3.out',
+        onUpdate: () => {
+          const k = st.t;
+          tmp.setFromAxisAngle(axis, (1 - k) * turns * Math.PI * 2);
+          cube.quaternion.copy(start).slerp(target, k).premultiply(tmp);
+          // hop: up then bounce down
+          const hop = k < .35 ? Math.sin(k / .35 * Math.PI / 2) * .55 : Math.abs(Math.cos((k - .35) / .65 * Math.PI * 1.5)) * .55 * (1 - (k - .35) / .65);
+          cube.position.y = hop; shadow.material.opacity = 1 - hop * .9; shadow.scale.setScalar(1 - hop * .35);
+          draw();
+        }
+      });
+    };
+    cv.addEventListener('pointerdown', e => { dragging = true; moved = 0; lx = e.clientX; ly = e.clientY; vx = vy = 0; cancelAnimationFrame(idle); cv.setPointerCapture(e.pointerId); box.classList.add('grab'); });
+    cv.addEventListener('pointermove', e => {
+      if (!dragging || busy) return;
+      const dx = e.clientX - lx, dy = e.clientY - ly; lx = e.clientX; ly = e.clientY; moved += Math.abs(dx) + Math.abs(dy);
+      vx = dx; vy = dy; spinBy(dx, dy);
+    });
+    const up = () => { if (!dragging) return; dragging = false; box.classList.remove('grab'); if (moved < 6) roll(); else coast(); };
+    cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
     box.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); roll(); } });
   });
 }
