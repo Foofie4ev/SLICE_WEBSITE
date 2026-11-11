@@ -268,7 +268,14 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
 .rally{position:relative;height:100svh;overflow:hidden;border-top:1px solid var(--line)}
 .r-bg{position:absolute;inset:0;background:radial-gradient(55% 70% at 30% 52%,var(--c0),var(--c1) 85%)}
 .r-rays{position:absolute;left:30%;top:55%;width:240vmax;height:240vmax;transform:translate(-50%,-50%);pointer-events:none;mix-blend-mode:soft-light;background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.55) 0deg 4deg,transparent 4deg 14deg);-webkit-mask-image:radial-gradient(circle,#000 0,transparent 38%);mask-image:radial-gradient(circle,#000 0,transparent 38%);animation:spin 60s linear infinite}
-.r-bg:not(:first-child){clip-path:circle(0% at 30% 55%)}
+.r-bg:not(:first-child){opacity:0}
+.r-juice,.r-drops{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.r-bg{z-index:0}
+.r-juice{z-index:1}
+.r-drops{z-index:2}
+.r-stage{z-index:3}
+.r-step{cursor:pointer}
+
 .r-word{position:absolute;left:0;top:50%;transform:translateY(-50%);white-space:nowrap;font-family:var(--display);font-weight:900;font-stretch:125%;font-size:min(24vw,30vh);line-height:1;text-transform:uppercase;color:transparent;-webkit-text-stroke:1.5px rgba(255,255,255,.22);opacity:0;pointer-events:none}
 .r-word.first{opacity:1}
 .r-head{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 92px);z-index:5}
@@ -311,7 +318,6 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
   .r-copy h3{font-size:clamp(2.6rem,13vw,4rem);transform-origin:50% 100%}
   .r-rays{left:50%;top:35%}
   .r-bg{background:radial-gradient(80% 60% at 50% 35%,var(--c0),var(--c1) 80%)}
-  .r-bg:not(:first-child){clip-path:circle(0% at 50% 35%)}
   .r-step span{display:none}
   .r-steps{top:calc(env(safe-area-inset-top,0px) + 112px);bottom:auto}
   .r-step i{margin-bottom:0}
@@ -410,6 +416,31 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
 .die3d.grab .die-canvas{cursor:grabbing}
 .die3d:focus-visible{outline:2px solid var(--lime);outline-offset:4px;border-radius:14px}
 .dice-hint{font-size:.8rem;color:var(--faint)}
+/* recipe for victory: one screen */
+.how{padding:clamp(40px,5vh,80px) 0}
+.how .sec-head{margin-bottom:clamp(18px,3vh,36px)}
+.recipe{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,1.4vw,20px)}
+.rc-step{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.01));overflow:hidden;transition:border-color .3s,transform .3s}
+.rc-step:hover{border-color:rgba(198,244,50,.35);transform:translateY(-3px)}
+.r-vis{height:clamp(120px,17vh,170px);display:flex;align-items:center;justify-content:center;gap:clamp(18px,3vw,44px);background:radial-gradient(60% 80% at 50% 60%,rgba(198,244,50,.10),transparent 70%);border-bottom:1px solid var(--line)}
+.r-cards{position:relative;height:clamp(104px,14.5vh,146px);width:clamp(170px,22vh,230px)}
+.r-cards img{position:absolute;left:50%;top:50%;height:100%;width:auto;max-width:none;aspect-ratio:var(--card-ar);border-radius:7.2%/4.6%;box-shadow:0 14px 26px -10px rgba(0,0,0,.7);transform:translate(calc(-50% + var(--x)),-50%) rotate(var(--r));transform-origin:50% 120%;transition:transform .4s var(--ease)}
+.rc-step:hover .r-cards img{transform:translate(calc(-50% + var(--x) * 1.35),-50%) rotate(calc(var(--r) * 1.5))}
+.r-die{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px}
+.r-die .dice-container{width:84px;height:84px}
+.r-die .die-canvas{width:128px!important;height:128px!important}
+.r-die .label{font-size:.58rem;margin-top:10px}
+.r-die .die-out{font-size:.85rem;min-height:1.2em;margin:0}
+.rc-txt{display:grid;grid-template-columns:auto 1fr;column-gap:12px;padding:clamp(14px,2vh,20px) clamp(16px,1.6vw,22px) clamp(16px,2.2vh,22px)}
+.rc-txt .n{grid-row:1/3;font-family:var(--display);font-weight:800;font-size:.75rem;letter-spacing:.12em;color:var(--lime);padding-top:4px}
+.rc-txt h3{font-family:var(--display);font-weight:800;font-stretch:112%;text-transform:uppercase;font-size:clamp(1rem,1.3vw,1.18rem);line-height:1.1;margin:0 0 6px}
+.rc-txt p{margin:0;color:var(--muted);font-size:clamp(.86rem,.95vw,.95rem);line-height:1.45}
+.rc-txt p b{color:var(--fg);font-weight:600}
+.rc-hint{text-align:center;color:var(--faint);font-size:.78rem;margin:14px 0 0}
+@media (min-width:1000px) and (min-height:700px){.how{min-height:100svh;display:flex;align-items:center}.how>.wrap{width:100%}}
+@media (max-width:999px){.recipe{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:600px){.recipe{grid-template-columns:1fr}.r-vis{height:140px}}
+
 
 .show-col{position:sticky;top:96px;height:min(640px,calc(100vh - 140px));display:grid;place-items:center}
 .show{position:relative;width:min(300px,80%);aspect-ratio:var(--card-ar)}
@@ -537,8 +568,8 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
   <div class="nav-inner">
     <a href="#top" class="brand" aria-label="SLICE! home"><img src="assets/slice-logo-sm.png" alt="SLICE!"></a>
     <div class="links">
-      <a href="#learn" data-nav="learn">Learn</a>
       <a href="#rally" data-nav="rally">The Rally</a>
+      <a href="#learn" data-nav="learn">Learn</a>
       <a href="#gameplay" data-nav="gameplay">Gameplay</a>
       <a href="#cards" data-nav="cards">The Deck</a>
       <a href="#rules" data-nav="rules">How to Play</a>
@@ -548,8 +579,8 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
   </div>
 </nav>
 <div class="mmenu" id="mobile-menu" aria-hidden="true">
-  <a href="#learn"><small>00</small>Learn to Play</a>
   <a href="#rally"><small>01</small>The Rally</a>
+  <a href="#learn"><small>02</small>Learn to Play</a>
   <a href="#gameplay"><small>02</small>Gameplay</a>
   <a href="#cards"><small>03</small>The Deck</a>
   <a href="#rules"><small>04</small>How to Play</a>
@@ -603,6 +634,42 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
   <div class="tape tape-b"><div class="tape-track" data-tape="Tennis with a twist|Singles &amp; doubles|Custom dice|Coming soon"></div></div>
 </div>
 
+<!-- ============ 01 THE RALLY ============ -->
+<section class="rally" id="rally" data-sec="01" data-name="The Rally" aria-label="The Rally">
+  <div class="r-bg" style="--c0:#d2ff57;--c1:#3c8a0e"></div>
+  <div class="r-bg" style="--c0:#ffbf5a;--c1:#d9480f"></div>
+  <div class="r-bg" style="--c0:#d08bff;--c1:#5a12a3"></div>
+  <div class="r-bg" style="--c0:#ff7d8c;--c1:#bf1030"></div>
+  <div class="r-bg" style="--c0:#fff6d6;--c1:#ffc94a"></div>
+
+  <canvas class="r-juice" id="r-juice" aria-hidden="true"></canvas>
+  <div class="r-stage">
+    <div class="r-cardcol">
+      <div class="r-card first"><img src="assets/cards/FOREHAND_SLICE_5.jpg" alt="Forehand Slice card"></div>
+      <div class="r-card"><img src="assets/cards/BACKHAND_6.jpg" alt="Backhand Topspin card"></div>
+      <div class="r-card"><img src="assets/cards/VOLLEY_7.jpg" alt="Volley card"></div>
+      <div class="r-card"><img src="assets/cards/SMASH_7.jpg" alt="Smash card"></div>
+      <div class="r-card"><img src="assets/cards/WINNER.jpg" alt="Winner card"></div>
+    </div>
+    <div class="r-copycol">
+      <div class="r-copy first"><span class="label">The rhythm breaker</span><h3>Slice it!</h3><p>Drop a Slice to flip the momentum. Now your opponent has to answer with equal or lower pace.</p></div>
+      <div class="r-copy"><span class="label">Topspin pressure</span><h3>Spin it!</h3><p>Hit Topspin and they have to return it with equal or higher pace. Keep them running.</p></div>
+      <div class="r-copy"><span class="label">Risk &amp; reward</span><h3>Dice it!</h3><p>Charge the net with a Volley or Drop-Shot and roll for pace. A winner, or straight into the net.</p></div>
+      <div class="r-copy"><span class="label">Punish the short ball</span><h3>Smash it!</h3><p>Pounce on a weak return with a Smash, or defend the onslaught with a Lob.</p></div>
+      <div class="r-copy dark"><span class="label">Take the point</span><h3>Win it!</h3><p>Play a Winner against a pace 3&ndash;5 shot and the point is yours on the spot. Just don&rsquo;t get caught playing an Error.</p></div>
+    </div>
+  </div>
+
+  <canvas class="r-drops" id="r-drops" aria-hidden="true"></canvas>
+  <div class="r-steps"><div class="wrap">
+    <div class="r-step on"><i></i><span>Slice</span></div>
+    <div class="r-step"><i></i><span>Spin</span></div>
+    <div class="r-step"><i></i><span>Dice</span></div>
+    <div class="r-step"><i></i><span>Smash</span></div>
+    <div class="r-step"><i></i><span>Win</span></div>
+  </div></div>
+</section>
+
 <!-- ============ LEARN TO PLAY (intro.html) ============ -->
 <section class="learn" id="learn" aria-label="Learn to play">
   <div class="wrap">
@@ -614,40 +681,6 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
     <div class="learn-frame" id="learn-frame" data-reveal><iframe src="intro.html?embed=1" title="SLICE! how to play" loading="lazy" allow="autoplay; fullscreen"></iframe></div>
     <div class="learn-links"><a href="intro.html" target="_blank" rel="noopener">Open full screen &#8599;</a><a href="intro.html?format=tall" target="_blank" rel="noopener">Vertical version &#8599;</a></div>
   </div>
-</section>
-
-<!-- ============ 01 THE RALLY ============ -->
-<section class="rally" id="rally" data-sec="01" data-name="The Rally" aria-label="The Rally">
-  <div class="r-bg" style="--c0:#d2ff57;--c1:#3c8a0e"></div>
-  <div class="r-bg" style="--c0:#ffbf5a;--c1:#d9480f"></div>
-  <div class="r-bg" style="--c0:#d08bff;--c1:#5a12a3"></div>
-  <div class="r-bg" style="--c0:#ff7d8c;--c1:#bf1030"></div>
-  <div class="r-bg" style="--c0:#fff6d6;--c1:#ffc94a"></div>
-
-  <div class="r-stage">
-    <div class="r-cardcol">
-      <div class="r-card first"><img src="assets/cards/FOREHAND_SLICE_5.jpg" alt="Forehand Slice card"></div>
-      <div class="r-card"><img src="assets/cards/BACKHAND_6.jpg" alt="Backhand Topspin card"></div>
-      <div class="r-card"><img src="assets/cards/VOLLEY_7.jpg" alt="Volley card"></div>
-      <div class="r-card"><img src="assets/cards/SMASH_7.jpg" alt="Smash card"></div>
-      <div class="r-card"><img src="assets/cards/WINNER.jpg" alt="Winner card"></div>
-    </div>
-    <div class="r-copycol">
-      <div class="r-copy first"><span class="label">The rhythm breaker</span><h3>Slice it!</h3><p>Drop a Slice to flip the momentum. Now your opponent has to answer with a lower pace.</p></div>
-      <div class="r-copy"><span class="label">Topspin pressure</span><h3>Spin it!</h3><p>Hit Topspin and they have to match your pace or go higher. Keep them running.</p></div>
-      <div class="r-copy"><span class="label">Risk &amp; reward</span><h3>Dice it!</h3><p>Charge the net with a Volley or Drop-Shot and roll for pace. A winner, or straight into the net.</p></div>
-      <div class="r-copy"><span class="label">Punish the short ball</span><h3>Smash it!</h3><p>Pounce on a weak return with a Smash, or defend the onslaught with a Lob.</p></div>
-      <div class="r-copy dark"><span class="label">Take the point</span><h3>Win it!</h3><p>Play a Winner against a pace 3&ndash;5 shot and the point is yours on the spot. Just don&rsquo;t get caught playing an Error.</p></div>
-    </div>
-  </div>
-
-  <div class="r-steps"><div class="wrap">
-    <div class="r-step on"><i></i><span>Slice</span></div>
-    <div class="r-step"><i></i><span>Spin</span></div>
-    <div class="r-step"><i></i><span>Dice</span></div>
-    <div class="r-step"><i></i><span>Smash</span></div>
-    <div class="r-step"><i></i><span>Win</span></div>
-  </div></div>
 </section>
 
 <!-- ============ 03 GAMEPLAY ============ -->
@@ -757,84 +790,18 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
         <div class="sec-idx"><b>04</b><i></i><span class="label">How to Play</span></div>
         <h2 class="title display" data-split>The recipe for <span class="accent">victory.</span></h2>
       </div>
-      <p class="lede" data-reveal>Six ideas, one match. Tap the dice to roll them.</p>
+      <p class="lede" data-reveal>Six ideas, one match.</p>
     </div>
 
-    <div class="how-grid">
-      <div class="steps">
-        <div class="step" data-reveal>
-          <div class="n">01</div>
-          <div>
-            <h3>Serve it</h3>
-            <p>Open the point with the Serve Die. It sets the first shot your opponent has to return, like <b>Topspin 4&uarr;</b> or <b>Slice 3&darr;</b>. Or it calls a LET or a FAULT.</p>
-            <div class="dice-row">
-              <div class="die-unit">
-                <div class="dice-container die3d" role="button" tabindex="0" aria-label="Roll the Serve die" data-faces="Topspin 4↑,Topspin 5↑,Slice 4↓,Slice 3↓,Let +1,Fault!" data-imgs="SERVE_1_TOPSPIN_4,SERVE_2_TOPSPIN_5,SERVE_3_SLICE_4,SERVE_4_SLICE_3,SERVE_5_LET,SERVE_6_FAULT"><img src="assets/dice3d/serve_hero.png" alt="Serve die" width="240" height="240"></div>
-                <div><span class="label">Serve die</span><span class="die-out" style="color:var(--lime)">&nbsp;</span></div>
-              </div>
-              <span class="dice-hint">Tap to roll · drag to spin</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="step" data-reveal>
-          <div class="n">02</div>
-          <div><h3>Build the rally</h3>
-            <p><b>Match the color.</b> Topspin coming in? Play <b>equal or higher</b>. Slice coming in? Play <b>equal or lower</b>. To switch colors with a groundstroke, <b>match the pace</b> (the number is the speed of the ball).</p></div>
-        </div>
-
-        <div class="step" data-reveal>
-          <div class="n">03</div>
-          <div><h3>Slice it up</h3>
-            <p>Play a Slice card to reverse the momentum. Your opponent must answer with <b>equal or lower</b> pace.</p></div>
-        </div>
-
-        <div class="step" data-reveal>
-          <div class="n">04</div>
-          <div>
-            <h3>Risk it all</h3>
-            <p>Attack the net with a Volley or Drop-Shot and roll for your pace. Just don&rsquo;t hit it out.</p>
-            <div class="dice-row">
-              <div class="die-unit">
-                <div class="dice-container die3d" role="button" tabindex="0" aria-label="Roll the Drop-Shot die" data-faces="1,2,Net!,Out!,1,2" data-imgs="DROPSHOT_1_1,DROPSHOT_2_2,DROPSHOT_3_NET,DROPSHOT_4_OUT,DROPSHOT_1_1,DROPSHOT_2_2"><img src="assets/dice3d/dropshot_hero.png" alt="Drop-Shot die" width="240" height="240"></div>
-                <div><span class="label">Drop-shot</span><span class="die-out" style="color:var(--gold)">&nbsp;</span></div>
-              </div>
-              <div class="die-unit">
-                <div class="dice-container die3d" role="button" tabindex="0" aria-label="Roll the Volley die" data-faces="6↑,7,Net!,Out!,6↑,7" data-imgs="VOLLEY_1_6_OR_HIGHER,VOLLEY_2_7,VOLLEY_3_NET,VOLLEY_4_OUT,VOLLEY_1_6_OR_HIGHER,VOLLEY_2_7"><img src="assets/dice3d/volley_hero.png" alt="Volley die" width="240" height="240"></div>
-                <div><span class="label">Volley</span><span class="die-out" style="color:var(--purple)">&nbsp;</span></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="step" data-reveal>
-          <div class="n">05</div>
-          <div><h3>Smash it down</h3>
-            <p>Punish a weak shot with a Smash, defend against an aggressive attack with a Lob, or match their pace with an Approach and steal a card.</p></div>
-        </div>
-
-        <div class="step" data-reveal>
-          <div class="n">06</div>
-          <div><h3>Highs and lows</h3>
-            <p>Save a Winner for the critical rally, and avoid getting stuck with an Error in the big moments.</p></div>
-        </div>
-      </div>
-
-      <div class="show-col" aria-hidden="true">
-        <div class="show" id="show">
-          <div class="show-glow" id="show-glow"></div>
-          <div class="sc first"><img src="assets/cards/FOREHAND_4.jpg" alt=""></div>
-          <div class="sc"><img src="assets/cards/BACKHAND_6.jpg" alt="" loading="lazy"></div>
-          <div class="sc"><img src="assets/cards/FOREHAND_SLICE_5.jpg" alt="" loading="lazy"></div>
-          <div class="sc"><img src="assets/cards/VOLLEY_7.jpg" alt="" loading="lazy"></div>
-          <div class="sc"><img src="assets/cards/SMASH_7.jpg" alt="" loading="lazy"></div>
-          <div class="sc"><img src="assets/cards/WINNER.jpg" alt="" loading="lazy"></div>
-          <img class="show-die d1" src="assets/dice3d/volley_hero.png" alt="">
-          <img class="show-die d2" src="assets/dice3d/dropshot_hero.png" alt="">
-          <div class="show-cap"><span class="label" id="show-n">Step 01 / 06</span><b id="show-t">Serve it</b></div>
-        </div>
-      </div>
+    <div class="recipe">
+      <div class="rc-step" data-reveal><div class="r-vis dice1"><div class="r-die"><div class="dice-container die3d" role="button" tabindex="0" aria-label="Roll the Serve die" data-faces="Topspin 4↑,Topspin 5↑,Slice 4↓,Slice 3↓,Let +1,Fault!" data-imgs="SERVE_1_TOPSPIN_4,SERVE_2_TOPSPIN_5,SERVE_3_SLICE_4,SERVE_4_SLICE_3,SERVE_5_LET,SERVE_6_FAULT"><img src="assets/dice3d/serve_hero.png" alt="Serve die" width="240" height="240"></div><span class="label">Serve die</span><span class="die-out" style="color:var(--lime)">&nbsp;</span></div></div><div class="rc-txt"><div class="n">01</div><h3>Serve it</h3><p>Play a groundstroke, or roll the <b>Serve Die</b> to set the first shot: <b>Topspin 4&uarr;</b>, <b>Slice 3&darr;</b>, a LET or a FAULT.</p></div></div>
+      <div class="rc-step" data-reveal><div class="r-vis"><div class="r-cards"><img src="assets/cards/FOREHAND_4.jpg" alt="" loading="lazy" style="--r:-6deg;--x:-36px"><img src="assets/cards/FOREHAND_6.jpg" alt="" loading="lazy" style="--r:0deg;--x:0px"><img src="assets/cards/BACKHAND_6.jpg" alt="" loading="lazy" style="--r:6deg;--x:36px"></div></div><div class="rc-txt"><div class="n">02</div><h3>Build the rally</h3><p><b>Match the color.</b> Topspin: return <b>equal or higher</b> pace. Slice: <b>equal or lower</b>. Switch colors by <b>matching the pace</b>.</p></div></div>
+      <div class="rc-step" data-reveal><div class="r-vis"><div class="r-cards"><img src="assets/cards/FOREHAND_7.jpg" alt="" loading="lazy" style="--r:-6deg;--x:-36px"><img src="assets/cards/FOREHAND_SLICE_5.jpg" alt="" loading="lazy" style="--r:0deg;--x:0px"><img src="assets/cards/FOREHAND_SLICE_2.jpg" alt="" loading="lazy" style="--r:6deg;--x:36px"></div></div><div class="rc-txt"><div class="n">03</div><h3>Slice it up</h3><p>Play a Slice to flip the momentum. Now your opponent must answer with <b>equal or lower</b> pace.</p></div></div>
+      <div class="rc-step" data-reveal><div class="r-vis dice2"><div class="r-die"><div class="dice-container die3d" role="button" tabindex="0" aria-label="Roll the Volley die" data-faces="6↑,7,Net!,Out!,6↑,7" data-imgs="VOLLEY_1_6_OR_HIGHER,VOLLEY_2_7,VOLLEY_3_NET,VOLLEY_4_OUT,VOLLEY_1_6_OR_HIGHER,VOLLEY_2_7"><img src="assets/dice3d/volley_hero.png" alt="Volley die" width="240" height="240"></div><span class="label">Volley</span><span class="die-out" style="color:var(--purple)">&nbsp;</span></div><div class="r-die"><div class="dice-container die3d" role="button" tabindex="0" aria-label="Roll the Drop-Shot die" data-faces="1,2,Net!,Out!,1,2" data-imgs="DROPSHOT_1_1,DROPSHOT_2_2,DROPSHOT_3_NET,DROPSHOT_4_OUT,DROPSHOT_1_1,DROPSHOT_2_2"><img src="assets/dice3d/dropshot_hero.png" alt="Drop-Shot die" width="240" height="240"></div><span class="label">Drop-Shot</span><span class="die-out" style="color:var(--gold)">&nbsp;</span></div></div><div class="rc-txt"><div class="n">04</div><h3>Risk it all</h3><p>Charge the net with a <b>Volley</b> or <b>Drop-Shot</b> and roll for your pace. Just don&rsquo;t hit it in the net or out.</p></div></div>
+      <div class="rc-step" data-reveal><div class="r-vis"><div class="r-cards"><img src="assets/cards/SMASH_6.jpg" alt="" loading="lazy" style="--r:-6deg;--x:-36px"><img src="assets/cards/LOB_1.jpg" alt="" loading="lazy" style="--r:0deg;--x:0px"><img src="assets/cards/APPROACH_5.jpg" alt="" loading="lazy" style="--r:6deg;--x:36px"></div></div><div class="rc-txt"><div class="n">05</div><h3>Play it smart</h3><p>A <b>Smash</b> punishes 1s and 2s, a <b>Lob</b> beats 6s and 7s, and an <b>Approach</b> matches the pace and steals a card.</p></div></div>
+      <div class="rc-step" data-reveal><div class="r-vis"><div class="r-cards"><img src="assets/cards/WINNER.jpg" alt="" loading="lazy" style="--r:-6deg;--x:-36px"><img src="assets/cards/GOOD_GET.jpg" alt="" loading="lazy" style="--r:0deg;--x:0px"><img src="assets/cards/ERROR.jpg" alt="" loading="lazy" style="--r:6deg;--x:36px"></div></div><div class="rc-txt"><div class="n">06</div><h3>Highs and lows</h3><p>Save a <b>Winner</b> for the big moment, dodge the <b>Error</b>, and keep a <b>Good Get</b> for a rescue.</p></div></div>
     </div>
+    <p class="rc-hint">Tap the dice to roll them &middot; drag to spin</p>
   </div>
 </section>
 
@@ -1361,46 +1328,95 @@ function reveals() {
 /* the rally */
 function rally() {
   const sec = $('#rally');
-  const bgs = $$('.r-bg', sec), cards = $$('.r-card', sec), copies = $$('.r-copy', sec), wordsEl = $$('.r-word', sec), steps = $$('.r-step', sec);
+  const bgs = $$('.r-bg', sec), cards = $$('.r-card', sec), copies = $$('.r-copy', sec), steps = $$('.r-step', sec);
   const titles = copies.map(c => split($('h3', c)));
-  const N = cards.length;
-  gsap.set(cards[0], { rotation: -4 });
-  if (reduced) return;
-  gsap.set(cards.slice(1), { xPercent: 140, rotation: 20, rotationY: -60, scale: .85, opacity: 0, transformPerspective: 1400 });
+  const N = cards.length, DWELL = 4.6;
+  const juice = $('#r-juice', sec), jx = juice.getContext('2d');
+  const COLORS = [['#d2ff57', '#3c8a0e'], ['#ffbf5a', '#d9480f'], ['#d08bff', '#5a12a3'], ['#ff7d8c', '#bf1030'], ['#fff6d6', '#ffc94a']];
+  let cur = 0, timer = null, busy = false, inView = false, drops = [], raf = 0;
 
-  const tl = gsap.timeline({ defaults: { ease: 'none' } });
-  const rest = [0];
-  tl.to({}, { duration: .4 });
-  const stacked = matchMedia('(max-width:820px) and (max-aspect-ratio:4/5)'); const origin = () => stacked.matches ? '50% 35%' : '30% 55%';
-  for (let i = 1; i < N; i++) {
-    const at = tl.duration();
-    tl.fromTo(bgs[i], { clipPath: () => `circle(0% at ${origin()})` }, { clipPath: () => `circle(150% at ${origin()})`, duration: 1, ease: 'power2.inOut' }, at)
-      .to(cards[i - 1], { xPercent: -150, rotation: -18, rotationY: 50, scale: .85, opacity: 0, duration: .7, ease: 'power2.in' }, at)
-      .to(cards[i], { xPercent: 0, rotation: i % 2 ? 5 : -5, rotationY: 0, scale: 1, opacity: 1, duration: .9, ease: 'back.out(1.5)' }, at + .3)
-      .to(copies[i - 1], { y: -40, opacity: 0, duration: .45, ease: 'power2.in' }, at)
-      .fromTo(copies[i], { opacity: 0 }, { opacity: 1, duration: .01 }, at + .45)
-      .fromTo(titles[i], { yPercent: 110, rotation: 8 }, { yPercent: 0, rotation: 0, stagger: .06, duration: .6, ease: 'back.out(1.8)' }, at + .45)
-      .fromTo([$('.label', copies[i]), $('p', copies[i])], { y: 20, opacity: 0 }, { y: 0, opacity: 1, stagger: .08, duration: .5, ease: 'power3.out' }, at + .55)
-      ;
-    rest.push(tl.duration());
-    tl.to({}, { duration: .5 });
-  }
-  const total = tl.duration(), snaps = rest.map(t => t / total);
-  ScrollTrigger.create({
-    trigger: sec, start: 'top top', end: () => '+=' + innerHeight * (N - 1),
-    pin: true, scrub: .8, animation: tl, anticipatePin: 1, invalidateOnRefresh: true,
-    snap: { snapTo: snaps, duration: { min: .2, max: .6 }, delay: .1, ease: 'power2.inOut' },
-    onUpdate: self => {
-      const t = self.progress * total;
-      let cur = 0; rest.forEach((r, i) => { if (t >= r - .5) cur = i; });
-      steps.forEach((s, i) => {
-        const a = i === 0 ? -1 : rest[i] - 1, b = i === 0 ? 0 : rest[i];
-        s.querySelector('i').style.setProperty('--f', gsap.utils.clamp(0, 1, (t - a) / (b - a)));
-        s.classList.toggle('on', i === cur);
-      });
-      sec.classList.toggle('light', cur === N - 1);
+  gsap.set(cards[0], { rotation: -4 });
+  gsap.set(cards.slice(1), { xPercent: 140, rotation: 20, rotationY: -60, scale: .85, opacity: 0, transformPerspective: 1400 });
+  gsap.set(bgs.slice(1), { autoAlpha: 0 });
+
+  // ---------- juice FX: a gooey splash that floods the new colour in, with flying droplets ----------
+  const origin = () => { const r = sec.getBoundingClientRect(), c = $('.r-cardcol', sec).getBoundingClientRect(); return [c.left - r.left + c.width / 2, c.top - r.top + c.height / 2]; };
+  const fit = () => { const r = sec.getBoundingClientRect(), d = Math.min(2, devicePixelRatio || 1); juice.width = r.width * d; juice.height = r.height * d; jx.setTransform(d, 0, 0, d, 0, 0); };
+  function splash(i, done) {
+    const [ox, oy] = origin(), [c0, c1] = COLORS[i], W = juice.width, H = juice.height;
+    const maxR = Math.hypot(Math.max(ox, sec.clientWidth - ox), Math.max(oy, sec.clientHeight - oy)) * 1.15;
+    // blob outline: wobbly radius per angle, like liquid spreading
+    const K = 48, wob = Array.from({ length: K }, () => .82 + Math.random() * .36);
+    for (let k = 0; k < 70; k++) {
+      const a = Math.random() * Math.PI * 2, sp = 6 + Math.random() * 16;
+      const rr = 120 + Math.random() * 60; drops.push({ x: ox + Math.cos(a) * rr, y: oy + Math.sin(a) * rr * 1.4, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 4, r: 3 + Math.random() * 11, c: Math.random() < .5 ? c0 : c1, life: 1 });
     }
-  });
+    const st = { r: 0 };
+    gsap.to(st, {
+      r: maxR, duration: 1.05, ease: 'power2.inOut',
+      onUpdate: () => {
+        jx.clearRect(0, 0, W, H);
+        const g = jx.createRadialGradient(ox, oy, 0, ox, oy, Math.max(1, st.r));
+        g.addColorStop(0, c0); g.addColorStop(1, c1);
+        jx.fillStyle = g; jx.beginPath();
+        for (let k = 0; k <= K; k++) {
+          const a = k / K * Math.PI * 2, w = wob[k % K] + Math.sin(a * 5 + st.r * .02) * .05;
+          const x = ox + Math.cos(a) * st.r * w, y = oy + Math.sin(a) * st.r * w;
+          k ? jx.lineTo(x, y) : jx.moveTo(x, y);
+        }
+        jx.closePath(); jx.fill();
+      },
+      onComplete: () => { bgs.forEach((b, j) => gsap.set(b, { autoAlpha: j === cur ? 1 : 0 })); jx.clearRect(0, 0, W, H); done && done(); }
+    });
+    if (!raf) raf = requestAnimationFrame(tickDrops);
+  }
+  const dc = $('#r-drops', sec), dx = dc.getContext('2d');
+  const fitD = () => { const r = sec.getBoundingClientRect(), d = Math.min(2, devicePixelRatio || 1); dc.width = r.width * d; dc.height = r.height * d; dx.setTransform(d, 0, 0, d, 0, 0); };
+  function tickDrops() {
+    dx.clearRect(0, 0, dc.width, dc.height);
+    drops = drops.filter(p => p.life > 0);
+    drops.forEach(p => {
+      p.vy += .55; p.vx *= .985; p.x += p.vx; p.y += p.vy; p.life -= .012;
+      dx.globalAlpha = Math.max(0, p.life);
+      const g = dx.createRadialGradient(p.x - p.r * .35, p.y - p.r * .35, 0, p.x, p.y, p.r);
+      g.addColorStop(0, 'rgba(255,255,255,.95)'); g.addColorStop(.35, p.c); g.addColorStop(1, p.c);
+      dx.fillStyle = g; dx.beginPath();
+      const sp = Math.min(2.2, 1 + Math.hypot(p.vx, p.vy) / 18), ang = Math.atan2(p.vy, p.vx);
+      dx.ellipse(p.x, p.y, p.r * sp, p.r, ang, 0, Math.PI * 2); dx.fill();
+    });
+    dx.globalAlpha = 1;
+    raf = drops.length ? requestAnimationFrame(tickDrops) : 0;
+  }
+
+  function setSteps(i, progress) { steps.forEach((s, k) => { s.classList.toggle('on', k === i); s.querySelector('i').style.setProperty('--f', k < i ? 1 : k === i ? progress : 0); }); sec.classList.toggle('light', i === N - 1); }
+  function go(i) {
+    if (i === cur) return;
+    if (busy) { gsap.delayedCall(.25, () => go(i)); return; }
+    busy = true; const prev = cur, dir = i > prev ? 1 : -1; cur = i;
+    if (reduced) { cards.forEach((c, k) => gsap.set(c, { opacity: k === i ? 1 : 0, xPercent: 0 })); copies.forEach((c, k) => gsap.set(c, { opacity: k === i ? 1 : 0 })); bgs.forEach((b, k) => gsap.set(b, { autoAlpha: k === i ? 1 : 0 })); busy = false; setSteps(i, 0); return; }
+    gsap.to(cards[prev], { xPercent: -150 * dir, rotation: -18 * dir, rotationY: 50 * dir, scale: .85, opacity: 0, duration: .6, ease: 'power2.in' });
+    gsap.fromTo(cards[i], { xPercent: 140 * dir, rotation: 20 * dir, rotationY: -60 * dir, scale: .85, opacity: 0 }, { xPercent: 0, rotation: i % 2 ? 5 : -5, rotationY: 0, scale: 1, opacity: 1, duration: .9, delay: .25, ease: 'back.out(1.5)' });
+    gsap.to(copies[prev], { y: -40, opacity: 0, duration: .4, ease: 'power2.in' });
+    gsap.set(copies[i], { y: 0, opacity: 1, delay: .4 });
+    gsap.fromTo(titles[i], { yPercent: 110, rotation: 8 }, { yPercent: 0, rotation: 0, stagger: .06, duration: .6, delay: .45, ease: 'back.out(1.8)' });
+    gsap.fromTo([$('.label', copies[i]), $('p', copies[i])], { y: 20, opacity: 0 }, { y: 0, opacity: 1, stagger: .08, duration: .5, delay: .55, ease: 'power3.out' });
+    splash(i, () => { busy = false; });
+    restart();
+  }
+  // progress bar on the current step, then advance
+  let prog = null;
+  function restart() {
+    if (prog) prog.kill();
+    const st = { p: 0 };
+    prog = gsap.to(st, { p: 1, duration: DWELL, ease: 'none', paused: !inView, onUpdate: () => setSteps(cur, st.p), onComplete: () => { if (busy) { gsap.delayedCall(.3, () => go((cur + 1) % N)); } else go((cur + 1) % N); } });
+  }
+  steps.forEach((s, k) => { s.style.cursor = 'pointer'; s.setAttribute('role', 'button'); s.tabIndex = 0; s.addEventListener('click', () => go(k)); s.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(k); } }); });
+  let sx = 0; sec.addEventListener('pointerdown', e => { sx = e.clientX; });
+  sec.addEventListener('pointerup', e => { const d = e.clientX - sx; if (Math.abs(d) > 50) go((cur + (d < 0 ? 1 : N - 1)) % N); });
+  sec.addEventListener('mouseenter', () => prog && prog.pause()); sec.addEventListener('mouseleave', () => inView && prog && prog.play());
+  ScrollTrigger.create({ trigger: sec, start: 'top 70%', end: 'bottom 30%', onToggle: s => { inView = s.isActive; if (!prog) return; inView ? prog.play() : prog.pause(); } });
+  addEventListener('resize', () => { fit(); fitD(); });
+  fit(); fitD(); setSteps(0, 0); restart();
   gsap.from(cards[0], { xPercent: 60, rotation: 12, opacity: 0, duration: 1.1, ease: 'power3.out', scrollTrigger: { trigger: sec, start: 'top 60%' } });
   gsap.from(titles[0], { yPercent: 110, stagger: .06, duration: .8, ease: 'power3.out', scrollTrigger: { trigger: sec, start: 'top 50%' } });
 }
@@ -1449,8 +1465,8 @@ function gameplay() {
 function deckRing() {
   const deck = [
     ['FOREHAND_7', 'Topspin Forehand', 'Groundstroke', 0], ['FOREHAND_SLICE_5', 'Forehand Slice', 'Groundstroke', 0], ['BACKHAND_6', 'Topspin Backhand', 'Groundstroke', 1], ['BACKHAND_SLICE_3', 'Backhand Slice', 'Groundstroke', 1],
-    ['APPROACH_5', 'Topspin Approach', 'Tactical', 1], ['APPROACH_3', 'Approach Slice', 'Tactical', 0], ['VOLLEY_7', 'Volley', 'Net card', 0], ['DROP_SHOT_2', 'Drop-Shot', 'Net card', 1], ['LOB_2', 'Lob', 'Tactical', 0],
-    ['SMASH_7', 'Smash', 'Tactical', 1], ['WINNER', 'Winner', 'Special', 0], ['GOOD_GET', 'Good Get', 'Special', 1], ['ERROR', 'Error', 'Special', 0],
+    ['APPROACH_5', 'Topspin Approach', 'Tactical', 1], ['APPROACH_3', 'Approach Slice', 'Tactical', 0], ['VOLLEY_7', 'Volley', 'Net card', 0], ['DROP_SHOT_2', 'Drop-Shot', 'Net card', 1], ['LOB_2', 'Lob', 'Tactical', 0], ['LOB_1', 'Lob', 'Tactical', 1],
+    ['SMASH_7', 'Smash', 'Tactical', 1], ['SMASH_6', 'Smash', 'Tactical', 0], ['WINNER', 'Winner', 'Special', 0], ['GOOD_GET', 'Good Get', 'Special', 1], ['ERROR', 'Error', 'Special', 0],
     ['SOFT_TOUCH', 'Soft Touch', 'Modifier', 1], ['EXTRA_SPIN', 'Extra Spin', 'Modifier', 0], ['FOREHAND_4', 'Topspin Forehand', 'Groundstroke', 0], ['BACKHAND_SLICE_7', 'Backhand Slice', 'Groundstroke', 1]
   ];
   const ring = $('#ring'), stage = $('#ring-stage'), nameEl = $('#ring-name'), typeEl = $('#ring-type');
@@ -1529,7 +1545,7 @@ function dice() {
   const FACE_ROT = [[0, -Math.PI / 2], [0, Math.PI / 2], [Math.PI / 2, 0], [-Math.PI / 2, 0], [0, 0], [0, Math.PI]];
   $$('.die3d').forEach(box => {
     const labels = box.dataset.faces.split(','), names = box.dataset.imgs.split(',');
-    const out = box.closest('.die-unit').querySelector('.die-out');
+    const out = box.closest('.die-unit, .r-die').querySelector('.die-out');
     const S = 168; // canvas size (CSS px); the die sits in an 84px slot and is allowed to overflow while it rolls
     const renderer = new T.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1));
@@ -1614,6 +1630,7 @@ function dice() {
 
 /* how-to-play card showcase */
 function showcase() {
+  if (!document.getElementById('show')) return;
   const names = ['Serve it', 'Build the rally', 'Slice it up', 'Risk it all', 'Smash it down', 'Highs and lows'];
   const glows = ['rgba(198,244,50,.35)', 'rgba(255,138,42,.35)', 'rgba(198,244,50,.35)', 'rgba(164,92,255,.4)', 'rgba(255,74,94,.38)', 'rgba(255,255,255,.25)'];
   const cards = $$('.sc'), steps = $$('.step'), n = $('#show-n'), t = $('#show-t'), glow = $('#show-glow');
