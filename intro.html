@@ -46,7 +46,7 @@ body.record #host,body.embed #host{bottom:0}
 /* corners clipped with clip-path too: Safari ignores border-radius on 3D-flipped images */
 .ci img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:7.2%/4.6%;-webkit-clip-path:inset(0 round 7.2% / 4.6%);clip-path:inset(0 round 7.2% / 4.6%);backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .card .sh{position:absolute;inset:1%;border-radius:7.2%/4.6%;box-shadow:0 calc(4 * var(--u)) calc(10 * var(--u)) rgba(0,0,0,.55)}
-.ci .b{transform:rotateY(180deg)}
+.ci .bk{transform:rotateY(180deg)}
 .card .dim{position:absolute;inset:0;border-radius:7.2%/4.6%;background:rgba(6,8,5,.66);opacity:0;visibility:hidden}
 .card .glow{position:absolute;inset:-3.5%;border-radius:9%/6%;box-shadow:0 0 0 calc(2.4 * var(--u)) var(--gc,var(--lime)),0 0 calc(14 * var(--u)) calc(3 * var(--u)) var(--gc,rgba(198,244,50,.7));opacity:0;visibility:hidden}
 .card .hl{position:absolute;border:calc(1.8 * var(--u)) solid #fff;border-radius:calc(3.5 * var(--u));box-shadow:0 0 0 calc(1.2 * var(--u)) rgba(0,0,0,.45),0 0 calc(8 * var(--u)) rgba(255,255,255,.75);opacity:0;visibility:hidden}
@@ -326,7 +326,7 @@ function fit() {
 const el = (cls, html = '', parent = fxL) => { const d = document.createElement('div'); d.className = cls; d.innerHTML = html; parent.appendChild(d); return d; };
 
 function C(name, w, { back = 'LIME', down = false } = {}) {
-  const c = el('card', `<div class="sh"></div><div class="ci"><img class="f" src="assets/cards/${name}.jpg" alt=""><img class="b" src="assets/cards/${back}_CARD_BACK.jpg" alt=""></div><div class="dim"></div><div class="glow"></div>`, cardsL);
+  const c = el('card', `<div class="sh"></div><div class="ci"><img class="f" src="assets/cards/${name}.jpg" alt=""><img class="bk" src="assets/cards/${back}_CARD_BACK.jpg" alt=""></div><div class="dim"></div><div class="glow"></div>`, cardsL);
   c.style.width = w + 'px'; c.style.height = (w * 1048 / 676) + 'px'; c.style.setProperty('--u', (w / 100) + 'px');
   c.ci = $('.ci', c); c.dimEl = $('.dim', c); c.glowEl = $('.glow', c);
   gsap.set(c, { xPercent: -50, yPercent: -50, x: -2000, y: -2000, autoAlpha: 0 });
