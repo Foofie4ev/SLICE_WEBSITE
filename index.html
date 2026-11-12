@@ -275,6 +275,12 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
 .r-drops{z-index:2}
 .r-stage{z-index:3}
 .r-step{cursor:pointer}
+.r-arrow{position:absolute;top:50%;z-index:6;width:56px;height:56px;margin-top:-28px;border-radius:50%;display:grid;place-items:center;color:#fff;background:rgba(0,0,0,.18);border:1.5px solid rgba(255,255,255,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);cursor:pointer;transition:transform .2s,background .2s}
+.r-arrow:hover{transform:scale(1.08);background:rgba(0,0,0,.3)}
+.r-arrow svg{width:24px;height:24px}
+.r-arrow.prev{left:clamp(10px,2.5vw,36px)}.r-arrow.next{right:clamp(10px,2.5vw,36px)}
+.rally.light .r-arrow{color:var(--bg);border-color:rgba(11,13,10,.45);background:rgba(255,255,255,.3)}
+@media (max-width:700px){.r-arrow{width:44px;height:44px;margin-top:-22px;top:38%}}
 
 .r-word{position:absolute;left:0;top:50%;transform:translateY(-50%);white-space:nowrap;font-family:var(--display);font-weight:900;font-stretch:125%;font-size:min(24vw,30vh);line-height:1;text-transform:uppercase;color:transparent;-webkit-text-stroke:1.5px rgba(255,255,255,.22);opacity:0;pointer-events:none}
 .r-word.first{opacity:1}
@@ -376,10 +382,18 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
 /* ============================================================
    Deck ring
    ============================================================ */
-.deck{background:radial-gradient(60% 50% at 50% 60%,rgba(198,244,50,.07),transparent 70%),var(--bg)}
-.ring-stage{position:relative;height:clamp(380px,56vh,560px);perspective:1600px;cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none;margin-top:-20px}
+.deck{--dc:#c6f432;position:relative;overflow:hidden;background:var(--bg)}
+.deck>.wrap,.deck .ring-stage{position:relative;z-index:2}
+.deck-fx{position:absolute;inset:0;z-index:0;pointer-events:none}
+.deck-glow{position:absolute;left:50%;top:58%;width:min(1100px,120vw);height:min(760px,90vh);transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--dc) 38%,transparent),color-mix(in srgb,var(--dc) 10%,transparent) 55%,transparent);transition:background .7s}
+.deck-big{position:absolute;left:0;right:0;top:44%;transform-origin:50% 50%;text-align:center;white-space:nowrap;font-family:var(--display);font-weight:900;font-style:italic;font-stretch:110%;text-transform:uppercase;font-size:clamp(4rem,13vw,12rem);line-height:1;color:transparent;-webkit-text-stroke:2px color-mix(in srgb,var(--dc) 55%,transparent);opacity:.9;transition:-webkit-text-stroke-color .7s}
+.deck-court{position:absolute;left:50%;bottom:24%;width:min(1100px,110vw);height:clamp(150px,22vh,240px);transform:translateX(-50%);color:color-mix(in srgb,var(--dc) 45%,transparent);opacity:.55;transition:color .7s}
+.deck-drops{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3}
+.ring-name .desc{display:block;margin-top:8px;color:var(--muted);font-size:clamp(.9rem,1.1vw,1rem);min-height:1.4em}
+.ring-name .label{color:var(--dc);transition:color .5s}
+.ring-stage{position:relative;height:clamp(460px,66vh,680px);perspective:1600px;cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none;margin-top:-20px}
 .ring-stage.dragging{cursor:grabbing}
-.ring{--cw:clamp(130px,13vw,190px);position:absolute;left:50%;top:50%;width:var(--cw);aspect-ratio:var(--card-ar);margin-left:calc(var(--cw) / -2);margin-top:calc(var(--cw) * -0.795);transform-style:preserve-3d}
+.ring{--cw:clamp(170px,17vw,250px);position:absolute;left:50%;top:50%;width:var(--cw);aspect-ratio:var(--card-ar);margin-left:calc(var(--cw) / -2);margin-top:calc(var(--cw) * -0.795);transform-style:preserve-3d}
 .rc{position:absolute;inset:0;transform-style:preserve-3d}
 .rc-face{position:absolute;inset:0;border-radius:var(--card-r);overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:#000;box-shadow:0 30px 50px -24px rgba(0,0,0,.8)}
 .rc-face img{width:100%;height:100%;object-fit:cover;pointer-events:none}
@@ -387,7 +401,7 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
 .rc-back{transform:rotateY(180deg)}
 .ring-ui{display:flex;align-items:center;justify-content:center;gap:24px;margin-top:8px}
 .ring-name{min-width:min(320px,50vw);text-align:center}
-.ring-name .nm{display:block;font-family:var(--display);font-weight:800;font-stretch:115%;text-transform:uppercase;font-size:clamp(1.1rem,2vw,1.5rem);letter-spacing:-.01em}
+.ring-name .nm{display:block;margin-top:4px;font-family:var(--display);font-weight:900;font-style:italic;font-stretch:110%;text-transform:uppercase;font-size:clamp(1.6rem,3vw,2.6rem);letter-spacing:-.01em}
 .ring-name .label{display:block;margin-top:4px;font-size:.62rem}
 .circle-btn{width:48px;height:48px;border-radius:50%;border:1px solid rgba(244,246,239,.2);display:grid;place-items:center;flex:none;transition:all .25s}
 .circle-btn:hover{border-color:var(--lime);color:var(--lime)}
@@ -661,6 +675,8 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
   </div>
 
   <canvas class="r-drops" id="r-drops" aria-hidden="true"></canvas>
+  <button class="r-arrow prev" id="r-prev" type="button" aria-label="Previous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <button class="r-arrow next" id="r-next" type="button" aria-label="Next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
   <div class="r-steps"><div class="wrap">
     <div class="r-step on"><i></i><span>Slice</span></div>
     <div class="r-step"><i></i><span>Spin</span></div>
@@ -772,11 +788,12 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
       <p class="lede" data-reveal>Every shot in the game. Drag to spin the rack, and tap the front card to take a closer look.</p>
     </div>
   </div>
-  <div class="ring-stage" id="ring-stage"><div class="ring" id="ring"></div></div>
+  <div class="deck-fx" aria-hidden="true"><div class="deck-glow"></div><div class="deck-big" id="deck-big">Groundstroke</div><svg class="deck-court" viewBox="0 0 1000 300" preserveAspectRatio="none"><g fill="none" stroke="currentColor" stroke-width="2"><path d="M120 300 L330 40 H670 L880 300"/><path d="M175 300 L355 40 M825 300 L645 40"/><path d="M262 140 H738 M206 210 H794"/><path d="M500 140 V210"/><path d="M80 112 H920" stroke-width="5"/></g></svg></div>
+  <div class="ring-stage" id="ring-stage"><canvas class="deck-drops" id="deck-drops"></canvas><div class="ring" id="ring"></div></div>
   <div class="wrap">
     <div class="ring-ui">
       <button class="circle-btn" type="button" id="ring-prev" aria-label="Previous card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
-      <div class="ring-name"><span class="nm" id="ring-name">Forehand Topspin</span><span class="label" id="ring-type">Groundstroke</span></div>
+      <div class="ring-name"><span class="label" id="ring-type">Groundstroke</span><span class="nm" id="ring-name">Topspin Forehand</span><span class="desc" id="ring-desc"></span></div>
       <button class="circle-btn" type="button" id="ring-next" aria-label="Next card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
     </div>
   </div>
@@ -1330,10 +1347,10 @@ function rally() {
   const sec = $('#rally');
   const bgs = $$('.r-bg', sec), cards = $$('.r-card', sec), copies = $$('.r-copy', sec), steps = $$('.r-step', sec);
   const titles = copies.map(c => split($('h3', c)));
-  const N = cards.length, DWELL = 4.6;
+  const N = cards.length;
   const juice = $('#r-juice', sec), jx = juice.getContext('2d');
   const COLORS = [['#d2ff57', '#3c8a0e'], ['#ffbf5a', '#d9480f'], ['#d08bff', '#5a12a3'], ['#ff7d8c', '#bf1030'], ['#fff6d6', '#ffc94a']];
-  let cur = 0, timer = null, busy = false, inView = false, drops = [], raf = 0;
+  let cur = 0, busy = false, drops = [], raf = 0, rst = null;
 
   gsap.set(cards[0], { rotation: -4 });
   gsap.set(cards.slice(1), { xPercent: 140, rotation: 20, rotationY: -60, scale: .85, opacity: 0, transformPerspective: 1400 });
@@ -1388,35 +1405,55 @@ function rally() {
     raf = drops.length ? requestAnimationFrame(tickDrops) : 0;
   }
 
-  function setSteps(i, progress) { steps.forEach((s, k) => { s.classList.toggle('on', k === i); s.querySelector('i').style.setProperty('--f', k < i ? 1 : k === i ? progress : 0); }); sec.classList.toggle('light', i === N - 1); }
+  function setSteps(i) { steps.forEach((s, k) => s.classList.toggle('on', k === i)); sec.classList.toggle('light', i === N - 1); }
   function go(i) {
     if (i === cur) return;
-    if (busy) { gsap.delayedCall(.25, () => go(i)); return; }
+    if (busy) return;
     busy = true; const prev = cur, dir = i > prev ? 1 : -1; cur = i;
-    if (reduced) { cards.forEach((c, k) => gsap.set(c, { opacity: k === i ? 1 : 0, xPercent: 0 })); copies.forEach((c, k) => gsap.set(c, { opacity: k === i ? 1 : 0 })); bgs.forEach((b, k) => gsap.set(b, { autoAlpha: k === i ? 1 : 0 })); busy = false; setSteps(i, 0); return; }
+    if (reduced) { cards.forEach((c, k) => gsap.set(c, { opacity: k === i ? 1 : 0, xPercent: 0 })); copies.forEach((c, k) => gsap.set(c, { opacity: k === i ? 1 : 0 })); bgs.forEach((b, k) => gsap.set(b, { autoAlpha: k === i ? 1 : 0 })); busy = false; setSteps(i); return; }
     gsap.to(cards[prev], { xPercent: -150 * dir, rotation: -18 * dir, rotationY: 50 * dir, scale: .85, opacity: 0, duration: .6, ease: 'power2.in' });
     gsap.fromTo(cards[i], { xPercent: 140 * dir, rotation: 20 * dir, rotationY: -60 * dir, scale: .85, opacity: 0 }, { xPercent: 0, rotation: i % 2 ? 5 : -5, rotationY: 0, scale: 1, opacity: 1, duration: .9, delay: .25, ease: 'back.out(1.5)' });
     gsap.to(copies[prev], { y: -40, opacity: 0, duration: .4, ease: 'power2.in' });
     gsap.set(copies[i], { y: 0, opacity: 1, delay: .4 });
     gsap.fromTo(titles[i], { yPercent: 110, rotation: 8 }, { yPercent: 0, rotation: 0, stagger: .06, duration: .6, delay: .45, ease: 'back.out(1.8)' });
     gsap.fromTo([$('.label', copies[i]), $('p', copies[i])], { y: 20, opacity: 0 }, { y: 0, opacity: 1, stagger: .08, duration: .5, delay: .55, ease: 'power3.out' });
-    splash(i, () => { busy = false; });
-    restart();
+    setSteps(i);
+    splash(i, () => { busy = false; if (rst) { const want = Math.round(rst.progress * (N - 1)); if (want !== cur) go(want); } });
   }
-  // progress bar on the current step, then advance
-  let prog = null;
-  function restart() {
-    if (prog) prog.kill();
-    const st = { p: 0 };
-    prog = gsap.to(st, { p: 1, duration: DWELL, ease: 'none', paused: !inView, onUpdate: () => setSteps(cur, st.p), onComplete: () => { if (busy) { gsap.delayedCall(.3, () => go((cur + 1) % N)); } else go((cur + 1) % N); } });
-  }
-  steps.forEach((s, k) => { s.style.cursor = 'pointer'; s.setAttribute('role', 'button'); s.tabIndex = 0; s.addEventListener('click', () => go(k)); s.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(k); } }); });
+  // scrolling drives the steps (each step plays the full splash); arrows and steps jump by scrolling too
+  const PER = .75;                                   // screens of scroll per step
+  rst = ScrollTrigger.create({
+    trigger: sec, start: 'top top', end: () => '+=' + innerHeight * PER * (N - 1),
+    pin: true, anticipatePin: 1, invalidateOnRefresh: true,
+    snap: { snapTo: 1 / (N - 1), duration: { min: .25, max: .6 }, delay: .05, ease: 'power2.inOut' },
+    onUpdate: self => {
+      const f = self.progress * (N - 1), i = Math.round(f);
+      steps.forEach((s, k) => s.querySelector('i').style.setProperty('--f', gsap.utils.clamp(0, 1, f - k + 1)));
+      if (i !== cur && !busy) go(i);
+    }
+  });
+  const scrollToStep = k => {
+    k = (k + N) % N;
+    const y = rst.start + (rst.end - rst.start) * (k / (N - 1));
+    if (typeof lenis !== 'undefined' && lenis) lenis.scrollTo(y, { duration: .9 }); else scrollTo({ top: y, behavior: 'smooth' });
+  };
+  const restart = () => {};
+  steps.forEach((s, k) => { s.style.cursor = 'pointer'; s.setAttribute('role', 'button'); s.tabIndex = 0; s.addEventListener('click', () => scrollToStep(k)); s.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); scrollToStep(k); } }); });
+  $('#r-prev', sec).addEventListener('click', () => scrollToStep(cur - 1));
+  $('#r-next', sec).addEventListener('click', () => scrollToStep(cur + 1));
   let sx = 0; sec.addEventListener('pointerdown', e => { sx = e.clientX; });
-  sec.addEventListener('pointerup', e => { const d = e.clientX - sx; if (Math.abs(d) > 50) go((cur + (d < 0 ? 1 : N - 1)) % N); });
-  sec.addEventListener('mouseenter', () => prog && prog.pause()); sec.addEventListener('mouseleave', () => inView && prog && prog.play());
-  ScrollTrigger.create({ trigger: sec, start: 'top 70%', end: 'bottom 30%', onToggle: s => { inView = s.isActive; if (!prog) return; inView ? prog.play() : prog.pause(); } });
+  sec.addEventListener('pointerup', e => { if (e.target.closest('button, .r-step')) return; const d = e.clientX - sx; if (Math.abs(d) > 50) scrollToStep(cur + (d < 0 ? 1 : -1)); });
   addEventListener('resize', () => { fit(); fitD(); });
-  fit(); fitD(); setSteps(0, 0); restart();
+  // autoplay: while the section is pinned and the visitor is idle, move on every few seconds (mouse over it or not)
+  const AUTO = 7000; let lastAct = performance.now();
+  const act = () => { lastAct = performance.now(); };
+  ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach(ev => addEventListener(ev, act, { passive: true }));
+  setInterval(() => {
+    if (!rst || !rst.isActive || busy || document.hidden) return;
+    if (performance.now() - lastAct < AUTO) return;
+    lastAct = performance.now(); scrollToStep(cur + 1);
+  }, 500);
+  fit(); fitD(); setSteps(0);
   gsap.from(cards[0], { xPercent: 60, rotation: 12, opacity: 0, duration: 1.1, ease: 'power3.out', scrollTrigger: { trigger: sec, start: 'top 60%' } });
   gsap.from(titles[0], { yPercent: 110, stagger: .06, duration: .8, ease: 'power3.out', scrollTrigger: { trigger: sec, start: 'top 50%' } });
 }
@@ -1469,8 +1506,26 @@ function deckRing() {
     ['SMASH_7', 'Smash', 'Tactical', 1], ['SMASH_6', 'Smash', 'Tactical', 0], ['WINNER', 'Winner', 'Special', 0], ['GOOD_GET', 'Good Get', 'Special', 1], ['ERROR', 'Error', 'Special', 0],
     ['SOFT_TOUCH', 'Soft Touch', 'Modifier', 1], ['EXTRA_SPIN', 'Extra Spin', 'Modifier', 0], ['FOREHAND_4', 'Topspin Forehand', 'Groundstroke', 0], ['BACKHAND_SLICE_7', 'Backhand Slice', 'Groundstroke', 1]
   ];
-  const ring = $('#ring'), stage = $('#ring-stage'), nameEl = $('#ring-name'), typeEl = $('#ring-type');
+  const INFO = {"FOREHAND_7": ["#c6f432", "Topspin: return equal or higher."], "FOREHAND_SLICE_5": ["#c6f432", "Slice: return equal or lower."], "BACKHAND_6": ["#ff8a2a", "Topspin: return equal or higher."], "BACKHAND_SLICE_3": ["#ff8a2a", "Slice: return equal or lower."], "APPROACH_5": ["#ff8a2a", "Match the pace exactly, then steal a card."], "APPROACH_3": ["#ffd23f", "Match the pace exactly, then steal a card."], "VOLLEY_7": ["#a45cff", "Returns any groundstroke. Roll for pace."], "DROP_SHOT_2": ["#ffe11a", "Returns any groundstroke. Roll for pace."], "LOB_2": ["#ff4f9a", "Returns 6s and 7s, including Smashes and Volleys."], "LOB_1": ["#ff4f9a", "Returns 6s and 7s, including Smashes and Volleys."], "SMASH_7": ["#ff4a5e", "Returns 1s and 2s, including Lobs and Drop-Shots."], "SMASH_6": ["#ff4a5e", "Returns 1s and 2s, including Lobs and Drop-Shots."], "WINNER": ["#ffffff", "Play it on a 3, 4 or 5 and win the point."], "GOOD_GET": ["#ffd23f", "Returns anything. Then discard a card."], "ERROR": ["#ff4a5e", "Stuck with it? Play it and lose the point."], "SOFT_TOUCH": ["#bfc4c9", "Lowers your card’s pace by 1."], "EXTRA_SPIN": ["#c6f432", "Raises your card’s pace by 1."], "FOREHAND_4": ["#c6f432", "Topspin: return equal or higher."], "BACKHAND_SLICE_7": ["#ff8a2a", "Slice: return equal or lower."]};
+  const ring = $('#ring'), stage = $('#ring-stage'), nameEl = $('#ring-name'), typeEl = $('#ring-type'), descEl = $('#ring-desc'), bigEl = $('#deck-big'), secEl = $('#cards');
   const N = deck.length, step = 360 / N;
+  // juice burst behind the front card
+  const dcv = $('#deck-drops'), dctx = dcv.getContext('2d'); let ddrops = [], draf = 0;
+  const dfit = () => { const r = stage.getBoundingClientRect(), d = Math.min(2, devicePixelRatio || 1); dcv.width = r.width * d; dcv.height = r.height * d; dctx.setTransform(d, 0, 0, d, 0, 0); };
+  dfit(); addEventListener('resize', dfit);
+  function deckBurst(col) {
+    const r = stage.getBoundingClientRect(), cx = r.width / 2, cy = r.height * .46;
+    for (let k = 0; k < 26; k++) { const a = -Math.PI * (.08 + .84 * Math.random()), sp = 5 + Math.random() * 10; ddrops.push({ x: cx + Math.cos(a) * 90, y: cy + Math.sin(a) * 120, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, r: 3 + Math.random() * 8, c: col, life: 1 }); }
+    if (!draf) draf = requestAnimationFrame(dtick);
+  }
+  function dtick() {
+    dctx.clearRect(0, 0, dcv.width, dcv.height); ddrops = ddrops.filter(p => p.life > 0);
+    ddrops.forEach(p => { p.vy += .45; p.x += p.vx; p.y += p.vy; p.life -= .016; dctx.globalAlpha = Math.max(0, p.life);
+      const g = dctx.createRadialGradient(p.x - p.r * .3, p.y - p.r * .3, 0, p.x, p.y, p.r); g.addColorStop(0, 'rgba(255,255,255,.95)'); g.addColorStop(.4, p.c); g.addColorStop(1, p.c);
+      dctx.fillStyle = g; dctx.beginPath(); dctx.ellipse(p.x, p.y, p.r * Math.min(2, 1 + Math.hypot(p.vx, p.vy) / 16), p.r, Math.atan2(p.vy, p.vx), 0, Math.PI * 2); dctx.fill(); });
+    dctx.globalAlpha = 1; draf = ddrops.length ? requestAnimationFrame(dtick) : 0;
+  }
+
   const els = deck.map(([f, n, , b], i) => {
     const d = document.createElement('div'); d.className = 'rc'; d.dataset.i = i;
     d.innerHTML = `<div class="rc-face"><img src="assets/cards/${f}.jpg" alt="${n} card" loading="lazy"></div><div class="rc-face rc-back"><img src="assets/cards/${b ? 'ORANGE' : 'LIME'}_CARD_BACK.jpg" alt="" loading="lazy"></div>`;
@@ -1486,7 +1541,10 @@ function deckRing() {
     ring.style.transform = `translateZ(${-radius}px) rotateY(${state.rot}deg)`;
     els.forEach((el, i) => { const a = ((i * step + state.rot) % 360 + 540) % 360 - 180; el.style.setProperty('--shade', (Math.min(Math.abs(a) / 180, 1) * .8).toFixed(3)); });
     const f = front();
-    if (f !== lastIdx) { lastIdx = f; nameEl.textContent = deck[f][1]; typeEl.textContent = deck[f][2]; }
+    if (f !== lastIdx) { const first = lastIdx < 0; lastIdx = f; nameEl.textContent = deck[f][1]; typeEl.textContent = deck[f][2];
+      const [col, line] = INFO[deck[f][0]] || ['#c6f432', '']; descEl.textContent = line; secEl.style.setProperty('--dc', col);
+      if (bigEl.textContent !== deck[f][2]) { bigEl.textContent = deck[f][2]; if (!reduced) gsap.fromTo(bigEl, { opacity: 0, scale: .94 }, { opacity: 1, scale: 1, duration: .5, ease: 'power3.out' }); }
+      if (!first && !dragging && !reduced) deckBurst(col); }
   };
   const snapTo = idx => { if (tween) tween.kill(); const cur = state.rot, diff = ((-idx * step - cur) % 360 + 540) % 360 - 180; tween = gsap.to(state, { rot: cur + diff, duration: .8, ease: 'power3.out', onUpdate: render, onComplete: () => { tween = null; } }); };
   new IntersectionObserver(([e]) => { visible = e.isIntersecting; }).observe(stage);
