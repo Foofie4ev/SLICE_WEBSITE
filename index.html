@@ -402,22 +402,29 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
    ============================================================ */
 .deck{--dc:#c6f432;position:relative;overflow:hidden;background:var(--bg)}
 .deck>.wrap,.deck .ring-stage{position:relative;z-index:2}
+/* the whole bag fits one screen */
+.deck{padding:max(80px,9vh) 0 clamp(24px,3vh,44px);min-height:100svh;display:flex;flex-direction:column;justify-content:center}
+.deck-head{text-align:center;display:flex;flex-direction:column;align-items:center}
+.deck-head .sec-idx{justify-content:center}
+.deck-head h2.title{white-space:nowrap;font-size:clamp(2rem,4.2vw,3.6rem)}
+.deck-head .lede{margin-top:clamp(8px,1.4vh,14px);text-align:center;max-width:48rem}
+@media (max-width:520px){.deck-head h2.title{white-space:normal}}
 .deck-fx{position:absolute;inset:0;z-index:0;pointer-events:none}
 .deck-glow{position:absolute;left:50%;top:58%;width:min(1100px,120vw);height:min(760px,90vh);transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--dc) 38%,transparent),color-mix(in srgb,var(--dc) 10%,transparent) 55%,transparent);transition:background .7s}
 .deck-big{display:none!important;position:absolute;left:0;right:0;top:44%;transform-origin:50% 50%;text-align:center;white-space:nowrap;font-family:var(--display);font-weight:900;font-style:italic;font-stretch:110%;text-transform:uppercase;font-size:clamp(4rem,13vw,12rem);line-height:1;color:transparent;-webkit-text-stroke:2px color-mix(in srgb,var(--dc) 55%,transparent);opacity:.9;transition:-webkit-text-stroke-color .7s}
-.deck-court{position:absolute;left:50%;bottom:24%;width:min(1100px,110vw);height:clamp(150px,22vh,240px);transform:translateX(-50%);color:color-mix(in srgb,var(--dc) 45%,transparent);opacity:.55;transition:color .7s}
+.deck-court{position:absolute;left:50%;bottom:20%;width:min(1100px,110vw);height:clamp(150px,22vh,240px);transform:translateX(-50%);color:color-mix(in srgb,var(--dc) 45%,transparent);opacity:.55;transition:color .7s}
 .deck-drops{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3}
 .ring-name .desc{display:block;margin-top:8px;color:var(--muted);font-size:clamp(.9rem,1.1vw,1rem);min-height:1.4em}
 .ring-name .label{color:var(--dc);transition:color .5s}
-.ring-stage{position:relative;height:clamp(460px,66vh,680px);perspective:1600px;cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none;margin-top:-20px}
+.ring-stage{position:relative;height:clamp(300px,50vh,600px);perspective:1600px;cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none;margin-top:clamp(0px,1vh,12px)}
 .ring-stage.dragging{cursor:grabbing}
-.ring{--cw:clamp(170px,17vw,250px);position:absolute;left:50%;top:50%;width:var(--cw);aspect-ratio:var(--card-ar);margin-left:calc(var(--cw) / -2);margin-top:calc(var(--cw) * -0.795);transform-style:preserve-3d}
+.ring{--cw:clamp(150px,min(17vw,27vh),250px);position:absolute;left:50%;top:50%;width:var(--cw);aspect-ratio:var(--card-ar);margin-left:calc(var(--cw) / -2);margin-top:calc(var(--cw) * -0.795);transform-style:preserve-3d}
 .rc{position:absolute;inset:0;transform-style:preserve-3d}
 .rc-face{position:absolute;inset:0;border-radius:var(--card-r);overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:#000;box-shadow:0 30px 50px -24px rgba(0,0,0,.8)}
 .rc-face img{width:100%;height:100%;object-fit:cover;pointer-events:none}
 .rc-face::after{content:"";position:absolute;inset:0;background:var(--bg);opacity:var(--shade,0);pointer-events:none}
 .rc-back{transform:rotateY(180deg)}
-.ring-ui{display:flex;align-items:center;justify-content:center;gap:24px;margin-top:8px}
+.ring-ui{display:flex;align-items:center;justify-content:center;gap:24px;margin-top:0}
 .ring-name{min-width:min(320px,50vw);text-align:center}
 .ring-name .nm{display:block;margin-top:4px;font-family:var(--display);font-weight:900;font-style:italic;font-stretch:110%;text-transform:uppercase;font-size:clamp(1.6rem,3vw,2.6rem);letter-spacing:-.01em}
 .ring-name .label{display:block;margin-top:4px;font-size:.62rem}
@@ -803,12 +810,10 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
 <!-- ============ 04 THE DECK ============ -->
 <section class="section deck" id="cards" data-sec="03" data-name="The Deck">
   <div class="wrap">
-    <div class="sec-head">
-      <div>
-        <div class="sec-idx"><b>03</b><i></i><span class="label">The Deck</span></div>
-        <h2 class="title display" data-split>Your tennis <span class="accent">bag.</span></h2>
-      </div>
-      <p class="lede" data-reveal>Every shot in the game. Drag to spin the rack, and tap the front card to take a closer look.</p>
+    <div class="deck-head">
+      <div class="sec-idx"><b>03</b><i></i><span class="label">The Deck</span></div>
+      <h2 class="title display" data-split>Your tennis <span class="accent">bag.</span></h2>
+      <p class="lede" data-reveal>Every shot in the game. Drag to spin the rack, and tap the front card for a closer look.</p>
     </div>
   </div>
   <div class="deck-fx" aria-hidden="true"><div class="deck-glow"></div><div class="deck-big" id="deck-big">Groundstroke</div><svg class="deck-court" viewBox="0 0 1000 300" preserveAspectRatio="none"><g fill="none" stroke="currentColor" stroke-width="2"><path d="M120 300 L330 40 H670 L880 300"/><path d="M175 300 L355 40 M825 300 L645 40"/><path d="M262 140 H738 M206 210 H794"/><path d="M500 140 V210"/><path d="M80 112 H920" stroke-width="5"/></g></svg></div>
