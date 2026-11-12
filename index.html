@@ -1601,15 +1601,15 @@ function dice() {
   // face order in three.js materials: +x, -x, +y, -y, +z, -z
   // and the rotation that brings each face toward the camera (+z) with its art upright
   const FACE_ROT = [[0, -Math.PI / 2], [0, Math.PI / 2], [Math.PI / 2, 0], [-Math.PI / 2, 0], [0, 0], [0, Math.PI]];
+  let shared = null; const DPR = Math.min(2, devicePixelRatio || 1);
   $$('.die3d').forEach(box => {
     const labels = box.dataset.faces.split(','), names = box.dataset.imgs.split(',');
     const out = box.closest('.die-unit, .r-die').querySelector('.die-out');
     const S = 168; // canvas size (CSS px); the die sits in an 84px slot and is allowed to overflow while it rolls
-    const renderer = new T.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1));
-    renderer.setSize(S, S);
-    if ('outputEncoding' in renderer) renderer.outputEncoding = T.sRGBEncoding;
-    const cv = renderer.domElement; cv.className = 'die-canvas';
+    // all three dice share one WebGL renderer (phones cap and choke on several); each die paints into its own 2D canvas
+    if (!shared) { shared = new T.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true }); shared.setPixelRatio(DPR); shared.setSize(S, S); if ('outputEncoding' in shared) shared.outputEncoding = T.sRGBEncoding; shared.setClearColor(0, 0); }
+    const renderer = shared, cv = document.createElement('canvas'); cv.width = cv.height = S * DPR; cv.className = 'die-canvas';
+    const c2 = cv.getContext('2d');
     box.innerHTML = ''; box.appendChild(cv);
     const scene = new T.Scene();
     const cam = new T.PerspectiveCamera(30, 1, .1, 50); cam.position.set(0, 0, 6.2);
@@ -1632,7 +1632,7 @@ function dice() {
     shadow.rotation.x = -Math.PI / 2; shadow.position.y = -1.15; scene.add(shadow);
     const rest = new T.Euler(-.42, .62, 0);           // resting tilt that shows three faces
     cube.rotation.copy(rest);
-    const draw = () => renderer.render(scene, cam);
+    const draw = () => { renderer.render(scene, cam); c2.clearRect(0, 0, cv.width, cv.height); c2.drawImage(renderer.domElement, 0, 0); };
     draw();
 
     let busy = false, dragging = false, moved = 0, lx = 0, ly = 0, vx = 0, vy = 0, idle = null;
