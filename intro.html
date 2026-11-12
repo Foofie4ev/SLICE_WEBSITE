@@ -1113,10 +1113,26 @@ function build(time = 0) {
   /* ---------- 11 · RECAP ---------- */
   scene('Recap', 19.6, s => {
     wipe(s - .2);
-    tl.to(logo, { x: L.outLogo[0], y: L.outLogo[1], scale: L.outLogoW / L.logoW, duration: .9, ease: 'power3.inOut' }, s + .1);
-    tl.fromTo(lg, { rotationY: 0 }, { rotationY: 360, duration: 1.1, ease: 'power3.inOut', immediateRender: false }, s + .1);
-    tl.set(rays, { x: L.outLogo[0], y: L.outLogo[1] }, s + .1);
-    tl.fromTo(rays, { autoAlpha: 0, scale: .5, rotation: 0 }, { autoAlpha: 1, scale: .9, rotation: 40, duration: 17, ease: 'none', immediateRender: false }, s + .2);
+    // each recap line gets its cards: they fly in, hold while the line plays, then fly out
+    const wide = fmt === 'wide', rw = wide ? 250 : 230, rc0 = wide ? [540, 560] : [540, 600], gap = wide ? 215 : 250;
+    const GROUPS = [
+      [['FOREHAND_4', 'FOREHAND_6', 'FOREHAND_SLICE_5'], .4, 4.7],
+      [['FOREHAND_5', 'BACKHAND_5'], 5.1, 6.8],
+      [['SOFT_TOUCH', 'EXTRA_SPIN'], 7.1, 9.2],
+      [['VOLLEY', 'DROP_SHOT'], 9.5, 11.8],
+      [['SMASH_6', 'LOB_1', 'APPROACH_5'], 12.1, 14.4],
+      [['WINNER', 'GOOD_GET', 'ERROR'], 14.7, 16.2],
+    ];
+    GROUPS.forEach(([names, tin, tout], g) => {
+      const n = names.length, dir = g % 2 ? 1 : -1;
+      const cs = names.map((nm, i) => {
+        const c = C(nm, rw), k = i - (n - 1) / 2;
+        const x = rc0[0] + k * gap, y = rc0[1] + Math.abs(k) * 26;
+        put(c, s + tin + i * .09, { x: x + dir * 900, y: y + 260, rotation: dir * 30 }, { x, y, rotation: k * 7 }, .6, 'back.out(1.25)');
+        return c;
+      });
+      out(cs, s + tout, -dir * 900, -200, -dir * 25);
+    });
     const rc = el('recap', [
       '<div class="chip"><b class="sw"></b>Groundstrokes: match color</div>',
       '<div class="chip"><b class="up">↑</b><span class="c-g">Topspin ↑</span>&nbsp;·&nbsp;<span class="c-y">Slice ↓</span></div>',
@@ -1131,7 +1147,11 @@ function build(time = 0) {
     screenTxt.push({ t: s + .3, text: 'Groundstrokes: match the color · Topspin equal or higher · Slice equal or lower · Switch colors? Match the pace · Modifiers: pace ±1, then draw · Net cards: any pace, roll for yours · Tactical: Smash, Lob, Approach · Save your Specials' });
     tl.to(chips, { autoAlpha: 0, x: fmt === 'wide' ? 60 : 0, duration: .3, stagger: .05 }, s + 16.3);
     T('FIRST TO g:7|WINS!', s + 16.6, null, { cls: 'low', k: 'Serve it · Slice it · Win it', s: 'SLICE! — the tennis card game. Coming to Kickstarter.' });
-    tl.fromTo(logo, { scale: L.outLogoW / L.logoW }, { scale: L.outLogoW / L.logoW * 1.06, duration: .18, yoyo: true, repeat: 3, ease: 'power2.out', immediateRender: false }, s + 16.7);
+    tl.to(logo, { x: L.outLogo[0], y: L.outLogo[1], scale: L.outLogoW / L.logoW, duration: .9, ease: 'power3.inOut' }, s + 16.3);
+    tl.fromTo(lg, { rotationY: 0 }, { rotationY: 360, duration: 1.1, ease: 'power3.inOut', immediateRender: false }, s + 16.3);
+    tl.set(rays, { x: L.outLogo[0], y: L.outLogo[1] }, s + 16.3);
+    tl.fromTo(rays, { autoAlpha: 0, scale: .5, rotation: 0 }, { autoAlpha: 1, scale: .9, rotation: 20, duration: 3.3, ease: 'none', immediateRender: false }, s + 16.4);
+    tl.fromTo(logo, { scale: L.outLogoW / L.logoW }, { scale: L.outLogoW / L.logoW * 1.06, duration: .18, yoyo: true, repeat: 3, ease: 'power2.out', immediateRender: false }, s + 17.3);
     vo(s + .3, 'Groundstrokes: match the color! If it has Topspin, the pace must be equal or higher. If it’s a Slice, the pace must be equal or lower!', 4.5);
     vo(s + 5.0, 'To switch colors, match the pace!', 1.8);
     vo(s + 7.0, 'Modifier cards change your card’s pace by one… then draw a card!', 2.2);
