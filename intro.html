@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=Rubik:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
 :root{
   --bg:#0b0d0a;--fg:#f4f6ef;--lime:#c6f432;--orange:#ff8a2a;--yellow:#ffd23f;--red:#ff4a5e;
@@ -137,8 +138,8 @@ body.record #host,body.embed #host{bottom:0}
 .score .t{font-size:22px;letter-spacing:.14em;font-style:normal;color:rgba(244,246,239,.7);padding:0 14px}
 
 /* ---------- die ---------- */
-.die{position:absolute;left:0;top:0;filter:drop-shadow(0 26px 30px rgba(0,0,0,.55))}
-.die img{position:absolute;inset:-14%;width:128%;height:128%;object-fit:contain}
+.die{position:absolute;left:0;top:0;filter:drop-shadow(0 22px 24px rgba(0,0,0,.5))}
+.die canvas{position:absolute;left:-55%;top:-55%;width:210%!important;height:210%!important;pointer-events:none}
 
 /* ---------- wipe ---------- */
 .wipe{position:absolute;top:-15%;height:130%;left:0;width:62%;background:var(--lime);z-index:40}
@@ -241,10 +242,9 @@ body.record .sndchip{display:none!important}
       </div>
     </div>
     <div class="score" id="score">You <div class="n"><span>0</span><span>1</span></div><div class="n o"><span>0</span></div> Opp <span class="t">First to 7</span></div>
-    <div class="die" id="die">
-      <img src="assets/dice3d/SERVE_1_TOPSPIN_4.png" alt=""><img src="assets/dice3d/SERVE_2_TOPSPIN_5.png" alt=""><img src="assets/dice3d/SERVE_3_SLICE_4.png" alt="">
-      <img src="assets/dice3d/SERVE_4_SLICE_3.png" alt=""><img src="assets/dice3d/SERVE_5_LET.png" alt=""><img src="assets/dice3d/SERVE_6_FAULT.png" alt="">
-    </div>
+    <div class="die" id="die"></div>
+    <div class="die" id="dieV"></div>
+    <div class="die" id="dieD"></div>
     <div id="txt"></div>
     <div class="logo" id="logo"><div class="lg" id="lg"></div></div>
     <div class="wipe" id="wipe"><div class="orb"><img src="assets/LIME_1.png" alt=""></div></div>
@@ -284,7 +284,7 @@ let FMT = P.get('format') || 'auto';
 
 const stage = $('#stage'), host = $('#host'), cardsL = $('#cards'), fxL = $('#fx'), txtL = $('#txt');
 const logo = $('#logo'), lg = $('#lg'), meter = $('#meter'), mlabs = $('#mlabs'), pips = $$('.pip'), marr = $('#marr');
-const score = $('#score'), scoreYou = $$('#score .n:first-of-type span'), die = $('#die'), faces = $$('#die img');
+const score = $('#score'), scoreYou = $$('#score .n:first-of-type span'), die = $('#die'), dieV = $('#dieV'), dieD = $('#dieD'), faces = [];
 const marrPath = $('#marr path'), wipeEl = $('#wipe'), cap = $('#cap'), rays = $('#rays'), court = $('#court'), blobL = $('#blobL'), blobO = $('#blobO');
 
 // 3D logo layers
@@ -422,14 +422,71 @@ function meterSet(at, label, lit, dir) {
   tl.to(marrPath, { fill: col, duration: .3 }, at + .1);
   tl.fromTo(marr, { y: 0 }, { y: dir === 'down' ? 10 : -10, duration: .25, yoyo: true, repeat: 3, ease: 'sine.inOut', immediateRender: false }, at + .55);
 }
+
+/* ---------- real 3D dice (three.js), driven by the timeline so scrubbing stays exact ---------- */
+const DIE_FACES = {
+  serve: ['SERVE_1_TOPSPIN_4', 'SERVE_2_TOPSPIN_5', 'SERVE_3_SLICE_4', 'SERVE_4_SLICE_3', 'SERVE_5_LET', 'SERVE_6_FAULT'],
+  volley: ['VOLLEY_1_6_OR_HIGHER', 'VOLLEY_2_7', 'VOLLEY_3_NET', 'VOLLEY_4_OUT', 'VOLLEY_1_6_OR_HIGHER', 'VOLLEY_2_7'],
+  drop: ['DROPSHOT_1_1', 'DROPSHOT_2_2', 'DROPSHOT_3_NET', 'DROPSHOT_4_OUT', 'DROPSHOT_1_1', 'DROPSHOT_2_2'],
+};
+// material order in three.js: +x, -x, +y, -y, +z, -z; these turn material i toward the camera
+const FACE_ROT = [[0, -Math.PI / 2], [0, Math.PI / 2], [Math.PI / 2, 0], [-Math.PI / 2, 0], [0, 0], [0, Math.PI]];
+const D3 = {};
+function makeDie3(el, kind) {
+  if (!window.THREE) return null;
+  const T = THREE;
+  const roundedBox = (size, r, seg) => {
+    const g = new T.BoxGeometry(size, size, size, seg, seg, seg), p = g.attributes.position, h = size / 2 - r, v = new T.Vector3(), c = new T.Vector3();
+    for (let i = 0; i < p.count; i++) { v.fromBufferAttribute(p, i); c.set(Math.max(-h, Math.min(h, v.x)), Math.max(-h, Math.min(h, v.y)), Math.max(-h, Math.min(h, v.z))); v.sub(c).normalize().multiplyScalar(r).add(c); p.setXYZ(i, v.x, v.y, v.z); }
+    g.computeVertexNormals(); return g;
+  };
+  const renderer = new T.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+  renderer.setPixelRatio(1); renderer.setSize(560, 560); renderer.outputEncoding = T.sRGBEncoding; renderer.setClearColor(0, 0);
+  el.innerHTML = ''; el.appendChild(renderer.domElement);
+  const scene = new T.Scene(), cam = new T.PerspectiveCamera(30, 1, .1, 50); cam.position.set(0, 0, 6.2);
+  scene.add(new T.AmbientLight(0xffffff, .5));
+  const key = new T.DirectionalLight(0xfff6e8, .85); key.position.set(-1.5, 3, 3.5); scene.add(key);
+  const fill = new T.DirectionalLight(0xffffff, .5); fill.position.set(3, .3, 2.5); scene.add(fill);
+  const loader = new T.TextureLoader();
+  const d = { kind, cube: null, last: null, draw: () => renderer.render(scene, cam) };
+  const mats = DIE_FACES[kind].map(n => { const t = loader.load(`assets/dicefaces/${n}.jpg`, () => d.draw()); t.encoding = T.sRGBEncoding; t.anisotropy = 8; return new T.MeshStandardMaterial({ map: t, roughness: .5, metalness: 0 }); });
+  d.cube = new T.Mesh(roundedBox(1.55, .15, 8), mats); scene.add(d.cube);
+  return d;
+}
+function faceQ(f) {
+  const T = THREE, [rx, ry] = FACE_ROT[f];
+  return new T.Quaternion().setFromEuler(new T.Euler(rx, ry, 0, 'XYZ')).premultiply(new T.Quaternion().setFromEuler(new T.Euler(-.38, .5, 0)));
+}
+function dieRest(d, f) { if (!d) return; d.last = faceQ(f); d.rest = d.last.clone(); d.rolls = []; d.cube.quaternion.copy(d.last); d.draw(); }
+let rollSeed = 1;
+// every roll is stored; the pose is computed from the timeline time, so seeking and scrubbing are exact
+function roll3(d, wrap, at, f, baseY, hop = 150, dur = 1.1) {
+  if (!d) return;
+  const T = THREE, start = d.last.clone(), target = faceQ(f); d.last = target.clone();
+  const r = k => { const x = Math.sin(rollSeed * 12.9898 + k * 78.233) * 43758.5453; return x - Math.floor(x); };
+  const axis = new T.Vector3(r(1) - .5, r(2) - .5, r(3) - .5).normalize(), turns = 2 + r(4); rollSeed++;
+  d.rolls.push({ at, dur, start, target, axis, turns });
+  if (hop) tl.to(wrap, { y: baseY - hop, duration: .3, ease: 'power2.out' }, at).to(wrap, { y: baseY, duration: .55, ease: 'bounce.out' }, at + .3);
+}
+const ease3 = gsap.parseEase('power3.out'), qTmp = window.THREE ? new THREE.Quaternion() : null;
+function poseDice(t) {
+  Object.values(D3).forEach(d => {
+    if (!d || !d.rolls) return;
+    let roll = null; for (const r of d.rolls) if (r.at <= t) roll = r;
+    if (!roll) d.cube.quaternion.copy(d.rest);
+    else {
+      const k = Math.min(1, (t - roll.at) / roll.dur), e = ease3(k);
+      d.cube.quaternion.copy(roll.start).slerp(roll.target, e);
+      qTmp.setFromAxisAngle(roll.axis, (1 - e) * roll.turns * Math.PI * 2); d.cube.quaternion.premultiply(qTmp);
+    }
+    d.draw();
+  });
+}
 let dieRot = 0;
-function roll(at, final, n = 9) {
-  const [, dy] = L.pile; dieRot += 720;
-  const seq = [2, 0, 5, 3, 1, 4, 2, 0, 3, 5, 1];
-  for (let k = 0; k < n; k++) { const f = k === n - 1 ? final : seq[(k + final) % seq.length]; tl.set(faces, { autoAlpha: (j) => j === f ? 1 : 0 }, at + k * .085); }
-  tl.to(die, { rotation: dieRot, duration: .8, ease: 'power3.out' }, at);
-  tl.to(die, { y: dy - 150, duration: .3, ease: 'power2.out' }, at).to(die, { y: dy, duration: .5, ease: 'bounce.out' }, at + .3);
-  tl.fromTo(die, { scale: 1.3 }, { scale: 1.42, duration: .12, yoyo: true, repeat: 1, immediateRender: false }, at + .8);
+function roll(at, final) {
+  const [, dy] = L.pile;
+  roll3(D3.serve, die, at, final, dy);
+  tl.fromTo(die, { scale: 1.3 }, { scale: 1.42, duration: .12, yoyo: true, repeat: 1, immediateRender: false }, at + .95);
 }
 const MOODS = { lime: 'rgba(198,244,50,0.45)', yellow: 'rgba(255,210,63,0.5)', red: 'rgba(255,74,94,0.45)', orange: 'rgba(255,138,42,0.45)' };
 function mood(at, m) { tl.to(blobL, { '--c': MOODS[m], duration: .8, ease: 'power2.out' }, at); }
@@ -504,14 +561,16 @@ function build(time = 0) {
   $$('.seg .b').forEach(b => b.classList.toggle('on', b.dataset.fmt === fmt));
   fit();
   cardsL.innerHTML = fxL.innerHTML = txtL.innerHTML = mlabs.innerHTML = '';
-  const persist = [$('#sprog'), marrPath, logo, lg, meter, score, die, wipeEl, rays, court, blobL, blobO, marr, ...pips, ...faces, ...scoreYou];
+  const persist = [$('#sprog'), marrPath, logo, lg, meter, score, die, dieV, dieD, wipeEl, rays, court, blobL, blobO, marr, ...pips, ...faces, ...scoreYou];
   gsap.killTweensOf(persist); gsap.set(persist, { clearProps: 'all' });
   cues = []; scenes = []; screenTxt = []; Z = 10; prevLab = null; dieRot = 0;
 
   gsap.set([logo, meter, score, die, wipeEl, rays], { autoAlpha: 0 });
   gsap.set(logo, { width: L.logoW, xPercent: -50, yPercent: -50, x: L.logo[0], y: L.logo[1] });
   gsap.set(die, { width: L.dieW, height: L.dieW, xPercent: -50, yPercent: -50, x: L.pile[0], y: L.pile[1] });
-  gsap.set(faces, { autoAlpha: 0 }); gsap.set(faces[0], { autoAlpha: 1 });
+  if (!D3.serve) { D3.serve = makeDie3(die, 'serve'); D3.volley = makeDie3(dieV, 'volley'); D3.drop = makeDie3(dieD, 'drop'); }
+  rollSeed = 1; dieRest(D3.serve, 0); dieRest(D3.volley, 0); dieRest(D3.drop, 0);
+  gsap.set([dieV, dieD], { autoAlpha: 0, xPercent: -50, yPercent: -50, width: L.dieW * .62, height: L.dieW * .62 });
   gsap.set(score, { xPercent: -50, yPercent: -50, x: L.score[0], y: L.score[1] });
   gsap.set(scoreYou[1], { yPercent: 100 });
   gsap.set(rays, { x: L.logo[0], y: L.logo[1] });
@@ -935,6 +994,16 @@ function build(time = 0) {
     const any = burst('Returns any groundstroke', (L.pair[0][0] + L.pair[1][0]) / 2, cy - ch(cw2) / 2 - 44, 'w', -3); any.style.fontSize = '34px'; any.style.padding = '10px 18px 8px';
     popAt(any, s + 3.0, -3); hide(any, s + 5.9);
     const up = lab('↑ Equal or higher', L.pair[0][0], 'g', -3), dn = lab('↓ Equal or lower', L.pair[1][0], 'y', 3);
+    // the dice roll for real: Volley lands 7, Drop-Shot lands 1; then both miss (NET / OUT)
+    const dv = [L.pair[0][0] - cw2 * .56, cy + ch(cw2) * .3], dd = [L.pair[1][0] + cw2 * .56, cy + ch(cw2) * .3];
+    tl.set(dieV, { x: dv[0], y: dv[1] }, s + 6.0); tl.set(dieD, { x: dd[0], y: dd[1] }, s + 6.0);
+    tl.fromTo(dieV, { autoAlpha: 0, scale: 0 }, { autoAlpha: 1, scale: 1, duration: .45, ease: 'back.out(2)', immediateRender: false }, s + 6.05);
+    roll3(D3.volley, dieV, s + 6.4, 1, dv[1], 130);
+    tl.fromTo(dieD, { autoAlpha: 0, scale: 0 }, { autoAlpha: 1, scale: 1, duration: .45, ease: 'back.out(2)', immediateRender: false }, s + 7.9);
+    roll3(D3.drop, dieD, s + 8.2, 0, dd[1], 130);
+    roll3(D3.volley, dieV, s + 14.7, 2, dv[1], 120);
+    roll3(D3.drop, dieD, s + 15.0, 3, dd[1], 120);
+    hide([dieV, dieD], s + 20.7);
     T('ROLL FOR|g:PACE!', s + 6.0, s + 10.4, { s: 'Volley: they must play a Groundstroke with pace equal or higher. Drop-Shot: equal or lower.' });
     popAt(up, s + 6.6, -3); popAt(dn, s + 8.4, 3); glow(V, s + 6.6, true, '#a45cff'); glow(V, s + 8.3, false); glow(D, s + 8.4, true, '#ffd23f'); glow(D, s + 10.3, false);
     hide([up, dn], s + 10.3);
@@ -1067,6 +1136,7 @@ function build(time = 0) {
     scenes.forEach(sc => { sc.t = shift(sc.t); });
     screenTxt.forEach(x => { x.t = shift(x.t); });
     qPauseT = shift(qPauseT); qRevealT = shift(qRevealT);
+    Object.values(D3).forEach(d => d && d.rolls && d.rolls.forEach(r => { r.at = shift(r.at); }));
     // the background drift and progress bar span the whole piece: stretch them too
     tl.getChildren(false, true, false).forEach(tw => { if (tw.startTime() === 0 && Math.abs(tw.duration() - S0) < .01) tw.duration(S); });
   }
@@ -1089,6 +1159,7 @@ function tick() {
   if (!tl) return;
   const t = tl.time();
   voTick(t);
+  poseDice(t);
   const c = cues.find(c => t >= c.t && t < c.e) || null;
   if (c !== lastCue) { lastCue = c; if (c) { cap.innerHTML = c.text; cap.classList.add('on'); } else cap.classList.remove('on'); }
   $('#fill').style.width = (t / tl.duration() * 100) + '%';
@@ -1226,7 +1297,7 @@ Promise.race([Promise.all([...IMG.map(loadImg), fontsReady()]), new Promise(r =>
   else if (!isNaN(t0)) { started = true; $('#start').classList.add('gone'); tl.seek(t0); tick(); setPlayIcon(false); }
   else { tl.seek(2.6); tick(); if (pending === 'play') start(); } // poster frame behind the start button
 });
-window.__slice = { get tl() { return tl; }, build, vo: VO };
+window.__slice = { get tl() { return tl; }, build, vo: VO, d3: D3, faceQ };
 })();
 </script>
 </body>
