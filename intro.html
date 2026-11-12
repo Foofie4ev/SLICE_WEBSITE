@@ -818,7 +818,7 @@ function build(time = 0) {
     hlPop(hA, s + K * 1.9); hlPop(hB, s + K * 2.05);
     // badge sits above both cards, same pill style as the other callouts
     const eq = burst('Pace 2 = Pace 2', px, py - ch(L.cw) / 2 - (fmt === 'tall' ? 44 : 64), 'g', -4); popAt(eq, s + K * 2.1, -4);
-    T('MATCH THE|g:PACE!', s + K * 1.9, s + K * 7.1, { s: 'Return a groundstroke with the same pace in the other color. Topspin or Slice. Groundstrokes only!' });
+    T('MATCH THE|g:PACE!', s + K * 1.9, s + K * 7.1, { s: 'Return a groundstroke with the same pace in the other color, regardless of spin. Groundstrokes only!' });
     const m1 = C('FOREHAND_4', L.miniW), m2 = C('BACKHAND_4', L.miniW);
     put(m1, s + K * 4.1, { x: L.mini[0][0], y: L.mini[0][1] + 80, rotation: 0, scale: .5, autoAlpha: 0 }, { y: L.mini[0][1], rotation: -5, scale: 1, autoAlpha: 1 }, .45, 'back.out(2)');
     put(m2, s + K * 4.3, { x: L.mini[1][0], y: L.mini[1][1] + 80, rotation: 0, scale: .5, autoAlpha: 0 }, { y: L.mini[1][1], rotation: 5, scale: 1, autoAlpha: 1 }, .45, 'back.out(2)');
