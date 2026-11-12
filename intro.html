@@ -73,6 +73,7 @@ body.record #host,body.embed #host{bottom:0}
 .burst.y{background:var(--yellow);color:#0b0d0a}
 .burst.r{background:var(--red);color:#fff}
 .burst.w{background:#fff;color:#0b0d0a}
+.burst.p{background:#a45cff;color:#fff}.burst.pk{background:#ff4f9a;color:#fff}
 .burst.k{background:#0b0d0a;color:var(--lime);border:3px solid var(--lime);font-size:30px;letter-spacing:.14em;font-style:normal;padding:12px 20px}
 .burst.eq{font-size:110px;padding:6px 34px 10px;border-radius:24px}
 .burst.count{font-size:220px;padding:0 54px 12px;border-radius:40px}
@@ -101,7 +102,7 @@ body.record #host,body.embed #host{bottom:0}
 .tb .ln{display:block;white-space:nowrap}
 .tb .wd{display:inline-block;padding-right:.22em}
 .tb .wd:last-child{padding-right:0}
-.c-g{color:var(--lime)}.c-o{color:var(--orange)}.c-y{color:var(--yellow)}.c-r{color:var(--red)}
+.c-g{color:var(--lime)}.c-o{color:var(--orange)}.c-y{color:var(--yellow)}.c-r{color:var(--red)}.tb .c-m{color:#aab0b6}.tb .c-p{color:#b77bff}.tb .c-k{color:#ff5aa5}.tb .c-a{color:#ffb98f}
 .tb .s{font:500 42px/1.25 var(--body);color:rgba(244,246,239,.86);max-width:780px}
 .fmt-tall .tb .s{font-size:44px;max-width:900px}
 
@@ -371,7 +372,7 @@ function pop(x, at, rot = -20) { tl.set(x, { autoAlpha: 1 }, at); tl.fromTo(x, {
 function popAt(x, at, rot) { tl.set(x, { autoAlpha: 1 }, at); tl.fromTo(x, { scale: 0 }, { scale: 1, rotation: rot, duration: .45, ease: 'back.out(2.6)', immediateRender: false }, at); }
 function HL(c, [l, t, w, h], color) {
   // ovals: grow the box a little so the ellipse clears the corners of what it circles
-  const k = 1.25; l -= w * (k - 1) / 2; t -= h * (k - 1) / 2; w *= k; h *= k;
+  const k = 1.12; l -= w * (k - 1) / 2; t -= h * (k - 1) / 2; w *= k; h *= k;
   const b = el('hl', '', c); Object.assign(b.style, { left: l + '%', top: t + '%', width: w + '%', height: h + '%' });
   if (color) b.style.borderColor = color; return b;
 }
@@ -389,7 +390,7 @@ function ofan(n, i) { const m = i - (n - 1) / 2; return { x: L.opp[0] + m * L.os
 function TB(h, { k, s, cls = '' } = {}) {
   const b = el('tb ' + cls, '', txtL);
   const words = l => l.split(' ').filter(Boolean).map(w => {
-    const m = w.match(/^([gory]):(.*)$/); const t = (m ? m[2] : w).replace(/_/g, '&nbsp;');
+    const m = w.match(/^([gorympka]):(.*)$/); const t = (m ? m[2] : w).replace(/_/g, '&nbsp;');
     return `<span class="wd${m ? ' c-' + m[1] : ''}">${t}</span>`;
   }).join('');
   b.innerHTML = (k ? `<div class="k">${k}</div>` : '') + `<div class="h">${h.split('|').map(l => `<span class="ln">${words(l)}</span>`).join('')}</div>` + (s ? `<div class="s">${s}</div>` : '');
@@ -398,7 +399,7 @@ function TB(h, { k, s, cls = '' } = {}) {
   const widest = () => Math.max(...$$('.ln', b).map(l => l.scrollWidth));
   const w0 = widest();
   if (w0 > max * .985) hd.style.fontSize = (parseFloat(getComputedStyle(hd).fontSize) * max / w0 * .97) + 'px';
-  b.plain = h.replace(/[gory]:/g, '').replace(/_/g, ' ').replace(/\|/g, ' ') + (s ? ' — ' + s : '');
+  b.plain = h.replace(/\b[gorympka]:/g, '').replace(/_/g, ' ').replace(/\|/g, ' ') + (s ? ' — ' + s : '');
   gsap.set(b, { autoAlpha: 0 });
   return b;
 }
@@ -706,10 +707,10 @@ function build(time = 0) {
     put(B, s + K * 3.0, { x: L.W + 300, y: by - 60, rotation: 30 }, { x: bx, y: by, rotation: 4 }, .6, 'power3.out'); flip(B, s + K * 3.05, .6);
     T('o:ORANGE_=|o:BACKHAND.', s + K * 3.05, s + K * 4.6);
     glow(B, s + K * 3.5, true, '#ff8a2a'); glow(B, s + K * 4.6, false);
-    const spA = HL(A, [29, 35, 50, 11], '#c6f432'), spB = HL(B, [24, 52, 54, 12], '#ffd23f');
+    const spA = HL(A, [27, 31, 50, 12], '#c6f432'), spB = HL(B, [24, 50, 52, 13], '#ffd23f');
     hlPop(spA, s + K * 4.8); hlPop(spB, s + K * 5.15); hide([spA, spB], s + K * 7.0);
     T('SPIN:|g:TOPSPIN|OR y:SLICE.', s + K * 4.7, s + K * 7.0);
-    const paA = HL(A, [5, 3, 33, 21]), paB = HL(B, [5, 3, 33, 21]);
+    const paA = HL(A, [4, 3, 22, 20]), paB = HL(B, [4, 3, 22, 20]);
     hlPop(paA, s + K * 7.2); hlPop(paB, s + K * 7.35); hide([paA, paB], s + K * 10.4);
     // pace scale fills slow → fast, then previews the two directions
     meterShow(s + K * 7.6); meterSet(s + K * 7.7, 'Pace: g:1 = slow · g:7 = rocket', [1, 2, 3, 4, 5, 6, 7], 'up');
@@ -717,7 +718,7 @@ function build(time = 0) {
     meterSet(s + K * 11.9, 'y:Slice: pace goes down', [1, 2, 3, 4, 5], 'down');
     meterHide(s + K * 13.2);
     T('NUMBERS|ARE g:PACE.', s + K * 7.1, s + K * 10.4, { s: 'The number is the speed, or pace, of your shot. The higher the number, the faster the pace.' });
-    const arA = HL(A, [26, 6, 15, 20], '#c6f432'), arB = HL(B, [24, 7, 16, 20], '#ffd23f');
+    const arA = HL(A, [24.5, 6, 12, 18], '#c6f432'), arB = HL(B, [26, 5, 12, 25], '#ffd23f');
     hlPop(arA, s + K * 10.6); hlPop(arB, s + K * 10.85);
     const bY = fmt === 'tall' ? ay + ch(L.pw) / 2 - 34 : ay - ch(L.pw) / 2 - 50;
     const bA = burst('↑ Pace up', ax, bY, 'g', -5), bB = burst('↓ Pace down', bx, bY, 'y', 4);
@@ -757,7 +758,7 @@ function build(time = 0) {
     meterShow(s + K * .2); meterSet(s + K * .25, 'Opponent’s shot: g:Topspin · pace 5', [5, 6, 7], 'up');
     T('g:TOPSPIN?|GO g:UP.', s + K * .3, s + K * 6.7, { k: 'Rule 2', s: 'Topspin speeds up the rally. Return it with the same color and equal or higher pace.' });
     const [f5, b3, fs6, bs5, fs2] = hand;
-    const tArr = HL(pileTop, [26, 6, 15, 20], '#c6f432'), tSpin = HL(pileTop, [29, 35, 50, 11], '#c6f432');
+    const tArr = HL(pileTop, [24.5, 6, 12, 18], '#c6f432'), tSpin = HL(pileTop, [27, 31, 50, 12], '#c6f432');
     hlPop(tArr, s + K * .5); hlPop(tSpin, s + K * .7); hide([tArr, tSpin], s + K * 4.6);
     const no2 = stamp(fs2, 'no', 'Too low'), ok5 = stamp(f5, 'ok'), ok6 = stamp(fs6, 'ok');
     glow(fs2, s + K * 2.6, false); dim(fs2, s + K * 2.6); pop(no2, s + K * 2.6); mv(fs2, s + K * 2.6, { y: '+=60' }, .4);
@@ -782,7 +783,7 @@ function build(time = 0) {
     meterSet(s + K * .1, 'Opponent’s shot: y:Slice · pace 6', [1, 2, 3, 4, 5, 6], 'down');
     T('y:SLICE?|GO y:DOWN.', s + K * .2, s + K * 6.6, { s: 'Slice slows the rally down. Return it with the same color and equal or lower pace.' });
     const [b3, fs6, bs5, fs2] = hand;
-    const sArr = HL(oSlice6, [24, 7, 16, 20], '#ffd23f'), sSpin = HL(oSlice6, [24, 52, 54, 12], '#ffd23f');
+    const sArr = HL(oSlice6, [26, 5, 12, 25], '#ffd23f'), sSpin = HL(oSlice6, [22, 50, 52, 13], '#ffd23f');
     hlPop(sArr, s + K * .35); hlPop(sSpin, s + K * .55); hide([sArr, sSpin], s + K * 5.5);
     // "so return it with the same color, and a pace that's equal or LOWER": the legal cards rise
     dim(fs2, s + K * 3.4, false);
@@ -791,13 +792,13 @@ function build(time = 0) {
     pop(okA, s + K * 4.9); pop(okB, s + K * 5.1);
     hide([okA, okB], s + K * 5.9); glow(fs2, s + K * 5.9, false); glow(fs6, s + K * 5.9, false); mv(fs6, s + K * 5.9, { y: '+=60' }, .4);
     play(fs2, s + K * 5.9, [px + 6, py + 6, 3], L.cw / L.hw); hide(inTag, s + K * 5.9);
-    const p2 = HL(fs2, [5, 3, 33, 21], '#ffd23f'); hlPop(p2, s + K * 6.2); hide(p2, s + K * 8.6);   // circle the 2 as it's played
+    const p2 = HL(fs2, [4, 3, 22, 20], '#ffd23f'); hlPop(p2, s + K * 6.2); hide(p2, s + K * 8.6);   // circle the 2 as it's played
     hand = [b3, fs6, bs5];
     hand.forEach((c, i) => mv(c, s + K * 6.4, fan(3, i), .5));
     T('YOUR SHOT|SETS UP|g:THEIR_RETURN.', s + K * 7.0, s + K * 11.9, { s: 'Every shot sets the rules for the return: the color, the spin and the pace.' });
     meterSet(s + K * 7.2, 'Their return: vs y:Slice · pace 2', [1, 2], 'down');
     // "...the color, the spin, and the pace!": circle each on the card just played
-    const cCol = HL(fs2, [4, 37, 90, 14], '#c6f432'), cSpin = HL(fs2, [24, 52, 54, 12], '#ffd23f'), cPace = HL(fs2, [5, 3, 33, 21], '#ffd23f');
+    const cCol = HL(fs2, [7, 37, 86, 16], '#c6f432'), cSpin = HL(fs2, [22, 50, 52, 13], '#ffd23f'), cPace = HL(fs2, [4, 3, 22, 20], '#ffd23f');
     hlPop(cCol, s + K * 9.6); hlPop(cSpin, s + K * 10.2); hlPop(cPace, s + K * 11.0); hide([cCol, cSpin, cPace], s + K * 11.9);
     vo(s + K * .2, 'When your opponent plays a <em>Slice</em>, it slows the rally down!', 3.0);
     vo(s + K * 3.4, 'So return it with the same color, and a pace that’s <em>equal or lower!</em>', 3.4);
@@ -814,7 +815,7 @@ function build(time = 0) {
     put(bs2, s + K * .3, { x: px + 200, y: -350, rotation: -40 }, { x: px + dx, y: py + 10, rotation: 7 }, .6); flip(bs2, s + K * .35, .5);
     ring(s + K * .85, [px + dx, py], '#ffffff', .3, 2);
     T('SWITCH|COLORS?', s + K * .3, s + K * 1.8, { s: 'Forehand to Backhand, or back again.' });
-    const hA = HL(pileTop, [5, 3, 33, 21]), hB = HL(bs2, [5, 3, 33, 21]);
+    const hA = HL(pileTop, [4, 3, 22, 20]), hB = HL(bs2, [4, 3, 22, 20]);
     hlPop(hA, s + K * 1.9); hlPop(hB, s + K * 2.05);
     // badge sits above both cards, same pill style as the other callouts
     const eq = burst('Pace 2 = Pace 2', px, py - ch(L.cw) / 2 - (fmt === 'tall' ? 44 : 64), 'g', -4); popAt(eq, s + K * 2.1, -4);
@@ -901,7 +902,8 @@ function build(time = 0) {
     const f5 = C('FOREHAND_5', L.hw), es = C('EXTRA_SPIN', L.hw);
     put(f5, s + .9, { x: L.hand[0] - 75, y: L.H + 300, rotation: 0 }, { x: L.hand[0] - 75, y: L.hand[1], rotation: -5 }, .55, 'back.out(1.3)');
     put(es, s + 1.0, { x: L.hand[0] + 75, y: L.H + 300, rotation: 0 }, { x: L.hand[0] + 75, y: L.hand[1], rotation: 5 }, .55, 'back.out(1.3)');
-    T('NEED_A_6?|ADD g:EXTRA|g:SPIN!', s + .3, s + 5.7, { k: 'Modifier cards', s: 'Play a modifier with your card. Extra Spin raises your card’s pace by 1.' });
+    T('m:MODIFIER|m:CARDS', s + .3, s + 2.5, { s: 'Need a little more pace? Use a modifier!' });
+    T('ADD m:EXTRA|m:SPIN!', s + 2.6, s + 5.7, { k: '+1 pace', s: 'Play a modifier with your card. Extra Spin raises your card’s pace by 1.' });
     play(f5, s + 2.6, [px - 14, py + 8, -6], L.cw / L.hw);
     play(es, s + 2.95, [px + L.cw * .66, py + 70, 10], L.cw / L.hw * .8);
     const eq = burst('5 + 1 = 6', px, fmt === 'tall' ? py + ch(L.cw) / 2 + 70 : py - ch(L.cw) / 2 - 64, 'g', -4); popAt(eq, s + 3.5, -4);
@@ -912,7 +914,7 @@ function build(time = 0) {
     const st = C('SOFT_TOUCH', L.pw);
     put(st, s + 6.0, { x: L.pair[0][0], y: L.H + 340, rotation: -20 }, { x: (L.pair[0][0] + L.pair[1][0]) / 2, y: L.pair[0][1], rotation: -4 }, .6, 'back.out(1.3)');
     const m1 = burst('−1 pace', (L.pair[0][0] + L.pair[1][0]) / 2, fmt === 'tall' ? L.pair[0][1] + ch(L.pw) / 2 + 60 : L.pair[0][1] - ch(L.pw) / 2 - 50, 'w', 4); popAt(m1, s + 6.5, 4);
-    T('y:SOFT_TOUCH|−1_PACE', s + 5.9, s + 10.0, { s: 'Soft Touch reduces your card’s pace by 1. One modifier per shot. After you play it, draw a card from your deck!' });
+    T('m:SOFT_TOUCH|−1_PACE', s + 5.9, s + 10.0, { s: 'Soft Touch reduces your card’s pace by 1. One modifier per shot. After you play it, draw a card from your deck!' });
     const dr = C('FOREHAND_1', L.bw, { down: true });
     put(dr, s + 8.2, { x: L.bag[0], y: L.bag[1], rotation: -8 }, { x: L.hand[0], y: L.hand[1], rotation: 0, scale: L.hw / L.bw }, .6, 'back.out(1.2)');
     const dtag = burst('+1 card!', L.hand[0] + (fmt === 'wide' ? 200 : 180), L.hand[1] - ch(L.hw) / 2 + 20, 'g', -3); dtag.style.fontSize = '34px'; dtag.style.padding = '10px 18px 8px'; popAt(dtag, s + 8.6, -3);
@@ -1084,18 +1086,18 @@ function build(time = 0) {
     };
     const tag = (txt, i, cls, at, end, rot = -3, below = false, x) => { const b = burst(txt, x !== undefined ? x : pos[i][0], below ? pos[i][1] + ch(gw) / 2 + 40 : pos[i][1] - ch(gw) / 2 - 40, cls, rot); b.style.fontSize = '30px'; b.style.padding = '9px 14px 7px'; popAt(b, at, rot); hide(b, end); return b; };
     T('TACTICAL|g:CARDS', s + .3, s + 3.3, { k: 'Specific pace only', s: 'Tactical cards can only return shots of a specific pace.' });
-    focus([0], s + 3.4, s + 6.4, '#ff4a5e'); tag('1s & 2s', 0, 'r', s + 3.6, s + 6.4);
+    focus([0], s + 3.4, s + 6.4, '#ff4a5e'); tag('Pace 1 or 2', 0, 'r', s + 3.6, s + 6.4);
     T('r:SMASH', s + 3.4, s + 6.4, { k: 'Low pace', s: 'A Smash returns low pace shots: 1s and 2s.' });
-    focus([1], s + 6.6, s + 9.6, '#ff4f9a'); tag('6s & 7s', 1, 'w', s + 6.8, s + 9.6, 3);
-    T('LOB', s + 6.6, s + 9.6, { k: 'High pace', s: 'A Lob returns high pace shots: 6s and 7s.' });
+    focus([1], s + 6.6, s + 9.6, '#ff4f9a'); tag('Pace 6 or 7', 1, 'pk', s + 6.8, s + 9.6, 3);
+    T('k:LOB', s + 6.6, s + 9.6, { k: 'High pace', s: 'A Lob returns high pace shots: 6s and 7s.' });
     // smash <-> lob, then what they return from the net
     focus([0, 1], s + 9.8, s + 17.0, '#ffffff');
     tag('Smash ↔ Lob', 0, 'w', s + 14.1, s + 16.9, -2, false, (pos[0][0] + pos[1][0]) / 2);
-    T('r:SMASH_↔|LOB', s + 13.9, s + 17.0, { s: 'A Smash can always return a Lob, and a Lob can always return a Smash.' });
-    tag('Returns Drop-Shots', 0, 'y', s + 10.4, s + 13.7, -3, true, pos[0][0] + (fmt === 'tall' ? 80 : 0)); tag('Returns Volleys', 1, 'o', s + 11.4, s + 13.7, 3, false, pos[1][0] + (fmt === 'wide' ? 20 : 30));
-    T('LOB_→_VOLLEY|r:SMASH_→_DROP-SHOT', s + 9.8, s + 13.8, { s: 'Volleys are high pace, so a Lob returns them. Drop-Shots are low, so a Smash returns them.' });
+    T('r:SMASH_↔|k:LOB', s + 13.9, s + 17.0, { s: 'A Smash can always return a Lob, and a Lob can always return a Smash.' });
+    tag('Returns Drop-Shots', 0, 'y', s + 10.4, s + 13.7, -3, true, pos[0][0] + (fmt === 'tall' ? 80 : 0)); tag('Returns Volleys', 1, 'p', s + 11.4, s + 13.7, 3, false, pos[1][0] + (fmt === 'wide' ? 20 : 30));
+    T('k:LOB_→_p:VOLLEY|r:SMASH_→_y:DROP-SHOT', s + 9.8, s + 13.8, { s: 'Volleys are high pace, so a Lob returns them. Drop-Shots are low, so a Smash returns them.' });
     focus([2, 3], s + 17.2, s + 24.0, '#ff8a2a'); tag('Equal pace', 2, 'o', s + 17.4, s + 23.9); tag('Steal a card!', 3, 'g', s + 19.0, s + 23.9, 3, true);
-    T('g:APPROACH', s + 17.2, s + 20.9, { k: 'Topspin 5 · Slice 3', s: 'The final Tactical card. Returns any shot of equal pace, and steals a card from your opponent’s hand!' });
+    T('a:APPROACH', s + 17.2, s + 20.9, { k: 'Topspin 5 · Slice 3', s: 'The final Tactical card. Returns any shot of equal pace, and steals a card from your opponent’s hand!' });
     T('STEAL THEIR|g:LAST_CARD?', s + 21.0, s + 24.0, { s: 'Then they can’t Dig Deep!' });
     out(G, s + 24.1, 0, 520);
     vo(s + .3, 'Tactical cards can only return shots of a <em>specific pace.</em>', 2.9);
