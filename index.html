@@ -654,7 +654,7 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
       </svg>
       <div class="hand" id="hand">
       <div class="hc x"><div class="hc-lift"><div class="hc-inner"><div class="hc-face"><img src="assets/cards/FOREHAND_SLICE_3.jpg" alt=""></div><div class="hc-face hc-back"><img src="assets/cards/LIME_CARD_BACK.jpg" alt=""></div></div></div></div>
-      <div class="hc"><div class="hc-lift"><div class="hc-inner"><div class="hc-face"><img src="assets/cards/VOLLEY_6.jpg" alt=""></div><div class="hc-face hc-back"><img src="assets/cards/LIME_CARD_BACK.jpg" alt=""></div></div></div></div>
+      <div class="hc"><div class="hc-lift"><div class="hc-inner"><div class="hc-face"><img src="assets/cards/VOLLEY.jpg" alt=""></div><div class="hc-face hc-back"><img src="assets/cards/LIME_CARD_BACK.jpg" alt=""></div></div></div></div>
       <div class="hc"><div class="hc-lift"><div class="hc-inner"><div class="hc-face"><img src="assets/cards/FOREHAND_7.jpg" alt=""></div><div class="hc-face hc-back"><img src="assets/cards/LIME_CARD_BACK.jpg" alt=""></div></div></div></div>
       <div class="hc"><div class="hc-lift"><div class="hc-inner"><div class="hc-face"><img src="assets/cards/WINNER.jpg" alt=""></div><div class="hc-face hc-back"><img src="assets/cards/LIME_CARD_BACK.jpg" alt=""></div></div></div></div>
       <div class="hc"><div class="hc-lift"><div class="hc-inner"><div class="hc-face"><img src="assets/cards/BACKHAND_5.jpg" alt=""></div><div class="hc-face hc-back"><img src="assets/cards/ORANGE_CARD_BACK.jpg" alt=""></div></div></div></div>
@@ -686,7 +686,7 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
     <div class="r-cardcol">
       <div class="r-card first"><img src="assets/cards/FOREHAND_SLICE_5.jpg" alt="Forehand Slice card"></div>
       <div class="r-card"><img src="assets/cards/BACKHAND_6.jpg" alt="Backhand Topspin card"></div>
-      <div class="r-card"><img src="assets/cards/VOLLEY_7.jpg" alt="Volley card"></div>
+      <div class="r-card"><img src="assets/cards/VOLLEY.jpg" alt="Volley card"></div>
       <div class="r-card"><img src="assets/cards/SMASH_7.jpg" alt="Smash card"></div>
       <div class="r-card"><img src="assets/cards/WINNER.jpg" alt="Winner card"></div>
     </div>
@@ -1565,12 +1565,12 @@ function gameplay() {
 /* deck ring */
 function deckRing() {
   const deck = [
-    ['FOREHAND_7', 'Topspin Forehand', 'Groundstroke', 0], ['FOREHAND_SLICE_5', 'Forehand Slice', 'Groundstroke', 0], ['BACKHAND_6', 'Topspin Backhand', 'Groundstroke', 1], ['BACKHAND_SLICE_3', 'Backhand Slice', 'Groundstroke', 1],
-    ['APPROACH_5', 'Topspin Approach', 'Tactical', 1], ['APPROACH_3', 'Approach Slice', 'Tactical', 0], ['VOLLEY_7', 'Volley', 'Net card', 0], ['DROP_SHOT_2', 'Drop-Shot', 'Net card', 1], ['LOB_2', 'Lob', 'Tactical', 0], ['LOB_1', 'Lob', 'Tactical', 1],
+    ['FOREHAND_7', 'Topspin Forehand', 'Groundstroke', 0], ['BACKHAND_6', 'Topspin Backhand', 'Groundstroke', 1], ['FOREHAND_SLICE_5', 'Forehand Slice', 'Groundstroke', 0], ['BACKHAND_SLICE_3', 'Backhand Slice', 'Groundstroke', 1],
+    ['APPROACH_5', 'Topspin Approach', 'Tactical', 1], ['APPROACH_3', 'Approach Slice', 'Tactical', 0], ['VOLLEY', 'Volley', 'Net card', 0], ['DROP_SHOT', 'Drop-Shot', 'Net card', 1], ['LOB_2', 'Lob', 'Tactical', 0], ['LOB_1', 'Lob', 'Tactical', 1],
     ['SMASH_7', 'Smash', 'Tactical', 1], ['SMASH_6', 'Smash', 'Tactical', 0], ['WINNER', 'Winner', 'Special', 0], ['GOOD_GET', 'Good Get', 'Special', 1], ['ERROR', 'Error', 'Special', 0],
     ['SOFT_TOUCH', 'Soft Touch', 'Modifier', 1], ['EXTRA_SPIN', 'Extra Spin', 'Modifier', 0], ['FOREHAND_4', 'Topspin Forehand', 'Groundstroke', 0], ['BACKHAND_SLICE_7', 'Backhand Slice', 'Groundstroke', 1]
   ];
-  const INFO = {"FOREHAND_7": ["#c6f432", "Topspin: return equal or higher."], "FOREHAND_SLICE_5": ["#c6f432", "Slice: return equal or lower."], "BACKHAND_6": ["#ff8a2a", "Topspin: return equal or higher."], "BACKHAND_SLICE_3": ["#ff8a2a", "Slice: return equal or lower."], "APPROACH_5": ["#ff8a2a", "Match the pace exactly, then steal a card."], "APPROACH_3": ["#ffd23f", "Match the pace exactly, then steal a card."], "VOLLEY_7": ["#a45cff", "Returns any groundstroke. Roll for pace."], "DROP_SHOT_2": ["#ffe11a", "Returns any groundstroke. Roll for pace."], "LOB_2": ["#ff4f9a", "Returns 6s and 7s, including Smashes and Volleys."], "LOB_1": ["#ff4f9a", "Returns 6s and 7s, including Smashes and Volleys."], "SMASH_7": ["#ff4a5e", "Returns 1s and 2s, including Lobs and Drop-Shots."], "SMASH_6": ["#ff4a5e", "Returns 1s and 2s, including Lobs and Drop-Shots."], "WINNER": ["#ffffff", "Play it on a 3, 4 or 5 and win the point."], "GOOD_GET": ["#ffd23f", "Returns anything. Then discard a card."], "ERROR": ["#ff4a5e", "Stuck with it? Play it and lose the point."], "SOFT_TOUCH": ["#bfc4c9", "Lowers your card’s pace by 1."], "EXTRA_SPIN": ["#c6f432", "Raises your card’s pace by 1."], "FOREHAND_4": ["#c6f432", "Topspin: return equal or higher."], "BACKHAND_SLICE_7": ["#ff8a2a", "Slice: return equal or lower."]};
+  const INFO = {"FOREHAND_7": ["#c6f432", "Topspin: return equal or higher."], "FOREHAND_SLICE_5": ["#c6f432", "Slice: return equal or lower."], "BACKHAND_6": ["#ff8a2a", "Topspin: return equal or higher."], "BACKHAND_SLICE_3": ["#ff8a2a", "Slice: return equal or lower."], "APPROACH_5": ["#ff8a2a", "Match the pace exactly, then steal a card."], "APPROACH_3": ["#ffd23f", "Match the pace exactly, then steal a card."], "VOLLEY": ["#a45cff", "Returns any groundstroke. Roll for pace."], "DROP_SHOT": ["#ffe11a", "Returns any groundstroke. Roll for pace."], "LOB_2": ["#ff4f9a", "Returns 6s and 7s, including Smashes and Volleys."], "LOB_1": ["#ff4f9a", "Returns 6s and 7s, including Smashes and Volleys."], "SMASH_7": ["#ff4a5e", "Returns 1s and 2s, including Lobs and Drop-Shots."], "SMASH_6": ["#ff4a5e", "Returns 1s and 2s, including Lobs and Drop-Shots."], "WINNER": ["#ffffff", "Play it on a 3, 4 or 5 and win the point."], "GOOD_GET": ["#ffd23f", "Returns anything. Then discard a card."], "ERROR": ["#ff4a5e", "Stuck with it? Play it and lose the point."], "SOFT_TOUCH": ["#bfc4c9", "Lowers your card’s pace by 1."], "EXTRA_SPIN": ["#c6f432", "Raises your card’s pace by 1."], "FOREHAND_4": ["#c6f432", "Topspin: return equal or higher."], "BACKHAND_SLICE_7": ["#ff8a2a", "Slice: return equal or lower."]};
   const ring = $('#ring'), stage = $('#ring-stage'), nameEl = $('#ring-name'), typeEl = $('#ring-type'), descEl = $('#ring-desc'), bigEl = $('#deck-big'), secEl = $('#cards');
   const N = deck.length, step = 360 / N;
   // juice burst behind the front card
