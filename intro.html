@@ -510,7 +510,7 @@ function wipe(at, color = '#c6f432', src = 'LIME_1') {
    ============================================================ */
 // bump when any clip changes, so browsers don't play an old cached copy
 const VO_VERSION = '3';
-const VO_DUR = [3.43, 2.04, 4.16, 2.78, 1.86, 2.58, 2.17, 4.27, 3.48, 1.3, 1.66, 1.65, 3.75, 5.41, 5.41, 2.59, 6.54, 3.57, 4.68, 2.55, 3.28, 4.77, 2.38, 5.72, 2.25, 1.39, 6.79, 4.02, 3.6, 3.74, 1.34, 6.13, 2.67, 4.15, 8.13, 2.49, 1.99, 1.89, 4.55, 3.64, 6.65, 4.17, 3.97, 2.39, 5.22, 2.39, 2.31, 3.72, 3.87, 5.79, 9.28, 4.59, 3.45, 2.04, 3.76, 3.58, 3.63, 4.62, 4.71, 7.72, 3.06, 3.86, 3.27, 2.06, 5.6, 2.1, 4.6, 4.4, 3.8];
+const VO_DUR = [3.43, 2.04, 4.16, 2.78, 1.86, 2.58, 2.17, 4.27, 3.48, 1.3, 1.66, 1.65, 3.75, 5.41, 5.41, 2.59, 6.54, 3.57, 4.68, 2.55, 3.28, 4.77, 2.38, 5.72, 2.25, 1.39, 6.79, 4.02, 3.6, 3.74, 1.34, 6.13, 2.67, 4.15, 8.13, 2.49, 1.99, 1.89, 4.55, 3.64, 6.65, 4.17, 3.97, 2.39, 5.22, 2.39, 2.31, 3.72, 3.87, 5.79, 9.28, 4.59, 3.45, 2.04, 3.76, 3.58, 3.63, 4.62, 4.71, 7.72, 3.06, 3.86, 3.27, 2.06, 7.5, 2.1, 4.3, 9.0, 3.8];
 // recap lines waiting for new recordings (0-based); remove an index once its VO_xx.m4a is replaced
 const VO_PENDING = new Set([64, 65, 66, 67]);
 const VO = { ctx: null, gain: null, bufs: [], raw: [], pend: [], on: false, src: null, idx: -1, lastT: 0, ok: false, song: null, songSrc: null };
@@ -1122,18 +1122,18 @@ function build(time = 0) {
       '<div class="chip"><b class="dn">↓</b><span class="c-y">Slice</span>&nbsp;equal or lower</div>',
       '<div class="chip"><b class="eq">=</b>Switch colors? Match the pace</div>',
       '<div class="chip"><b class="nt"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4" fill="none" stroke="#fff" stroke-width="2.4"/><circle cx="8.5" cy="8.5" r="1.8" fill="#fff"/><circle cx="12" cy="12" r="1.8" fill="#fff"/><circle cx="15.5" cy="15.5" r="1.8" fill="#fff"/></svg></b><span class="c-p">Net cards</span>&nbsp;any pace · roll it</div>',
-      '<div class="chip"><b class="tc"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r=".8" fill="#fff"/></svg></b><span class="c-r">Tactical</span>&nbsp;a specific pace</div>'].join(''), txtL);
+      '<div class="chip"><b class="tc"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r=".8" fill="#fff"/></svg></b><span class="c-r">Tactical</span>&nbsp;Smash · Lob · Approach</div>'].join(''), txtL);
     const chips = $$('.chip', rc);
     [.3, 2.0, 3.3, 5.0, 7.2, 9.8].forEach((t, i) => tl.fromTo(chips[i], { autoAlpha: 0, x: fmt === 'wide' ? -80 : 0, y: fmt === 'tall' ? 40 : 0, scale: .8 }, { autoAlpha: 1, x: 0, y: 0, scale: 1, duration: .5, ease: 'back.out(2)', immediateRender: false }, s + t));
     gsap.set(chips, { autoAlpha: 0 });
-    screenTxt.push({ t: s + .3, text: 'Groundstrokes: match the color · Topspin ↑ equal or higher · Slice ↓ equal or lower · Switch colors? Match the pace · Net cards: any pace, roll for yours · Tactical: a specific pace' });
+    screenTxt.push({ t: s + .3, text: 'Groundstrokes: match the color · Topspin ↑ equal or higher · Slice ↓ equal or lower · Switch colors? Match the pace · Net cards: any pace, roll for yours · Tactical: Smash 1–2, Lob 6–7, Approach = pace' });
     tl.to(chips, { autoAlpha: 0, x: fmt === 'wide' ? 60 : 0, duration: .3, stagger: .05 }, s + 11.9);
     T('FIRST TO g:7|WINS!', s + 12.2, null, { cls: 'low', k: 'Serve it · Slice it · Win it', s: 'SLICE! — the tennis card game. Coming to Kickstarter.' });
     tl.fromTo(logo, { scale: L.outLogoW / L.logoW }, { scale: L.outLogoW / L.logoW * 1.06, duration: .18, yoyo: true, repeat: 3, ease: 'power2.out', immediateRender: false }, s + 12.3);
-    vo(s + .3, 'Groundstrokes: match the color. Topspin, equal or higher. Slice, equal or lower.', 4.5);
+    vo(s + .3, 'Groundstrokes: match the color. If it has Topspin, the pace must be equal or higher. If it’s a Slice, the pace must be equal or lower.', 4.5);
     vo(s + 5.0, 'To switch colors, match the pace.', 2);
-    vo(s + 7.2, 'Net cards return any groundstroke, at any pace… then roll for yours!', 2.4);
-    vo(s + 9.8, 'Tactical cards only return a specific pace… like a Smash on a one or a two!', 2.2);
+    vo(s + 7.2, 'Net cards return any groundstroke, at any pace… then roll to determine your pace!', 2.4);
+    vo(s + 9.8, 'Tactical cards only return a specific pace… like a Smash on a one or a two, or a Lob on a six or a seven! Approaches can be played against any shot of equal pace.', 2.2);
     vo(s + 12.2, 'That’s <em>SLICE!</em> Now get out there… and serve it up!', 3.2);
   });
 
