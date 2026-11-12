@@ -513,8 +513,8 @@ function wipe(at, color = '#c6f432', src = 'LIME_1') {
    Voice-over (ElevenLabs, one clip per caption)
    ============================================================ */
 // bump when any clip changes, so browsers don't play an old cached copy
-const VO_VERSION = '7';
-const VO_DUR = [3.43, 2.04, 4.16, 2.78, 1.86, 2.58, 2.17, 4.27, 3.48, 1.3, 1.66, 1.65, 3.75, 5.41, 5.41, 2.59, 6.54, 4.75, 6.21, 2.55, 0, 3.82, 4.31, 5.7, 2.25, 3.12, 9.1, 4.02, 3.6, 3.74, 1.34, 6.13, 2.67, 4.15, 8.13, 2.49, 1.99, 1.89, 4.55, 3.64, 6.65, 4.17, 3.97, 2.39, 5.22, 2.39, 2.31, 3.72, 3.87, 5.79, 9.28, 4.59, 3.45, 2.04, 3.76, 3.58, 3.63, 4.62, 4.71, 7.72, 3.06, 3.86, 3.27, 2.06, 9.48, 2.52, 4.41, 8.76, 12.42, 4.03, 3.8];
+const VO_VERSION = '8';
+const VO_DUR = [3.43, 2.04, 4.16, 2.78, 1.86, 2.58, 2.17, 4.27, 3.48, 1.3, 1.66, 1.65, 3.75, 5.41, 5.41, 2.59, 6.54, 4.75, 6.21, 2.55, 0, 3.82, 4.31, 5.7, 2.25, 3.12, 9.1, 3.27, 8.94, 9.33, 9.15, 3.74, 1.34, 6.13, 2.67, 4.15, 8.13, 5.26, 4.54, 4.2, 7.05, 4.2, 5.7, 5.07, 1.71, 7.4, 7.35, 2.39, 5.88, 1.32, 6.25, 5.38, 6.39, 3.87, 7.26, 7.41, 7.38, 4.59, 3.45, 2.04, 3.76, 3.58, 3.63, 4.62, 4.71, 9.89, 2.94, 3.06, 3.86, 3.27, 2.06, 9.48, 3.79, 4.41, 8.76, 12.42, 4.03, 3.8];
 // recap lines waiting for new recordings (0-based); remove an index once its VO_xx.m4a is replaced
 const VO_PENDING = new Set([20]); // VO_21 retired
 const VO = { ctx: null, gain: null, bufs: [], raw: [], pend: [], want: -1, on: false, src: null, idx: -1, lastT: 0, ok: false, song: null, songSrc: null };
@@ -836,24 +836,37 @@ function build(time = 0) {
     vo(s + K * 4.5, 'Topspin or Slice, you can always play a Groundstroke of <em>equal pace</em>, in either color! Switch colors to throw off your opponent during a rally!', 7.0);
   });
 
-  /* ---------- 7 · NOPE ---------- */
-  scene('Nope!', 7.02, s => {
-    const K = 1.35;
-    const top = C('BACKHAND_7', L.cw, { back: 'ORANGE', down: true });
-    put(top, s + K * .2, { x: px + 120, y: -350, rotation: -40 }, { x: px, y: py, rotation: -3 }, .55); flip(top, s + K * .25, .5);
-    meterShow(s + K * .3); meterSet(s + K * .35, 'Opponent’s shot: g:Topspin · pace 7', [7], 'up');
-    T('y:SLICE_4 ON A|g:TOPSPIN_7?', s + K * .3, s + K * 1.9);
-    const bad = C('BACKHAND_SLICE_4', L.cw);
-    put(bad, s + K * 1.4, { x: px - 80, y: L.H + 340, rotation: -25 }, { x: px + 16, y: py + 40, rotation: 8 }, .45, 'power3.in');
-    tl.to(bad, { x: px - L.cw * .95, y: py + ch(L.cw) * (fmt === 'tall' ? -.04 : .45), rotation: -22, duration: .6, ease: 'power3.out' }, s + K * 1.87);
-    tl.fromTo(top, { x: px }, { x: px + 16, duration: .05, repeat: 5, yoyo: true, immediateRender: false }, s + K * 1.87);
-    ring(s + K * 1.85, [px, py + 30], '#ff4a5e', .3, 3);
-    mood(s + K * 1.85, 'red');
-    const no = stamp(bad, 'no', 'Too low'); pop(no, s + K * 2.0); dim(bad, s + K * 2.1);
-    T('r:NOPE!', s + K * 2.0, s + K * 4.7, { s: 'You can’t return a Topspin 7 with less than pace 7.' });
-    out([top, bad], s + K * 4.7, L.W * .6, -60, 35); meterHide(s + K * 4.7);
-    vo(s + K * .3, 'Return a Topspin Backhand seven with a Backhand Slice four?', 1.6);
-    vo(s + K * 2.0, '<em>No way!</em> Topspin needs equal or higher pace!', 2.6);
+  /* ---------- 7 · ILLEGAL PLAYS ---------- */
+  scene('Illegal Plays', 32.6, s => {
+    mood(s + .1, 'red');
+    T('r:ILLEGAL|r:PLAYS!', s + .3, s + 3.6, { s: 'Here’s what you can’t do.' });
+    meterShow(s + 6.9);
+    // each example: the opponent's card lands on "Like a…", the wrong card bounces off on "…returned with"
+    const ex = (t0, tLike, tRet, tEnd, opp, bad, meter, head, sub, why) => {
+      T(head, t0, tEnd, { k: 'Illegal', s: sub });
+      const top = C(opp, L.cw, { back: 'ORANGE', down: true });
+      put(top, tLike, { x: px + 120, y: -350, rotation: -40 }, { x: px, y: py, rotation: -3 }, .55); flip(top, tLike + .05, .5);
+      ring(tLike + .5, L.pile, '#ffffff', .3, 2);
+      meterSet(tLike + .1, meter[0], meter[1], meter[2]);
+      const c = C(bad, L.cw);
+      put(c, tRet, { x: px - 80, y: L.H + 340, rotation: -25 }, { x: px + 16, y: py + 40, rotation: 8 }, .45, 'power3.in');
+      tl.to(c, { x: px - L.cw * .95, y: py + ch(L.cw) * (fmt === 'tall' ? -.04 : .45), rotation: -22, duration: .6, ease: 'power3.out' }, tRet + .47);
+      tl.fromTo(top, { x: px }, { x: px + 16, duration: .05, repeat: 5, yoyo: true, immediateRender: false }, tRet + .47);
+      ring(tRet + .45, [px, py + 30], '#ff4a5e', .3, 3);
+      const no = stamp(c, 'no', why); pop(no, tRet + .6); dim(c, tRet + .7);
+      out([top, c], tEnd, L.W * .6, -60, 35);
+    };
+    ex(s + 3.8, s + 7.0, s + 9.6, s + 12.9, 'FOREHAND_5', 'BACKHAND_3', ['Opponent’s shot: g:Topspin · pace 5', [5, 6, 7], 'up'],
+       'r:WRONG|r:COLOR!', 'You can’t switch colors unless the pace matches.', 'Not pace 5');
+    ex(s + 13.1, s + 16.8, s + 19.3, s + 22.5, 'FOREHAND_7', 'FOREHAND_4', ['Opponent’s shot: g:Topspin · pace 7', [7], 'up'],
+       'g:TOPSPIN?|r:NOT_LOWER!', 'You can’t return a Topspin groundstroke with a lower pace.', 'Too slow');
+    ex(s + 22.7, s + 26.6, s + 28.9, s + 32.3, 'BACKHAND_SLICE_2', 'BACKHAND_SLICE_5', ['Opponent’s shot: y:Slice · pace 2', [1, 2], 'down'],
+       'y:SLICE?|r:NOT_HIGHER!', 'You can’t return a Slice groundstroke with a higher pace.', 'Too fast');
+    meterHide(s + 32.3);
+    vo(s + .3, '<em>Illegal plays!</em> Here’s what you CAN’T do.', 3.0);
+    vo(s + 3.8, 'You can’t switch colors unless the pace matches. Like a Topspin Forehand at pace five… returned with a Topspin Backhand at pace three.', 8.9);
+    vo(s + 13.1, 'You can’t return a Topspin groundstroke with a lower pace. Like a Topspin Forehand at pace seven… returned with a Topspin Forehand at pace four.', 9.2);
+    vo(s + 22.7, 'And you can’t return a Slice groundstroke with a higher pace. Like a Backhand Slice at pace two… returned with a Backhand Slice at pace five.', 9.1);
   });
 
   /* ---------- 8 · YOUR TURN (quiz) ---------- */
@@ -926,187 +939,283 @@ function build(time = 0) {
   });
 
   /* ---------- 9 · THE SERVE ---------- */
-  scene('The Serve', 21.06, s => {
-    const K = 1.12;
+  scene('The Serve', 38.8, s => {
     mood(s, 'lime');
-    T('EVERY POINT|STARTS WITH|A g:SERVE.', s + K * .2, s + K * 2.4);
-    T('TWO WAYS|TO g:SERVE.', s + K * 2.5, s + K * 5.8, { s: '1 · Play a groundstroke from your hand<br>2 · Roll the Serve Die' });
+    T('THE g:SERVE!', s + .3, s + 1.65);
+    T('EVERY RALLY|STARTS WITH|A g:SERVE.', s + 1.75, s + 4.1);
+    T('TWO WAYS|TO g:SERVE.', s + 4.2, s + 10.4, { s: '1 · Play a groundstroke from your hand<br>2 · Roll the Serve Die' });
+    // "Either play a groundstroke from your hand… or roll the Serve Die!"
     const sv = C('FOREHAND_3', L.hw);
-    put(sv, s + K * 2.6, { x: L.hand[0], y: L.H + 300, rotation: 0 }, { x: L.serveL[0], y: L.serveL[1], rotation: -4, scale: L.cw * .8 / L.hw }, .6);
-    const c1 = burst('1 · Play a card', L.serveL[0], L.serveL[1] + ch(L.cw * .8) / 2 + 50, 'k', 0); popAt(c1, s + K * 3.0, 0);
-    tl.set(die, { autoAlpha: 1 }, s + K * 4.4);
-    tl.fromTo(die, { x: L.serveR[0], y: L.serveR[1], scale: 0, rotation: -180 }, { x: L.serveR[0], y: L.serveR[1], scale: 1, rotation: 0, duration: .6, ease: 'back.out(1.6)', immediateRender: false }, s + K * 4.4);
-    const c2 = burst('2 · Roll the die', L.serveR[0], L.serveR[1] + ch(L.cw * .8) / 2 + 50, 'k', 0); popAt(c2, s + K * 4.7, 0);
-    out([sv], s + K * 5.8, -300, 0, -20); hide([c1, c2], s + K * 5.8);
-    mv(die, s + K * 5.9, { x: px, y: py, scale: 1.3 }, .5);
-    roll(s + K * 6.3, 5);
-    T('r:FAULT!', s + K * 7.15, s + K * 9.4, { s: 'Second serve. Two faults? Lose the point.' });
-    ring(s + K * 7.1, L.pile, '#ff4a5e', .4, 3.5);
-    roll(s + K * 9.5, 4);
-    T('LET! g:+1', s + K * 10.35, s + K * 12.8, { s: 'Both players draw a card. Roll again.' });
-    ring(s + K * 10.3, L.pile, '#c6f432', .4, 3.5);
+    put(sv, s + 5.9, { x: L.hand[0], y: L.H + 300, rotation: 0 }, { x: L.serveL[0], y: L.serveL[1], rotation: -4, scale: L.cw * .8 / L.hw }, .6);
+    const c1 = burst('1 · Play a card', L.serveL[0], L.serveL[1] + ch(L.cw * .8) / 2 + 50, 'k', 0); popAt(c1, s + 6.3, 0);
+    tl.set(die, { autoAlpha: 1 }, s + 8.2);
+    tl.fromTo(die, { x: L.serveR[0], y: L.serveR[1], scale: 0, rotation: -180 }, { x: L.serveR[0], y: L.serveR[1], scale: 1, rotation: 0, duration: .6, ease: 'back.out(1.6)', immediateRender: false }, s + 8.2);
+    const c2 = burst('2 · Roll the die', L.serveR[0], L.serveR[1] + ch(L.cw * .8) / 2 + 50, 'k', 0); popAt(c2, s + 8.5, 0);
+    out([sv], s + 10.5, -300, 0, -20); hide([c1, c2], s + 10.5);
+    // every die serve has a pace and a spin
+    mv(die, s + 10.6, { x: px, y: py, scale: 1.3 }, .5);
+    T('PACE g:+_SPIN', s + 10.6, s + 14.8, { k: 'The Serve Die', s: 'Every serve on the die has a pace and a spin, just like a groundstroke.' });
+    roll(s + 13.9, 0);
+    T('g:TOPSPIN_4 ↑', s + 15.0, s + 18.5, { s: 'Return it at pace 4 or higher.' });
+    meterShow(s + 15.0); meterSet(s + 15.1, 'Serve: g:Topspin · pace 4', [4, 5, 6, 7], 'up');
+    roll(s + 17.5, 3);
+    T('y:SLICE_3 ↓', s + 18.6, s + 22.1, { s: 'Return it at pace 3 or lower.' });
+    meterSet(s + 18.7, 'Serve: y:Slice · pace 3', [1, 2, 3], 'down');
+    // either color can return a die serve
+    T('g:FOREHAND|OR o:BACKHAND!', s + 22.3, s + 26.6, { k: 'Returning a die serve', s: 'Any groundstroke at the right pace, in either color.' });
+    mv(die, s + 22.3, { x: px - L.cw * .62, rotation: -10, scale: 1 }, .45);
+    const r1 = C('FOREHAND_3', L.cw), r2 = C('BACKHAND_2', L.cw);
+    put(r1, s + 22.6, { x: px + 200, y: L.H + 340, rotation: 25 }, { x: px + L.cw * .58, y: py + 10, rotation: 6 }, .55);
+    const ok1 = stamp(r1, 'ok', 'Forehand'); pop(ok1, s + 23.2);
+    out([r1], s + 24.3, L.W * .6, -60, 35);
+    put(r2, s + 24.4, { x: px + 200, y: L.H + 340, rotation: 25 }, { x: px + L.cw * .58, y: py + 10, rotation: 6 }, .55);
+    const ok2 = stamp(r2, 'ok', 'Backhand'); pop(ok2, s + 25.0);
+    out([r2], s + 26.5, L.W * .6, -60, 35); meterHide(s + 26.5);
+    // Let, then Fault
+    mv(die, s + 26.0, { x: px, y: py, rotation: 0, scale: 1.3 }, .4);
+    roll(s + 26.4, 4);
+    T('LET! g:+1', s + 27.4, s + 32.9, { s: 'The serve clipped the net. Both players draw a card. Roll again.' });
+    ring(s + 27.4, L.pile, '#c6f432', .4, 3.5);
     const d1 = C('FOREHAND_1', L.hw, { down: true }), d2 = C('BACKHAND_1', L.ow, { back: 'ORANGE', down: true });
-    put(d1, s + K * 10.6, { x: px, y: py, rotation: 0, scale: .4 }, { x: L.hand[0], y: L.H + 260, rotation: 10, scale: 1 }, .7, 'power2.in');
-    put(d2, s + K * 10.7, { x: px, y: py, rotation: 0, scale: .4 }, { x: L.opp[0], y: -260, rotation: 190, scale: 1 }, .7, 'power2.in');
-    roll(s + K * 12.9, 0);
-    ring(s + K * 13.7, L.pile, '#c6f432', .4, 4);
-    T('g:TOPSPIN_4 ↑', s + K * 13.75, s + K * 18.5, { s: 'Return any groundstroke — Forehand <b>or</b> Backhand — pace 4 or higher.' });
-    meterShow(s + K * 14.0); meterSet(s + K * 14.05, 'Receiver: g:Topspin · pace 4', [4, 5, 6, 7], 'up');
-    mv(die, s + K * 16.1, { x: px - L.cw * .62, rotation: dieRot - 10, scale: 1 }, .45);
-    const r5 = C('BACKHAND_5', L.cw);
-    put(r5, s + K * 16.2, { x: px + 200, y: L.H + 340, rotation: 25 }, { x: px + L.cw * .58, y: py + 10, rotation: 6 }, .55);
-    ring(s + K * 16.7, [px + L.cw * .58, py], '#ff8a2a', .3, 2);
-    const ok = stamp(r5, 'ok', 'Either color'); pop(ok, s + K * 16.8);
-    out([r5], s + K * 18.4, L.W * .6, -60, 35); hide(die, s + K * 18.4); meterHide(s + K * 18.4);
-    vo(s + K * .2, 'There are two ways to serve every point.', 2.4);
-    vo(s + K * 2.6, 'Play a groundstroke from your hand…', 1.8);
-    vo(s + K * 4.45, '…or roll the <em>Serve Die!</em>', 2.4);
-    vo(s + K * 7.15, 'A Fault? Take a second serve. Two Faults and you lose the point!', 2.3);
-    vo(s + K * 10.35, 'A Let? Both players draw a card, and you roll again!', 2.5);
-    vo(s + K * 13.75, '<em>Topspin four!</em> The receiver returns the serve with a Forehand or a Backhand, at pace four or higher!', 4.6);
+    put(d1, s + 30.3, { x: px, y: py, rotation: 0, scale: .4 }, { x: L.hand[0], y: L.H + 260, rotation: 10, scale: 1 }, .7, 'power2.in');
+    put(d2, s + 30.4, { x: px, y: py, rotation: 0, scale: .4 }, { x: L.opp[0], y: -260, rotation: 190, scale: 1 }, .7, 'power2.in');
+    roll(s + 32.2, 5);
+    T('r:FAULT!', s + 33.2, s + 38.4, { s: 'Take a second serve. Two faults? You lose the point.' });
+    ring(s + 33.2, L.pile, '#ff4a5e', .4, 3.5);
+    hide(die, s + 38.4);
+    vo(s + .3, 'The Serve! Every rally begins with a serve, and there are two ways to serve.', 5.0);
+    vo(s + 5.8, 'Either play a groundstroke from your hand… or roll the <em>Serve Die!</em>', 4.4);
+    vo(s + 10.6, 'Every serve on the die has a pace and a spin, just like a groundstroke.', 4.0);
+    vo(s + 15.0, '<em>Topspin four?</em> Return it at pace four or higher. <em>Slice three?</em> Return it at pace three or lower.', 6.9);
+    vo(s + 22.3, 'And the receiver can return a die serve with a Forehand or a Backhand!', 4.0);
+    vo(s + 27.4, 'Roll a <em>Let?</em> The serve clipped the net. Both players draw a card, and you roll again!', 5.5);
+    vo(s + 33.2, 'Roll a <em>Fault?</em> Take a second serve. Two Faults, and you lose the point!', 4.9);
   });
 
-  /* ---------- 10 · STUCK & SCORING ---------- */
-  scene('Stuck? & Scoring', 13.78, s => {
-    const K = 1.3;
+  /* ---------- 10 · LAST DITCH EFFORT ---------- */
+  scene('Last Ditch Effort', 17.8, s => {
+    mood(s, 'lime');
     const top = C('FOREHAND_6', L.cw, { back: 'ORANGE', down: true });
-    put(top, s + K * .2, { x: px + 120, y: -350, rotation: -40 }, { x: px, y: py, rotation: -3 }, .55); flip(top, s + K * .25, .5);
-    meterShow(s + K * .3); meterSet(s + K * .35, 'Opponent’s shot: g:Topspin · pace 6', [6, 7], 'up');
+    put(top, s + .2, { x: px + 120, y: -350, rotation: -40 }, { x: px, y: py, rotation: -3 }, .55); flip(top, s + .25, .5);
+    meterShow(s + .3); meterSet(s + .35, 'Opponent’s shot: g:Topspin · pace 6', [6, 7], 'up');
+    T('LAST DITCH|g:EFFORT!', s + .3, s + 2.2);
     const H = ['BACKHAND_2', 'FOREHAND_SLICE_3', 'BACKHAND_SLICE_4'].map(n => C(n, L.hw));
-    H.forEach((c, i) => put(c, s + K * .4 + i * .07, { x: L.hand[0], y: L.H + 300, rotation: 0 }, fan(3, i), .5, 'back.out(1.3)'));
-    H.forEach((c, i) => dim(c, s + K * 1.3 + i * .08));
-    T('NO r:RETURN?', s + K * .3, s + K * 1.8);
-    T('LAST DITCH|g:EFFORT!', s + K * 1.9, s + K * 5.8, { s: 'Draw 1 card. If it works, play it!' });
-    const bag = [0, 1, 2].map(i => { const c = C('FOREHAND_1', L.bw, { down: true }); put(c, s + K * 1.6 + i * .05, { x: L.bag[0] - 200, y: L.bag[1], rotation: 0 }, { x: L.bag[0] + i * 4, y: L.bag[1] - i * 4, rotation: -6 + i * 2 }, .5); return c; });
-    const bagTag = burst('Your deck', L.bag[0], L.bag[1] + ch(L.bw) / 2 + 34, 'k', 0); bagTag.style.fontSize = '22px'; popAt(bagTag, s + K * 2.0, 0);
-    const dc = C('FOREHAND_7', L.bw, { down: true });
+    H.forEach((c, i) => put(c, s + 2.5 + i * .07, { x: L.hand[0], y: L.H + 300, rotation: 0 }, fan(3, i), .5, 'back.out(1.3)'));
+    H.forEach((c, i) => dim(c, s + 4.2 + i * .08));
+    T('NO r:PLAYABLE|r:CARD?', s + 2.3, s + 9.8, { k: 'During a rally', s: 'Draw the top card of your deck.' });
+    const bag = [0, 1, 2].map(i => { const c = C('FOREHAND_1', L.bw, { down: true }); put(c, s + 5.4 + i * .05, { x: L.bag[0] - 200, y: L.bag[1], rotation: 0 }, { x: L.bag[0] + i * 4, y: L.bag[1] - i * 4, rotation: -6 + i * 2 }, .5); return c; });
+    const bagTag = burst('Your deck', L.bag[0], L.bag[1] + ch(L.bw) / 2 + 34, 'k', 0); bagTag.style.fontSize = '22px'; popAt(bagTag, s + 5.8, 0);
     const mid = fmt === 'wide' ? [(L.bag[0] + px) / 2, py + 140] : [850, py + 10];
-    put(dc, s + K * 2.8, { x: L.bag[0] + 8, y: L.bag[1] - 8, rotation: -2 }, { x: mid[0], y: mid[1], rotation: 0, scale: 1.4 }, .5, 'back.out(1.4)');
-    flip(dc, s + K * 3.2, .5);
-    const ok = stamp(dc, 'ok', 'Saved!'); pop(ok, s + K * 3.7);
-    tl.to(ok, { autoAlpha: 0, duration: .2 }, s + K * 4.4);
-    play(dc, s + K * 4.4, [px + 10, py + 6, 5], L.cw / L.bw);
-    tl.fromTo(score, { autoAlpha: 0, scale: .6 }, { autoAlpha: 1, scale: 1, duration: .5, ease: 'back.out(2)', immediateRender: false }, s + K * 5.9);
-    tl.to(scoreYou, { yPercent: '-=100', duration: .45, ease: 'back.out(2)' }, s + K * 6.4);
-    tl.fromTo(score, { scale: 1 }, { scale: 1.12, duration: .15, yoyo: true, repeat: 1, immediateRender: false }, s + K * 6.4);
-    T('WIN THE|POINT: g:+1!', s + K * 5.9, s + K * 8.0);
-    out([top, dc], s + K * 7.6, L.W * .6, -60, 35); meterHide(s + K * 7.6);
-    T('REFILL|TO g:7!', s + K * 8.1, s + K * 10.4, { s: 'Then switch servers and serve the next point.' });
-    H.forEach(c => dim(c, s + K * 8.1, false));
-    H.forEach((c, i) => mv(c, s + K * 8.2, fan(7, i), .45));
+    // it works: play it, the rally goes on
+    const dc = C('FOREHAND_7', L.bw, { down: true });
+    put(dc, s + 7.9, { x: L.bag[0] + 8, y: L.bag[1] - 8, rotation: -2 }, { x: mid[0], y: mid[1], rotation: 0, scale: 1.4 }, .5, 'back.out(1.4)');
+    flip(dc, s + 8.3, .5);
+    T('PLAY IT!|g:RALLY_ON!', s + 10.0, s + 13.7, { s: 'If you can play it, play it, and the rally continues.' });
+    const ok = stamp(dc, 'ok', 'Playable!'); pop(ok, s + 10.3);
+    tl.to(ok, { autoAlpha: 0, duration: .2 }, s + 11.0);
+    play(dc, s + 11.1, [px + 10, py + 6, 5], L.cw / L.bw);
+    out([top, dc], s + 13.0, L.W * .6, -60, 35);
+    // it doesn't: into your hand, point lost
+    const top2 = C('FOREHAND_6', L.cw, { back: 'ORANGE', down: true });
+    put(top2, s + 13.1, { x: px + 120, y: -350, rotation: -40 }, { x: px, y: py, rotation: -3 }, .5); flip(top2, s + 13.15, .45);
+    const dc2 = C('BACKHAND_2', L.bw, { down: true });
+    put(dc2, s + 13.4, { x: L.bag[0] + 8, y: L.bag[1] - 8, rotation: -2 }, { x: mid[0], y: mid[1], rotation: 0, scale: 1.4 }, .5, 'back.out(1.4)');
+    flip(dc2, s + 13.6, .45);
+    T('CAN’T PLAY IT?|r:POINT_LOST.', s + 13.8, s + 17.5, { s: 'Put that card in your hand, and you lose the point.' });
+    const no = stamp(dc2, 'no', 'No good'); pop(no, s + 13.9);
+    tl.to(no, { autoAlpha: 0, duration: .2 }, s + 14.4);
+    mv(dc2, s + 14.5, { ...fan(4, 3), scale: L.hw / L.bw }, .55);
+    H.forEach((c, i) => mv(c, s + 14.5, fan(4, i), .5));
+    mood(s + 16.2, 'red'); ring(s + 16.3, L.pile, '#ff4a5e', .3, 3);
+    out([...H, dc2], s + 17.5, 0, 420); out(bag, s + 17.5, -300, 0); out([top2], s + 17.5, L.W * .6, -60, 35); hide(bagTag, s + 17.5); meterHide(s + 17.5);
+    vo(s + .3, '<em>Last Ditch Effort!</em>', 1.6);
+    vo(s + 2.3, 'During a rally, if you don’t have a playable card in your hand, it’s time for a Last Ditch Effort: draw the top card of your deck.', 7.3);
+    vo(s + 10.0, 'If you can play it, play it… and the rally continues! If you can’t, put that card in your hand… and you lose the point.', 7.2);
+  });
+
+  /* ---------- 10a · SCORING ---------- */
+  scene('Scoring', 9.0, s => {
+    mood(s, 'lime');
+    tl.fromTo(score, { autoAlpha: 0, scale: .6 }, { autoAlpha: 1, scale: 1, duration: .5, ease: 'back.out(2)', immediateRender: false }, s + .3);
+    tl.to(scoreYou, { yPercent: '-=100', duration: .45, ease: 'back.out(2)' }, s + .8);
+    tl.fromTo(score, { scale: 1 }, { scale: 1.12, duration: .15, yoyo: true, repeat: 1, immediateRender: false }, s + .8);
+    T('WIN THE|POINT: g:+1!', s + .3, s + 2.6);
+    T('REFILL|TO g:7!', s + 2.7, s + 8.7, { s: 'Both players refill their hand to 7 cards. Then switch servers and play the next point.' });
+    const bag = [0, 1, 2].map(i => { const c = C('FOREHAND_1', L.bw, { down: true }); put(c, s + 2.7 + i * .05, { x: L.bag[0] - 200, y: L.bag[1], rotation: 0 }, { x: L.bag[0] + i * 4, y: L.bag[1] - i * 4, rotation: -6 + i * 2 }, .5); return c; });
+    const H = ['BACKHAND_2', 'FOREHAND_SLICE_3', 'BACKHAND_SLICE_4'].map(n => C(n, L.hw));
+    H.forEach((c, i) => put(c, s + 2.8 + i * .07, { x: L.hand[0], y: L.H + 300, rotation: 0 }, fan(7, i), .5, 'back.out(1.3)'));
     ['FOREHAND_2', 'BACKHAND_SLICE_6', 'FOREHAND_SLICE_7', 'BACKHAND_4'].forEach((n, i) => {
       const c = C(n, L.hw, { down: true });
-      put(c, s + K * 8.3 + i * .12, { x: L.bag[0], y: L.bag[1], rotation: 0, scale: L.bw / L.hw }, { ...fan(7, i + 3), scale: 1 }, .55, 'back.out(1.2)');
-      flip(c, s + K * 8.55 + i * .12, .45); H.push(c);
+      put(c, s + 3.8 + i * .2, { x: L.bag[0], y: L.bag[1], rotation: 0, scale: L.bw / L.hw }, { ...fan(7, i + 3), scale: 1 }, .55, 'back.out(1.2)');
+      flip(c, s + 4.05 + i * .2, .45); H.push(c);
     });
-    out(H, s + K * 10.3, 0, 420); out(bag, s + K * 10.3, -300, 0); hide([bagTag, score], s + K * 10.3);
-    vo(s + K * .3, 'No legal return? <em>Last Ditch Effort!</em> Draw one card.', 3.0);
-    vo(s + K * 3.4, 'If that card works, play it. If not, you lose the point.', 2.4);
-    vo(s + K * 5.9, 'Win the point, and you score one!', 2.0);
-    vo(s + K * 8.1, 'Then both players refill to <em>seven</em> cards, switch servers, and play the next point!', 2.4);
+    const seven = burst('7 cards', L.hand[0], L.hand[1] - ch(L.hw) / 2 - 60, 'g', -3); popAt(seven, s + 5.0, -3);
+    out(H, s + 8.7, 0, 420); out(bag, s + 8.7, -300, 0); hide([seven, score], s + 8.7);
+    vo(s + .3, 'Win the point, and you score one!', 2.0);
+    vo(s + 2.7, 'Then both players refill their hand to <em>seven</em> cards, switch servers, and play the next point!', 5.8);
   });
 
   /* ---------- 10b · DIG DEEP ---------- */
-  scene('Dig Deep', 9.4, s => {
+  scene('Dig Deep', 21.0, s => {
     mood(s, 'orange');
     const top = C('BACKHAND_4', L.cw, { back: 'ORANGE', down: true });
     put(top, s + .2, { x: px + 120, y: -350, rotation: -40 }, { x: px, y: py, rotation: -3 }, .55); flip(top, s + .25, .5);
+    T('g:DIG_DEEP!', s + .3, s + 1.8);
     const last = C('BACKHAND_5', L.hw);
-    put(last, s + .5, { x: L.hand[0], y: L.H + 300, rotation: 0 }, { x: L.hand[0], y: L.hand[1], rotation: 0 }, .5, 'back.out(1.3)');
-    const tagL = burst('Last card', L.hand[0], L.hand[1] - ch(L.hw) / 2 - 40, 'k', 0); popAt(tagL, s + .9, 0); hide(tagL, s + 2.0);
-    play(last, s + 2.0, [px + 10, py + 6, 5], L.cw / L.hw);
-    T('LAST CARD?|g:DIG_DEEP!', s + .3, s + 8.9, { k: 'Played your last card', s: 'Draw 3 cards and keep playing. Next time, draw 2. After that, 1.' });
-    const bag = [0, 1, 2].map(i => { const c = C('FOREHAND_1', L.bw, { down: true }); put(c, s + 2.2 + i * .05, { x: L.bag[0] - 200, y: L.bag[1], rotation: 0 }, { x: L.bag[0] + i * 4, y: L.bag[1] - i * 4, rotation: -6 + i * 2 }, .5); return c; });
-    const drawn = ['FOREHAND_3', 'BACKHAND_SLICE_2', 'FOREHAND_6'].map(n => C(n, L.hw, { down: true }));
-    drawn.forEach((c, i) => { put(c, s + 3.0 + i * .25, { x: L.bag[0], y: L.bag[1], rotation: 0, scale: L.bw / L.hw }, { ...fan(3, i), scale: 1 }, .55, 'back.out(1.2)'); flip(c, s + 3.3 + i * .25, .45); });
-    const d3 = burst('Draw 3!', L.hand[0], L.hand[1] - ch(L.hw) / 2 - 50, 'g', -4); popAt(d3, s + 3.9, -4);
-    const d21 = burst('Then 2 · then 1', L.hand[0], L.hand[1] - ch(L.hw) / 2 - 50, 'w', 3); popAt(d21, s + 6.0, 3); hide(d3, s + 5.9);
-    hide(d21, s + 8.8);
-    out(drawn, s + 8.8, 0, 420); out(bag, s + 8.8, -300, 0); out([top, last], s + 8.8, L.W * .6, -60, 35);
-    vo(s + .3, 'Played your <em>last card?</em> Dig Deep!', 2.2);
-    vo(s + 2.9, 'Draw three cards and keep playing.', 2.0);
-    vo(s + 5.9, 'Run out again in the same point? Draw two, then one.', 2.8);
+    put(last, s + 2.0, { x: L.hand[0], y: L.H + 300, rotation: 0 }, { x: L.hand[0], y: L.hand[1], rotation: 0 }, .5, 'back.out(1.3)');
+    const tagL = burst('Last card', L.hand[0], L.hand[1] - ch(L.hw) / 2 - 40, 'k', 0); popAt(tagL, s + 2.4, 0); hide(tagL, s + 3.3);
+    play(last, s + 3.4, [px + 10, py + 6, 5], L.cw / L.hw);
+    const bag = [0, 1, 2].map(i => { const c = C('FOREHAND_1', L.bw, { down: true }); put(c, s + 3.6 + i * .05, { x: L.bag[0] - 200, y: L.bag[1], rotation: 0 }, { x: L.bag[0] + i * 4, y: L.bag[1] - i * 4, rotation: -6 + i * 2 }, .5); return c; });
+    const badge = (txt, at, end, cls) => { const b = burst(txt, L.hand[0], L.hand[1] - ch(L.hw) / 2 - 56, cls, -3); popAt(b, at, -3); hide(b, end); };
+    let pile = 0;
+    const draw = (names, at) => names.map((n, i) => { const c = C(n, L.hw, { down: true }); put(c, at + i * .25, { x: L.bag[0], y: L.bag[1], rotation: 0, scale: L.bw / L.hw }, { ...fan(names.length, i), scale: 1 }, .55, 'back.out(1.2)'); flip(c, at + .3 + i * .25, .45); return c; });
+    const playAll = (cs, at) => cs.forEach((c, i) => { pile++; play(c, at + i * .35, [px + 10 + (pile % 3) * 6, py + 6 - (pile % 2) * 6, (pile % 2 ? 5 : -4)], L.cw / L.hw); });
+    // 1st time: draw 3
+    T('LAST CARD|PLAYED?', s + 1.9, s + 8.3, { k: '1st time', s: 'Dig Deep: draw 3 cards and keep playing.' });
+    const h3 = draw(['FOREHAND_3', 'BACKHAND_SLICE_2', 'FOREHAND_6'], s + 5.9); badge('Draw 3', s + 6.5, s + 8.4, 'g');
+    // 2nd time: draw 2
+    playAll(h3, s + 8.6);
+    T('RUN OUT|AGAIN?', s + 8.5, s + 14.0, { k: '2nd time · same point', s: 'Dig Deep again, but only draw 2.' });
+    const h2 = draw(['BACKHAND_6', 'FOREHAND_SLICE_4'], s + 12.6); badge('Draw 2', s + 12.9, s + 14.1, 'w');
+    // 3rd time: draw 1, then it resets
+    playAll(h2, s + 14.3);
+    T('THIRD|TIME?', s + 14.2, s + 18.0, { k: '3rd time · same point', s: 'Now it’s just 1 card.' });
+    const h1 = draw(['BACKHAND_3'], s + 15.6); badge('Draw 1', s + 15.9, s + 18.0, 'w');
+    T('NEW POINT?|BACK_TO g:3.', s + 18.0, s + 20.7, { s: 'Dig Deep resets every point.' });
+    out([...h1], s + 20.7, 0, 420); out(bag, s + 20.7, -300, 0); out($$('.card', cardsL).filter(c => [top, last, ...h3, ...h2].includes(c)), s + 20.7, L.W * .6, -60, 35);
+    vo(s + .3, '<em>Dig Deep!</em>', 1.3);
+    vo(s + 1.9, 'If you play your last card and the rally continues, Dig Deep: draw three cards and keep playing.', 6.2);
+    vo(s + 8.5, 'Run out again in the same point? Dig Deep again, but this time you only draw two.', 5.3);
+    vo(s + 14.2, 'Run out a third time? Now it’s just one card. And every new point, it resets to three.', 6.3);
   });
 
   /* ---------- 10c · NET CARDS ---------- */
-  scene('Net Cards', 21.4, s => {
+  scene('Net Cards', 38.4, s => {
     wipe(s - .2, '#a45cff', 'LIME_2'); mood(s + .2, 'orange');
     const cw2 = fmt === 'tall' ? 270 : L.pw, cy = fmt === 'tall' ? 1090 : L.pair[0][1];
     const V = C('VOLLEY', cw2), D = C('DROP_SHOT', cw2);
     put(V, s + .3, { x: L.pair[0][0], y: L.H + 380, rotation: -18 }, { x: L.pair[0][0], y: cy, rotation: -4 }, .65, 'back.out(1.3)');
     put(D, s + .45, { x: L.pair[1][0], y: L.H + 380, rotation: 18 }, { x: L.pair[1][0], y: cy, rotation: 4 }, .65, 'back.out(1.3)');
-    T('NET|g:CARDS!', s + .3, s + 5.9, { k: 'Volley · Drop-Shot', s: 'Net cards can return any groundstroke, at any pace. Then roll the die for your pace!' });
+    T('p:NET|p:CARDS!', s + .3, s + 4.2, { k: 'Volley · Drop-Shot' });
     const lab = (txt, x, cls, rot) => { const b = burst(txt, x, cy + ch(cw2) / 2 + 40, cls, rot); b.style.fontSize = fmt === 'wide' ? '27px' : '28px'; b.style.padding = '9px 14px 7px'; return b; };
-    const any = burst('Returns any groundstroke', (L.pair[0][0] + L.pair[1][0]) / 2, cy - ch(cw2) / 2 - 44, 'w', -3); any.style.fontSize = '34px'; any.style.padding = '10px 18px 8px';
-    popAt(any, s + 3.0, -3); hide(any, s + 5.9);
-    const up = lab('↑ Equal or higher', L.pair[0][0], 'g', -3), dn = lab('↓ Equal or lower', L.pair[1][0], 'y', 3);
-    // the dice roll for real: Volley lands 7, Drop-Shot lands 1; then both miss (NET / OUT)
+    const any = burst('Returns ANY groundstroke', (L.pair[0][0] + L.pair[1][0]) / 2, cy - ch(cw2) / 2 - 44, 'w', -3); any.style.fontSize = '34px'; any.style.padding = '10px 18px 8px';
+    T('ANY|g:GROUNDSTROKE!', s + 4.4, s + 11.7, { k: 'Regardless of its pace', s: 'Net cards can return any groundstroke. Then roll the matching die to set your shot’s pace.' });
+    popAt(any, s + 4.6, -3); hide(any, s + 11.7);
+    // "then roll the matching die": each die appears next to its card
     const dv = [L.pair[0][0] - cw2 * .56, cy + ch(cw2) * .3], dd = [L.pair[1][0] + cw2 * .56, cy + ch(cw2) * .3];
-    tl.set(dieV, { x: dv[0], y: dv[1] }, s + 6.0); tl.set(dieD, { x: dd[0], y: dd[1] }, s + 6.0);
-    tl.fromTo(dieV, { autoAlpha: 0, scale: 0 }, { autoAlpha: 1, scale: 1, duration: .45, ease: 'back.out(2)', immediateRender: false }, s + 6.05);
-    roll3(D3.volley, dieV, s + 6.4, 1, dv[1], 130);
-    tl.fromTo(dieD, { autoAlpha: 0, scale: 0 }, { autoAlpha: 1, scale: 1, duration: .45, ease: 'back.out(2)', immediateRender: false }, s + 7.9);
-    roll3(D3.drop, dieD, s + 8.2, 0, dd[1], 130);
-    roll3(D3.volley, dieV, s + 14.7, 2, dv[1], 120);
-    roll3(D3.drop, dieD, s + 15.0, 3, dd[1], 120);
-    hide([dieV, dieD], s + 20.7);
-    T('ROLL FOR|g:PACE!', s + 6.0, s + 10.4, { s: 'Volley: they must play a Groundstroke with pace equal or higher. Drop-Shot: equal or lower.' });
-    popAt(up, s + 6.6, -3); popAt(dn, s + 8.4, 3); glow(V, s + 6.6, true, '#a45cff'); glow(V, s + 8.3, false); glow(D, s + 8.4, true, '#ffd23f'); glow(D, s + 10.3, false);
-    hide([up, dn], s + 10.3);
+    tl.set(dieV, { x: dv[0], y: dv[1] }, s + 8.5); tl.set(dieD, { x: dd[0], y: dd[1] }, s + 8.5);
+    tl.fromTo(dieV, { autoAlpha: 0, scale: 0 }, { autoAlpha: 1, scale: 1, duration: .45, ease: 'back.out(2)', immediateRender: false }, s + 8.6);
+    tl.fromTo(dieD, { autoAlpha: 0, scale: 0 }, { autoAlpha: 1, scale: 1, duration: .45, ease: 'back.out(2)', immediateRender: false }, s + 8.9);
+    const pace = (txt, d, cls, at, end) => { const b = burst(txt, d[0], d[1] - (fmt === 'tall' ? 150 : 130), cls, 0); b.style.fontSize = '30px'; b.style.padding = '8px 14px 6px'; popAt(b, at, 0); hide(b, end); };
+    // Volley: pace 6 or 7, return equal or higher
+    T('p:VOLLEY:|PACE_6_OR_7', s + 11.9, s + 19.4, { s: 'Your opponent must return it with a groundstroke of equal or higher pace.' });
+    glow(V, s + 11.9, true, '#a45cff'); dim(D, s + 11.9); hide(dieD, s + 11.9, .2);
+    roll3(D3.volley, dieV, s + 11.9, 0, dv[1], 130); roll3(D3.volley, dieV, s + 13.4, 1, dv[1], 130);
+    pace('6 or 7', dv, 'p', s + 13.1, s + 19.3);
+    const up = lab('↑ Equal or higher', L.pair[0][0], 'g', -3); popAt(up, s + 15.2, -3); hide(up, s + 19.3);
+    glow(V, s + 19.3, false); dim(D, s + 19.3, false);
+    // Drop-Shot: pace 1 or 2, return equal or lower
+    T('y:DROP-SHOT:|PACE_1_OR_2', s + 19.6, s + 27.1, { s: 'Your opponent must return it with a groundstroke of equal or lower pace.' });
+    glow(D, s + 19.6, true, '#ffd23f'); dim(V, s + 19.6); show(dieD, s + 19.5, .2); hide(dieV, s + 19.6, .2);
+    roll3(D3.drop, dieD, s + 19.6, 0, dd[1], 130); roll3(D3.drop, dieD, s + 21.0, 1, dd[1], 130);
+    pace('1 or 2', dd, 'y', s + 20.8, s + 27.0);
+    const dn = lab('↓ Equal or lower', L.pair[1][0], 'y', 3); popAt(dn, s + 23.0, 3); hide(dn, s + 27.0);
+    glow(D, s + 27.0, false); dim(V, s + 27.0, false); show(dieV, s + 27.1, .2);
     // same card always returns it
     const sv = lab('Volley ↔ Volley', L.pair[0][0], 'w', -3), sd = lab('Drop-Shot ↔ Drop-Shot', L.pair[1][0], 'w', 3);
     gsap.set(sd, { y: cy - ch(cw2) / 2 - 40 });
-    T('SAME|g:CARD?', s + 10.5, s + 14.4, { k: 'Always legal', s: 'You can always return a Volley with a Volley, and a Drop-Shot with a Drop-Shot.' });
-    popAt(sv, s + 10.9, -3); popAt(sd, s + 11.6, 3); glow(V, s + 10.9, true, '#ffffff'); glow(D, s + 11.6, true, '#ffffff');
-    glow(V, s + 14.3, false); glow(D, s + 14.3, false); hide([sv, sd], s + 14.3);
-    T('r:NET? r:OUT?|r:POINT_LOST!', s + 14.6, s + 17.9, { s: 'Roll NET or OUT on the die and you lose the point.' });
-    T('r:HIGH_RISK!|g:HIGH_REWARD!', s + 18.0, s + 21.0);
-    mood(s + 18.0, 'lime'); ring(s + 18.1, [L.pair[0][0], cy], '#c6f432', .3, 3); ring(s + 18.3, [L.pair[1][0], cy], '#c6f432', .3, 3);
-    mood(s + 14.6, 'red'); ring(s + 14.7, [L.pair[0][0], cy], '#ff4a5e', .3, 3); ring(s + 14.9, [L.pair[1][0], cy], '#ff4a5e', .3, 3);
-    out([V, D], s + 20.9, 0, 520);
-    vo(s + .3, 'Next up: <em>net cards!</em> Volleys and Drop-Shots.', 2.6);
-    vo(s + 3.0, 'Net cards can return any groundstroke, at any pace. Then roll the die for your pace!', 2.9);
-    vo(s + 6.0, 'Roll a Volley, and your opponent must play a Groundstroke with pace <em>equal or higher.</em> Roll a Drop-Shot, and they must play a Groundstroke with pace <em>equal or lower.</em>', 4.4);
-    vo(s + 10.5, 'And you can always return a Volley with a Volley… or a Drop-Shot with a Drop-Shot!', 3.8);
-    vo(s + 14.6, 'But roll NET or OUT… and you lose the point!', 3.2);
-    vo(s + 18.0, 'High risk… <em>high reward!</em>', 2.6);
+    T('SAME|g:CARD?', s + 27.3, s + 32.0, { k: 'Always legal', s: 'You can always return a Volley with a Volley, and a Drop-Shot with a Drop-Shot.' });
+    popAt(sv, s + 27.7, -3); popAt(sd, s + 29.6, 3); glow(V, s + 27.7, true, '#ffffff'); glow(D, s + 29.6, true, '#ffffff');
+    glow(V, s + 31.9, false); glow(D, s + 31.9, false); hide([sv, sd], s + 31.9);
+    // NET / OUT
+    roll3(D3.volley, dieV, s + 31.4, 2, dv[1], 120); roll3(D3.drop, dieD, s + 31.7, 3, dd[1], 120);
+    T('r:NET? r:OUT?|r:POINT_LOST!', s + 32.2, s + 35.8, { s: 'Roll NET or OUT on the die and you lose the point.' });
+    mood(s + 32.2, 'red'); ring(s + 32.4, [L.pair[0][0], cy], '#ff4a5e', .3, 3); ring(s + 32.7, [L.pair[1][0], cy], '#ff4a5e', .3, 3);
+    T('r:HIGH_RISK!|g:HIGH_REWARD!', s + 35.9, s + 38.2);
+    mood(s + 35.9, 'lime'); ring(s + 36.0, [L.pair[0][0], cy], '#c6f432', .3, 3); ring(s + 36.2, [L.pair[1][0], cy], '#c6f432', .3, 3);
+    hide([dieV, dieD], s + 38.1); out([V, D], s + 38.1, 0, 520);
+    vo(s + .3, 'Next up: <em>net cards!</em> Volleys and Drop-Shots.', 3.6);
+    vo(s + 4.4, 'Net Cards can return ANY groundstroke, regardless of its pace. Then roll the matching die to set your shot’s pace.', 7.0);
+    vo(s + 11.9, 'Roll the Volley Die for a pace of six or seven. Your opponent must return it with a groundstroke of <em>equal or higher</em> pace.', 7.2);
+    vo(s + 19.6, 'Roll the Drop-Shot Die for a pace of one or two. Your opponent must return it with a groundstroke of <em>equal or lower</em> pace.', 7.2);
+    vo(s + 27.3, 'And you can always return a Volley with a Volley… or a Drop-Shot with a Drop-Shot!', 4.4);
+    vo(s + 32.2, 'But roll NET or OUT… and you lose the point!', 3.3);
+    vo(s + 35.9, 'High risk… <em>high reward!</em>', 2.0);
   });
 
   /* ---------- 10d · TACTICAL CARDS ---------- */
-  scene('Tactical Cards', 24.6, s => {
+  scene('Tactical Cards', 38.9, s => {
     mood(s, 'orange');
-    const names = ['SMASH_7', 'LOB_1', 'APPROACH_5', 'APPROACH_3'];
-    const gw = fmt === 'wide' ? 200 : 215;
-    const pos = names.map((_, i) => fmt === 'wide' ? [240 + i * 215, 545] : [150 + i * 260, 1090]);
-    const G = names.map(n => C(n, gw));
-    G.forEach((c, i) => put(c, s + .3 + i * .08, { x: pos[i][0], y: L.H + 380, rotation: 0 }, { x: pos[i][0], y: pos[i][1], rotation: i % 2 ? 3 : -3 }, .6, 'back.out(1.3)'));
-    const focus = (idx, at, end, color) => {
-      G.forEach((c, i) => { if (idx.includes(i)) glow(c, at, true, color); else dim(c, at); });
-      G.forEach((c, i) => { if (idx.includes(i)) glow(c, end, false); else dim(c, end, false); });
-    };
-    const tag = (txt, i, cls, at, end, rot = -3, below = false, x) => { const b = burst(txt, x !== undefined ? x : pos[i][0], below ? pos[i][1] + ch(gw) / 2 + 40 : pos[i][1] - ch(gw) / 2 - 40, cls, rot); b.style.fontSize = '30px'; b.style.padding = '9px 14px 7px'; popAt(b, at, rot); hide(b, end); return b; };
-    T('TACTICAL|g:CARDS', s + .3, s + 3.3, { k: 'Specific pace only', s: 'Tactical cards can only return shots of a specific pace.' });
-    focus([0], s + 3.4, s + 6.4, '#ff4a5e'); tag('Pace 1 or 2', 0, 'r', s + 3.6, s + 6.4);
-    T('r:SMASH', s + 3.4, s + 6.4, { k: 'Low pace', s: 'A Smash returns low pace shots: 1s and 2s.' });
-    focus([1], s + 6.6, s + 9.6, '#ff4f9a'); tag('Pace 6 or 7', 1, 'pk', s + 6.8, s + 9.6, 3);
-    T('k:LOB', s + 6.6, s + 9.6, { k: 'High pace', s: 'A Lob returns high pace shots: 6s and 7s.' });
-    // smash <-> lob, then what they return from the net
-    focus([0, 1], s + 9.8, s + 17.0, '#ffffff');
-    tag('Smash ↔ Lob', 0, 'w', s + 14.1, s + 16.9, -2, false, (pos[0][0] + pos[1][0]) / 2);
-    T('r:SMASH_↔|k:LOB', s + 13.9, s + 17.0, { s: 'A Smash can always return a Lob, and a Lob can always return a Smash.' });
-    tag('Returns Drop-Shots', 0, 'y', s + 10.4, s + 13.7, -3, true, pos[0][0] + (fmt === 'tall' ? 80 : 0)); tag('Returns Volleys', 1, 'p', s + 11.4, s + 13.7, 3, false, pos[1][0] + (fmt === 'wide' ? 20 : 30));
-    T('k:LOB_→_p:VOLLEY|r:SMASH_→_y:DROP-SHOT', s + 9.8, s + 13.8, { s: 'Volleys are high pace, so a Lob returns them. Drop-Shots are low, so a Smash returns them.' });
-    focus([2, 3], s + 17.2, s + 24.0, '#ff8a2a'); tag('Equal pace', 2, 'o', s + 17.4, s + 23.9); tag('Steal a card!', 3, 'g', s + 19.0, s + 23.9, 3, true);
-    T('a:APPROACH', s + 17.2, s + 20.9, { k: 'Topspin 5 · Slice 3', s: 'The final Tactical card. Returns any shot of equal pace, and steals a card from your opponent’s hand!' });
-    T('STEAL THEIR|g:LAST_CARD?', s + 21.0, s + 24.0, { s: 'Then they can’t Dig Deep!' });
-    out(G, s + 24.1, 0, 520);
-    vo(s + .3, 'Tactical cards can only return shots of a <em>specific pace.</em>', 2.9);
-    vo(s + 3.4, 'A Smash returns low pace shots: ones and twos.', 3.0);
-    vo(s + 6.6, 'A Lob returns high pace shots: sixes and sevens.', 3.0);
-    vo(s + 13.9, 'A Smash can always return a Lob… and a Lob can always return a Smash!', 2.9);
-    vo(s + 9.8, 'And that means a Lob can return a Volley… and a Smash can return a Drop-Shot!', 3.8);
-    vo(s + 17.2, 'The final Tactical card is an <em>Approach</em>, which can return any shot of equal pace… and steals a card from your opponent’s hand!', 3.6);
-    vo(s + 21.0, 'Steal their last card, and they can’t Dig Deep!', 2.8);
+    const tw = fmt === 'tall' ? 270 : L.pw, lp = [L.pair[0][0], fmt === 'tall' ? 1090 : L.pair[0][1]], rp = [L.pair[1][0], lp[1]];
+    const mid = [(lp[0] + rp[0]) / 2, lp[1]];
+    const tag = (txt, x, y, cls, at, end, rot = -3) => { const b = burst(txt, x, y, cls, rot); b.style.fontSize = '30px'; b.style.padding = '9px 14px 7px'; popAt(b, at, rot); hide(b, end); return b; };
+    const above = y => y - ch(tw) / 2 - 44, below = y => y + ch(tw) / 2 + 44;
+    const fromHand = (c, at, [x, y], rot) => put(c, at, { x, y: L.H + 380, rotation: rot * 3 }, { x: x + 14, y: y + 12, rotation: rot }, .5, 'power3.out');
+    const fromOpp = (c, at, [x, y], rot) => { put(c, at, { x: x + 120, y: -350, rotation: -40 }, { x, y, rotation: rot }, .55); };
+    T('TACTICAL|g:CARDS', s + .3, s + 4.1, { k: 'Specific pace only', s: 'Tactical cards can only return shots of a specific pace.' });
+    // Smash 7, then Smash 6
+    const sm7 = C('SMASH_7', tw), sm6 = C('SMASH_6', tw);
+    fromHand(sm7, s + 4.4, [lp[0] + (rp[0] - lp[0]) * .25, lp[1]], -5); fromHand(sm6, s + 5.6, [lp[0] + (rp[0] - lp[0]) * .62, lp[1]], 5);
+    T('r:SMASH', s + 4.3, s + 7.9, { k: 'Low pace', s: 'A Smash returns low pace shots: 1s and 2s.' });
+    tag('Pace 1 or 2', mid[0], above(mid[1]), 'r', s + 4.8, s + 7.9);
+    out([sm7, sm6], s + 7.9, -L.W * .6, 0, -20);
+    // Lob 1, then Lob 2
+    const lb1 = C('LOB_1', tw), lb2 = C('LOB_2', tw);
+    fromHand(lb1, s + 8.2, [lp[0] + (rp[0] - lp[0]) * .25, lp[1]], -5); fromHand(lb2, s + 9.4, [lp[0] + (rp[0] - lp[0]) * .62, lp[1]], 5);
+    T('k:LOB', s + 8.1, s + 11.8, { k: 'High pace', s: 'A Lob returns high pace shots: 6s and 7s.' });
+    tag('Pace 6 or 7', mid[0], above(mid[1]), 'pk', s + 8.6, s + 11.8, 3);
+    out([lb1, lb2], s + 11.8, -L.W * .6, 0, -20);
+    // a Lob on a Volley (rolled 7), a Smash on a Drop-Shot (rolled 2)
+    T('k:LOB → p:VOLLEY|r:SMASH → y:DROP-SHOT', s + 12.0, s + 16.7, { s: 'Volleys are high pace, so a Lob returns them. Drop-Shots are low, so a Smash returns them.' });
+    const nv = C('VOLLEY', tw, { back: 'ORANGE', down: true }), nd = C('DROP_SHOT', tw, { back: 'ORANGE', down: true });
+    fromOpp(nv, s + 12.0, lp, -3); flip(nv, s + 12.05, .5);
+    const dvp = [lp[0] - tw * .56, lp[1] + ch(tw) * .3], ddp = [rp[0] + tw * .56, rp[1] + ch(tw) * .3];
+    tl.set(dieV, { x: dvp[0], y: dvp[1] }, s + 12.3); show(dieV, s + 12.35, .2); roll3(D3.volley, dieV, s + 12.4, 1, dvp[1], 120);
+    const lobV = C('LOB_1', tw); fromHand(lobV, s + 13.8, lp, 6); ring(s + 14.2, lp, '#ff4f9a', .3, 2.5);
+    fromOpp(nd, s + 14.4, rp, 3); flip(nd, s + 14.45, .5);
+    tl.set(dieD, { x: ddp[0], y: ddp[1] }, s + 14.6); show(dieD, s + 14.65, .2); roll3(D3.drop, dieD, s + 14.7, 1, ddp[1], 120);
+    const smD = C('SMASH_7', tw); fromHand(smD, s + 15.9, rp, -6); ring(s + 16.3, rp, '#ff4a5e', .3, 2.5);
+    hide([dieV, dieD], s + 16.7); out([nv, lobV, nd, smD], s + 16.7, L.W * .6, -60, 35);
+    // a Smash on a Lob, a Lob on a Smash
+    T('r:SMASH_↔|k:LOB', s + 16.9, s + 21.7, { s: 'A Smash can always return a Lob, and a Lob can always return a Smash.' });
+    const oL2 = C('LOB_2', tw, { back: 'ORANGE', down: true }), oS6 = C('SMASH_6', tw, { back: 'ORANGE', down: true });
+    fromOpp(oL2, s + 16.9, lp, -3); flip(oL2, s + 16.95, .5);
+    const s7 = C('SMASH_7', tw); fromHand(s7, s + 17.9, lp, 6); ring(s + 18.3, lp, '#ff4a5e', .3, 2.5);
+    fromOpp(oS6, s + 19.2, rp, 3); flip(oS6, s + 19.25, .5);
+    const l1 = C('LOB_1', tw); fromHand(l1, s + 20.2, rp, -6); ring(s + 20.6, rp, '#ff4f9a', .3, 2.5);
+    out([oL2, s7, oS6, l1], s + 21.7, L.W * .6, -60, 35);
+    // Approach on an equal-pace shot
+    T('a:APPROACH', s + 21.9, s + 32.0, { k: 'Topspin 5 · Slice 3', s: 'Play it on a shot of equal pace. Then steal a card from your opponent’s hand!' });
+    const g5 = C('FOREHAND_5', tw, { back: 'ORANGE', down: true }), g3 = C('BACKHAND_SLICE_3', tw, { back: 'ORANGE', down: true });
+    fromOpp(g5, s + 24.6, lp, -3); flip(g5, s + 24.65, .5);
+    const a5 = C('APPROACH_5', tw); fromHand(a5, s + 26.9, lp, 6); ring(s + 27.3, lp, '#ffb98f', .3, 2.5);
+    tag('5 = 5', lp[0], below(lp[1]), 'o', s + 27.4, s + 31.9);
+    fromOpp(g3, s + 28.5, rp, 3); flip(g3, s + 28.55, .5);
+    const a3 = C('APPROACH_3', tw); fromHand(a3, s + 29.7, rp, -6); ring(s + 30.1, rp, '#ffb98f', .3, 2.5);
+    tag('3 = 3', rp[0], below(rp[1]), 'o', s + 30.2, s + 31.9, 3);
+    out([g5, a5, g3, a3], s + 31.9, L.W * .6, -60, 35);
+    // steal from the opponent's face-down hand
+    const OH = ['FOREHAND_2', 'BACKHAND_6', 'LOB_2', 'FOREHAND_SLICE_4'].map(n => C(n, L.ow, { back: 'ORANGE', down: true }));
+    OH.forEach((c, i) => put(c, s + 31.6 + i * .06, { x: L.opp[0], y: -320, rotation: 180 }, ofan(4, i), .5, 'back.out(1.3)'));
+    T('g:STEAL!', s + 32.1, s + 35.1, { s: 'Take a random card from your opponent’s hand.' });
+    const st = OH[2];
+    mv(st, s + 32.7, { x: L.hand[0], y: L.hand[1], rotation: 0, scale: L.hw / L.ow }, .7, 'power2.inOut'); flip(st, s + 33.3, .45);
+    tag('Stolen!', L.hand[0], L.hand[1] - ch(L.hw) / 2 - 50, 'g', s + 33.6, s + 35.2);
+    [OH[0], OH[1], OH[3]].forEach((c, i) => mv(c, s + 33.0, ofan(3, i), .45));
+    // their last card
+    T('STEAL THEIR|g:LAST_CARD?', s + 35.3, s + 38.6, { s: 'Then they can’t Dig Deep!' });
+    out([OH[0], OH[1]], s + 35.3, 0, -400); mv(OH[3], s + 35.4, ofan(1, 0), .4);
+    mv(OH[3], s + 36.2, { x: L.hand[0] + 120, y: L.hand[1], rotation: 6, scale: L.hw / L.ow }, .65, 'power2.inOut'); flip(OH[3], s + 36.7, .45);
+    tag('No Dig Deep!', L.opp[0], L.opp[1] + 120, 'r', s + 36.8, s + 38.6, 3);
+    out([st, OH[3]], s + 38.6, 0, 420);
+    vo(s + .3, 'Tactical cards can only return shots of a <em>specific pace.</em>', 3.6);
+    vo(s + 4.3, 'A Smash returns low pace shots: ones and twos.', 3.5);
+    vo(s + 8.1, 'A Lob returns high pace shots: sixes and sevens.', 3.5);
+    vo(s + 12.0, 'And that means a Lob can return a Volley… and a Smash can return a Drop-Shot!', 4.5);
+    vo(s + 16.9, 'A Smash can always return a Lob… and a Lob can always return a Smash!', 4.6);
+    vo(s + 21.9, 'The final Tactical card is the <em>Approach</em>. Play it on a shot of equal pace: a Topspin Approach five on a five… or an Approach Slice three on a three.', 9.8);
+    vo(s + 32.1, 'Then <em>steal a card</em> from your opponent’s hand!', 2.9);
+    vo(s + 35.3, 'Steal their last card, and they can’t Dig Deep!', 3.0);
   });
 
   /* ---------- 10e · SPECIAL CARDS (tease) ---------- */
@@ -1175,7 +1284,7 @@ function build(time = 0) {
     tl.fromTo(rays, { autoAlpha: 0, scale: .5, rotation: 0 }, { autoAlpha: 1, scale: .9, rotation: 20, duration: 3.3, ease: 'none', immediateRender: false }, s + 16.4);
     tl.fromTo(logo, { scale: L.outLogoW / L.logoW }, { scale: L.outLogoW / L.logoW * 1.06, duration: .18, yoyo: true, repeat: 3, ease: 'power2.out', immediateRender: false }, s + 17.3);
     vo(s + .3, 'Groundstrokes: match the color! If it has Topspin, the pace must be equal or higher. If it’s a Slice, the pace must be equal or lower!', 4.5);
-    vo(s + 5.0, 'To switch colors, match the pace!', 1.8);
+    vo(s + 5.0, 'To switch colors, match the pace… regardless of spin!', 1.8);
     vo(s + 7.0, 'Modifier cards change your card’s pace by one… then draw a card!', 2.2);
     vo(s + 9.4, 'Net cards return any groundstroke, at any pace… then roll to determine your pace! Careful not to roll it OUT, or into the NET!', 2.4);
     vo(s + 12.0, 'Tactical cards only return a specific pace… like a Smash on a one or two, or a Lob on a six or seven! Approaches can be played against any shot of equal pace… then steal a card!', 2.4);
