@@ -335,32 +335,50 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
    Gameplay
    ============================================================ */
 .grid4{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
-.tile{--acc:var(--lime);position:relative;grid-column:span 6;min-height:300px;border-radius:20px;padding:clamp(24px,2.6vw,32px);border:1px solid var(--line);background:var(--bg-2);overflow:hidden;isolation:isolate;transition:border-color .35s}
+.tile{--acc:var(--lime);position:relative;grid-column:span 6;min-height:340px;display:flex;flex-direction:column;border-radius:20px;padding:clamp(24px,2.6vw,32px);border:1px solid var(--line);background:var(--bg-2);overflow:hidden;isolation:isolate;transition:border-color .35s}
 .tile::before{content:"";position:absolute;inset:0;z-index:-1;opacity:0;transition:opacity .4s;background:radial-gradient(380px circle at var(--mx,50%) var(--my,50%),color-mix(in srgb,var(--acc) 12%,transparent),transparent 65%)}
 .tile:hover{border-color:color-mix(in srgb,var(--acc) 35%,transparent)}
 .tile:hover::before{opacity:1}
 .tile .label{color:var(--acc)}
 .tile h3{font-family:var(--display);font-weight:800;font-stretch:112%;text-transform:uppercase;font-size:clamp(1.3rem,1.9vw,1.65rem);letter-spacing:-.01em;line-height:1;margin:10px 0 10px}
-.tile p{color:var(--muted);margin:0;max-width:24rem;font-size:.97rem}
+.tile p{color:var(--muted);margin:0;max-width:30rem;font-size:.97rem}
+.tile p b{font-weight:600}.c-lime{color:var(--lime)}.c-yel{color:#ffe11a}
 .t-a{grid-column:span 7;--acc:var(--orange)}
 .t-b{grid-column:span 5;--acc:var(--purple)}
-.t-c{grid-column:span 5;--acc:var(--lime)}
-.t-d{grid-column:span 7;--acc:var(--gold)}
-.vis{position:absolute;left:clamp(24px,2.6vw,32px);right:clamp(24px,2.6vw,32px);bottom:clamp(24px,2.6vw,32px)}
+.t-c{grid-column:span 7;--acc:var(--lime)}
+.t-d{grid-column:span 5;--acc:var(--gold)}
+.vis{position:relative;margin-top:auto;padding-top:28px}
 .pace{display:flex;align-items:flex-end;gap:6px;height:84px}
 .pace i{flex:1;height:calc(var(--h)*1%);border-radius:4px;background:rgba(244,246,239,.07);position:relative;overflow:hidden}
-.pace i::after{content:"";position:absolute;inset:0;background:var(--orange);transform:scaleY(0);transform-origin:50% 100%;transition:transform .35s var(--ease)}
+.pace i em{position:absolute;left:0;right:0;bottom:4px;z-index:1;text-align:center;font:800 .7rem/1 var(--display);font-style:normal;color:rgba(11,13,10,.55)}
+.pace-top{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:12px}
+.pace-mode{font-family:var(--display);font-weight:800;font-stretch:110%;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--pc,var(--lime));transition:color .3s}
+.pace-vis{--pc:var(--lime);display:grid;grid-template-columns:clamp(96px,9vw,124px) 1fr;gap:clamp(18px,2.4vw,34px);align-items:end}
+.pace-vis.bh{--pc:var(--orange)}
+.rally-pile{position:relative;aspect-ratio:676/1048;width:100%}
+.rally-pile img{position:absolute;inset:0;width:100%;height:100%;border-radius:7%/4.5%;box-shadow:0 14px 28px -10px rgba(0,0,0,.75)}
+.pace-rule{margin-top:12px;font-size:.88rem;color:var(--muted);min-height:1.4em}
+.pace-rule b{color:var(--pc);font-weight:700}
+.pace i::after{content:"";position:absolute;inset:0;background:var(--pc);transform:scaleY(0);transform-origin:50% 100%;transition:transform .35s var(--ease)}
 .pace i.on::after{transform:scaleY(1)}
-.pace-n{position:absolute;right:0;bottom:100px;font-family:var(--display);font-weight:800;font-stretch:110%;font-size:2.2rem;line-height:1;color:var(--orange)}
+.pace-n{font-family:var(--display);font-weight:800;font-stretch:110%;font-size:2.2rem;line-height:1;color:var(--pc);transition:color .3s}
 .pace-n small{font-size:.7rem;letter-spacing:.16em;color:var(--muted);margin-right:8px;vertical-align:middle;font-weight:600}
-.die-vis{display:flex;align-items:center;gap:18px}
+.die-vis{display:flex;flex-direction:column;gap:18px}
+.dice3{display:flex;justify-content:space-around;align-items:flex-start;gap:8px}
+.die-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;border-top:1px solid var(--line);padding-top:16px}
+.die-say{font-size:.9rem;color:var(--fg);line-height:1.35;min-height:2.7em;display:flex;align-items:center}
+.die-foot .btn{flex:none}
 .die2d{width:76px;height:76px;border-radius:14px;overflow:hidden;cursor:pointer;flex:none;box-shadow:0 14px 30px -12px rgba(164,92,255,.6)}
 .die2d img{width:100%;height:100%;object-fit:cover}
 .die-res{font-family:var(--display);font-weight:800;font-stretch:110%;font-size:1.1rem;text-transform:uppercase;min-height:1.3em;color:var(--purple)}
-.die-vis .btn{margin-left:auto}
-.court{height:118px}
-.court svg{width:100%;height:100%;overflow:visible}
-.court-lbl{position:absolute;right:0;top:-30px;font-family:var(--display);font-weight:700;font-size:.66rem;letter-spacing:.16em;color:var(--lime)}
+.court svg{display:block;height:auto;aspect-ratio:320/120;max-width:420px}
+.play-name{font-family:var(--display);font-weight:800;font-style:italic;font-stretch:110%;text-transform:uppercase;font-size:1.05rem;color:var(--lime);margin-bottom:10px}
+.play-steps{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:12px;min-height:28px}
+.play-steps span{font:700 .68rem/1 var(--display);letter-spacing:.1em;text-transform:uppercase;padding:7px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted);transition:all .3s}
+.play-steps span.on{background:var(--lime);border-color:var(--lime);color:#0b0d0a}
+.play-steps span.done{color:var(--fg);border-color:rgba(198,244,50,.4)}
+.play-steps i{color:var(--faint);font-style:normal;font-size:.8rem}
+.court svg{width:100%;overflow:visible}
 .duo{display:flex;align-items:center;justify-content:space-between;gap:16px}
 .duo-side{display:flex;gap:8px}
 .person{width:44px;height:44px;transition:transform .5s var(--ease),opacity .4s,width .5s var(--ease)}
@@ -386,7 +404,7 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
 .deck>.wrap,.deck .ring-stage{position:relative;z-index:2}
 .deck-fx{position:absolute;inset:0;z-index:0;pointer-events:none}
 .deck-glow{position:absolute;left:50%;top:58%;width:min(1100px,120vw);height:min(760px,90vh);transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--dc) 38%,transparent),color-mix(in srgb,var(--dc) 10%,transparent) 55%,transparent);transition:background .7s}
-.deck-big{position:absolute;left:0;right:0;top:44%;transform-origin:50% 50%;text-align:center;white-space:nowrap;font-family:var(--display);font-weight:900;font-style:italic;font-stretch:110%;text-transform:uppercase;font-size:clamp(4rem,13vw,12rem);line-height:1;color:transparent;-webkit-text-stroke:2px color-mix(in srgb,var(--dc) 55%,transparent);opacity:.9;transition:-webkit-text-stroke-color .7s}
+.deck-big{display:none!important;position:absolute;left:0;right:0;top:44%;transform-origin:50% 50%;text-align:center;white-space:nowrap;font-family:var(--display);font-weight:900;font-style:italic;font-stretch:110%;text-transform:uppercase;font-size:clamp(4rem,13vw,12rem);line-height:1;color:transparent;-webkit-text-stroke:2px color-mix(in srgb,var(--dc) 55%,transparent);opacity:.9;transition:-webkit-text-stroke-color .7s}
 .deck-court{position:absolute;left:50%;bottom:24%;width:min(1100px,110vw);height:clamp(150px,22vh,240px);transform:translateX(-50%);color:color-mix(in srgb,var(--dc) 45%,transparent);opacity:.55;transition:color .7s}
 .deck-drops{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3}
 .ring-name .desc{display:block;margin-top:8px;color:var(--muted);font-size:clamp(.9rem,1.1vw,1rem);min-height:1.4em}
@@ -714,46 +732,51 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
       <article class="tile t-a" data-reveal>
         <span class="label">Momentum</span>
         <h3>Fast paced</h3>
-        <p>Topspin pushes the pace up, and a single Slice can drag the whole rally back down.</p>
-        <div class="vis">
-          <div class="pace-n"><small>Pace</small><span id="pace-n">1</span></div>
-          <div class="pace" id="pace"><i style="--h:24"></i><i style="--h:35"></i><i style="--h:46"></i><i style="--h:58"></i><i style="--h:70"></i><i style="--h:84"></i><i style="--h:100"></i></div>
+        <p>Every groundstroke sets the pace for the next. <b class="c-lime">Topspin</b> pushes it up, <b class="c-yel">Slice</b> drags it down, and matching the pace <b>switches colors</b>.</p>
+        <div class="vis pace-vis">
+          <div class="rally-pile" id="rally-pile" aria-hidden="true"></div>
+          <div class="pace-side">
+            <div class="pace-top"><span class="pace-mode" id="pace-mode">Topspin ↑</span><span class="pace-n"><small>Pace</small><span id="pace-n">3</span></span></div>
+            <div class="pace" id="pace"><i style="--h:24"><em>1</em></i><i style="--h:35"><em>2</em></i><i style="--h:46"><em>3</em></i><i style="--h:58"><em>4</em></i><i style="--h:70"><em>5</em></i><i style="--h:84"><em>6</em></i><i style="--h:100"><em>7</em></i></div>
+            <div class="pace-rule" id="pace-rule">&nbsp;</div>
+          </div>
         </div>
       </article>
 
       <article class="tile t-b" data-reveal>
         <span class="label">Dice</span>
         <h3>Risk &amp; reward</h3>
-        <p>Roll for it at the net. Will it be a winner or a dump into the net? Give it a try.</p>
+        <p>Roll the Serve to start the point. Charge the net and the Volley or Drop-Shot die sets your pace&hellip; unless it lands NET or OUT.</p>
         <div class="vis die-vis">
-          <div class="die2d" id="die2d" role="button" tabindex="0" aria-label="Roll the volley die"><img src="assets/dice/VOLLEY_6orHIGHER_180.png" alt="Volley die showing 6 or higher"></div>
-          <div class="die-res" id="die-res" aria-live="polite">&nbsp;</div>
-          <button class="btn btn-line btn-sm" type="button" id="risk-roll">Roll</button>
+          <div class="dice3"><div class="r-die"><div class="dice-container die3d" data-kind="serve" role="button" tabindex="0" aria-label="Roll the Serve die" data-faces="Topspin 4↑,Topspin 5↑,Slice 4↓,Slice 3↓,Let +1,Fault!" data-imgs="SERVE_1_TOPSPIN_4,SERVE_2_TOPSPIN_5,SERVE_3_SLICE_4,SERVE_4_SLICE_3,SERVE_5_LET,SERVE_6_FAULT"><img src="assets/dice3d/serve_hero.png" alt="Serve die" width="240" height="240"></div><span class="label">Serve</span><span class="die-out" style="color:var(--lime)">&nbsp;</span></div><div class="r-die"><div class="dice-container die3d" data-kind="volley" role="button" tabindex="0" aria-label="Roll the Volley die" data-faces="6↑,7,Net!,Out!,6↑,7" data-imgs="VOLLEY_1_6_OR_HIGHER,VOLLEY_2_7,VOLLEY_3_NET,VOLLEY_4_OUT,VOLLEY_1_6_OR_HIGHER,VOLLEY_2_7"><img src="assets/dice3d/volley_hero.png" alt="Volley die" width="240" height="240"></div><span class="label">Volley</span><span class="die-out" style="color:var(--purple)">&nbsp;</span></div><div class="r-die"><div class="dice-container die3d" data-kind="drop" role="button" tabindex="0" aria-label="Roll the Drop-Shot die" data-faces="1,2,Net!,Out!,1,2" data-imgs="DROPSHOT_1_1,DROPSHOT_2_2,DROPSHOT_3_NET,DROPSHOT_4_OUT,DROPSHOT_1_1,DROPSHOT_2_2"><img src="assets/dice3d/dropshot_hero.png" alt="Drop-Shot die" width="240" height="240"></div><span class="label">Drop-Shot</span><span class="die-out" style="color:var(--gold)">&nbsp;</span></div></div>
+          <div class="die-foot"><span class="die-say" id="die-say">Tap a die to roll it, or roll all three.</span><button class="btn btn-line btn-sm" type="button" id="risk-roll">Roll all</button></div>
         </div>
       </article>
 
       <article class="tile t-c" data-reveal>
         <span class="label">Strategy</span>
         <h3>Real tactics</h3>
-        <p>Cross-court, down-the-line, lobs and smashes. Real tennis thinking in a card game.</p>
+        <p>Build the point like a pro. Set it up, then finish it.</p>
         <div class="vis court">
-          <span class="court-lbl" id="court-lbl">CROSS-COURT</span>
+          <div class="play-name" id="play-name">Serve &amp; volley</div>
           <svg viewBox="0 0 320 120" aria-hidden="true">
             <rect x="1" y="1" width="318" height="118" rx="4" fill="none" stroke="rgba(244,246,239,.25)" stroke-width="1.2"/>
             <line x1="1" y1="16" x2="319" y2="16" stroke="rgba(244,246,239,.12)"/><line x1="1" y1="104" x2="319" y2="104" stroke="rgba(244,246,239,.12)"/>
             <line x1="84" y1="16" x2="84" y2="104" stroke="rgba(244,246,239,.12)"/><line x1="236" y1="16" x2="236" y2="104" stroke="rgba(244,246,239,.12)"/>
             <line x1="84" y1="60" x2="236" y2="60" stroke="rgba(244,246,239,.12)"/>
             <line x1="160" y1="-4" x2="160" y2="124" stroke="rgba(244,246,239,.6)" stroke-width="1.5"/>
-            <path id="shot-path" d="M20 95 Q160 10 300 25" fill="none" stroke="#c6f432" stroke-width="1.5" stroke-dasharray="4 5"/>
+            <g id="shot-trail"></g>
+            <path id="shot-path" d="M20 95 Q160 10 300 25" fill="none" stroke="#c6f432" stroke-width="1.8"/>
             <circle id="court-ball" cx="20" cy="95" r="5" fill="#c6f432"/>
           </svg>
+          <div class="play-steps" id="play-steps"></div>
         </div>
       </article>
 
       <article class="tile t-d" data-reveal>
         <span class="label">Formats</span>
         <h3>Singles &amp; doubles</h3>
-        <p>Go head-to-head in 1v1 or team up for 2v2 doubles.</p>
+        <p>Go head-to-head 1v1, or team up for 2v2 doubles.</p>
         <div class="vis duo">
           <div class="duo-side">
             <svg class="person" viewBox="0 0 64 64"><circle cx="32" cy="18" r="11" fill="#c6f432"/><path d="M12 60c0-13 9-22 20-22s20 9 20 22z" fill="#c6f432"/></svg>
@@ -1461,37 +1484,73 @@ function rally() {
 /* gameplay tiles */
 function gameplay() {
   $$('.tile').forEach(t => t.addEventListener('pointermove', e => { const r = t.getBoundingClientRect(); t.style.setProperty('--mx', (e.clientX - r.left) + 'px'); t.style.setProperty('--my', (e.clientY - r.top) + 'px'); }));
-  const bars = $$('#pace i'), pn = $('#pace-n'); let p = 0, paceInt;
-  const paceTick = () => { p = (p % 7) + 1; bars.forEach((b, i) => b.classList.toggle('on', i < p)); pn.textContent = p; };
-  ScrollTrigger.create({ trigger: '.t-a', start: 'top bottom', end: 'bottom top', onToggle: s => { clearInterval(paceInt); if (s.isActive) paceInt = setInterval(paceTick, 600); } });
-
-  const faces = [['VOLLEY_6orHIGHER_180', '6 or higher'], ['VOLLLEY_7_180', 'Pace 7'], ['VOLLEY_NET_180', 'In the net'], ['VOLLEY_OUT_180', 'Out']];
-  const die = $('#die2d'), dimg = $('img', die), res = $('#die-res'); let rolling = false;
-  const roll = () => {
-    if (rolling) return; rolling = true; res.innerHTML = '&nbsp;';
-    let n = 0; const final = faces[(Math.random() * faces.length) | 0];
-    gsap.fromTo(die, { rotation: 0 }, { rotation: 360, duration: .8, ease: 'power3.out' });
-    const iv = setInterval(() => {
-      const f = n++ < 8 ? faces[n % faces.length] : final;
-      dimg.src = `assets/dice/${f[0]}.png`;
-      if (n > 8) { clearInterval(iv); rolling = false; res.textContent = final[1]; dimg.alt = 'Volley die showing ' + final[1]; gsap.from(res, { y: 8, opacity: 0, duration: .4 }); }
-    }, 70);
+  // momentum: a little rally. Each groundstroke sets the pace, its spin sets the direction, matching the pace switches colors
+  const bars = $$('#pace i'), pn = $('#pace-n'), pm = $('#pace-mode'), pv = $('.pace-vis'), pile = $('#rally-pile'), rule = $('#pace-rule');
+  const RALLY = [['FOREHAND_3', 3, 0, 1], ['FOREHAND_5', 5, 0, 1], ['BACKHAND_5', 5, 1, 1, 1], ['BACKHAND_7', 7, 1, 1], ['BACKHAND_SLICE_7', 7, 1, 0],
+                 ['BACKHAND_SLICE_4', 4, 1, 0], ['FOREHAND_SLICE_4', 4, 0, 0, 1], ['FOREHAND_SLICE_2', 2, 0, 0], ['FOREHAND_2', 2, 0, 1]];
+  let ri = 0, paceInt;
+  const paceTick = () => {
+    const [nm, p, bh, top, sw] = RALLY[ri++ % RALLY.length], col = bh ? 'Backhand' : 'Forehand';
+    bars.forEach((b, i) => b.classList.toggle('on', i < p)); pn.textContent = p;
+    pv.classList.toggle('bh', !!bh);
+    pm.textContent = sw ? 'Switch! ⇄' : top ? 'Topspin ↑' : 'Slice ↓';
+    rule.innerHTML = top ? `Next: a ${col} <b>${p} or higher</b>` : `Next: a ${col} <b>${p} or lower</b>`;
+    const im = new Image(); im.src = `assets/cards/${nm}.jpg`; im.alt = ''; pile.appendChild(im);
+    const old = $$('img', pile); old.slice(0, -3).forEach(x => x.remove());
+    old.slice(-3, -1).forEach((x, k, arr) => gsap.to(x, { x: -(arr.length - k) * 10, rotation: -(arr.length - k) * 5, opacity: .55, duration: .4 }));
+    if (!reduced) gsap.fromTo(im, { x: 70, y: -30, rotation: 18, opacity: 0, scale: 1.08 }, { x: 0, y: 0, rotation: (ri % 2 ? 3 : -2), opacity: 1, scale: 1, duration: .5, ease: 'back.out(1.6)' });
   };
-  die.addEventListener('click', roll); $('#risk-roll').addEventListener('click', roll);
-  die.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); roll(); } });
+  paceTick();
+  ScrollTrigger.create({ trigger: '.t-a', start: 'top bottom', end: 'bottom top', onToggle: s => { clearInterval(paceInt); if (s.isActive) paceInt = setInterval(paceTick, 1700); } });
 
-  const ball = $('#court-ball'), path = $('#shot-path'), lbl = $('#court-lbl');
-  const shots = [['CROSS-COURT', 'M20 95 Q160 10 300 25'], ['DOWN-THE-LINE', 'M20 95 Q160 115 300 95'], ['LOB', 'M300 25 Q160 -70 24 30'], ['SMASH', 'M24 30 Q160 50 296 92']];
-  let si = 0, courtInt;
-  const shoot = () => {
-    const [name, d] = shots[si++ % shots.length];
-    path.setAttribute('d', d); lbl.textContent = name;
-    const len = path.getTotalLength();
-    gsap.fromTo(path, { strokeDasharray: `${len} ${len}`, strokeDashoffset: len }, { strokeDashoffset: 0, duration: .9, ease: 'power2.inOut' });
-    const o = { t: 0 };
-    gsap.to(o, { t: 1, duration: .9, ease: 'power2.inOut', onUpdate: () => { const pt = path.getPointAtLength(o.t * len); ball.setAttribute('cx', pt.x); ball.setAttribute('cy', pt.y); } });
+  // the dice are real 3D dice (built by dice()); explain whatever was rolled last
+  const say = $('#die-say');
+  const MEAN = {
+    'serve:Topspin 4↑': 'Serve: Topspin 4. Return it with a 4 or higher.', 'serve:Topspin 5↑': 'Serve: Topspin 5. Return it with a 5 or higher.',
+    'serve:Slice 4↓': 'Serve: Slice 4. Return it with a 4 or lower.', 'serve:Slice 3↓': 'Serve: Slice 3. Return it with a 3 or lower.',
+    'serve:Let +1': 'Let! Both players draw a card, and you serve again.', 'serve:Fault!': 'Fault! Take a second serve. Two and you lose the point.',
+    'volley:6↑': 'Volley at pace 6. They need a 6 or higher… or a Lob.', 'volley:7': 'Volley at pace 7. They need a 7… or a Lob.',
+    'drop:1': 'Drop-Shot at pace 1. They need a 1… or a Smash.', 'drop:2': 'Drop-Shot at pace 2. They need a 2 or lower… or a Smash.',
   };
-  ScrollTrigger.create({ trigger: '.t-c', start: 'top bottom', end: 'bottom top', onToggle: s => { clearInterval(courtInt); if (s.isActive) { shoot(); courtInt = setInterval(shoot, 2000); } } });
+  $$('.t-b .r-die').forEach(u => {
+    const kind = $('.die3d', u).dataset.kind, o = $('.die-out', u);
+    new MutationObserver(() => { const k = o.textContent.trim(); if (!k) return; say.textContent = MEAN[`${kind}:${k}`] || 'Into the NET or OUT. You lose the point!'; gsap.fromTo(say, { opacity: 0, y: 4 }, { opacity: 1, y: 0, duration: .3 }); })
+      .observe(o, { childList: true, characterData: true, subtree: true });
+  });
+  $('#risk-roll').addEventListener('click', () => $$('.t-b .die3d').forEach((d, i) => setTimeout(() => d.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })), i * 260)));
+
+  // tactics: named plays, shot by shot. Your shots (lime) go left to right; their replies (white) come back
+  const ball = $('#court-ball'), path = $('#shot-path'), trail = $('#shot-trail'), nameEl = $('#play-name'), stepsEl = $('#play-steps');
+  const PLAYS = [
+    ['Serve & volley', [['Serve', 'M14 92 Q160 30 282 34', 1], ['Return', 'M282 34 Q200 10 118 78', 0], ['Volley!', 'M118 78 Q150 70 268 98', 1]]],
+    ['Groundstroke, Drop-Shot, Smash!', [['Groundstroke', 'M20 30 Q160 0 300 88', 1], ['Return', 'M300 88 Q160 120 30 60', 0], ['Drop-Shot', 'M30 60 Q130 30 178 70', 1], ['Pop-up', 'M178 70 Q150 -40 120 40', 0], ['Smash!', 'M120 40 Q170 50 296 100', 1]]],
+    ['Topspin it up, then Lob', [['Topspin 5', 'M20 90 Q160 40 296 30', 1], ['Topspin 7', 'M296 30 Q160 70 140 84', 0], ['Lob!', 'M140 84 Q210 -60 304 96', 1]]],
+  ];
+  let pIdx = 0, playTl = null, courtOn = false;
+  function runPlay() {
+    const [name, shots] = PLAYS[pIdx++ % PLAYS.length];
+    nameEl.textContent = name; trail.innerHTML = '';
+    stepsEl.innerHTML = shots.filter(x => x[2]).map(x => `<span>${x[0]}</span>`).join('<i>›</i>');
+    const chips = $$('span', stepsEl);
+    gsap.fromTo([nameEl, stepsEl], { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: .35 });
+    playTl = gsap.timeline({ delay: .4, onComplete: () => { if (courtOn) gsap.delayedCall(1.4, runPlay); } });
+    let ci = 0;
+    shots.forEach(([lab, d, mine]) => {
+      const col = mine ? '#c6f432' : 'rgba(244,246,239,.75)', my = mine ? ci++ : -1, o = { t: 0 };
+      playTl.call(() => {
+        path.setAttribute('d', d); path.setAttribute('stroke', col); ball.setAttribute('fill', col);
+        chips.forEach((c, k) => { c.classList.toggle('on', k === my); if (my >= 0 && k < my) c.classList.add('done'); });
+      });
+      const len = () => path.getTotalLength();
+      playTl.fromTo(o, { t: 0 }, { t: 1, duration: lab.endsWith('!') ? .55 : .8, ease: 'power1.inOut', onUpdate: () => {
+        const L = len(), pt = path.getPointAtLength(o.t * L); path.style.strokeDasharray = `${L} ${L}`; path.style.strokeDashoffset = L * (1 - o.t);
+        ball.setAttribute('cx', pt.x); ball.setAttribute('cy', pt.y); } });
+      playTl.call(() => { const g = path.cloneNode(); g.removeAttribute('id'); g.setAttribute('opacity', '.28'); g.setAttribute('stroke-dasharray', '3 4'); g.style.strokeDasharray = ''; g.style.strokeDashoffset = ''; trail.appendChild(g); });
+      playTl.to({}, { duration: .25 });
+    });
+    playTl.call(() => chips.forEach(c => { c.classList.remove('on'); c.classList.add('done'); }));
+  }
+  ScrollTrigger.create({ trigger: '.t-c', start: 'top bottom', end: 'bottom top', onToggle: st => { courtOn = st.isActive; if (courtOn && (!playTl || !playTl.isActive())) runPlay(); } });
 
   const p2 = $$('.t-d .p2'), mode = $('#duo-mode'); let doubles = false, duoInt;
   const duoTick = () => { doubles = !doubles; p2.forEach(x => x.classList.toggle('off', !doubles)); mode.textContent = doubles ? 'Doubles' : 'Singles'; };
