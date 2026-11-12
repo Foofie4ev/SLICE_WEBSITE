@@ -512,8 +512,8 @@ function wipe(at, color = '#c6f432', src = 'LIME_1') {
    Voice-over (ElevenLabs, one clip per caption)
    ============================================================ */
 // bump when any clip changes, so browsers don't play an old cached copy
-const VO_VERSION = '6';
-const VO_DUR = [3.43, 2.04, 4.16, 2.78, 1.86, 2.58, 2.17, 4.27, 3.48, 1.3, 1.66, 1.65, 3.75, 5.41, 5.41, 2.59, 6.54, 4.75, 6.21, 2.55, 0, 3.82, 4.31, 5.7, 2.25, 1.39, 6.79, 4.02, 3.6, 3.74, 1.34, 6.13, 2.67, 4.15, 8.13, 2.49, 1.99, 1.89, 4.55, 3.64, 6.65, 4.17, 3.97, 2.39, 5.22, 2.39, 2.31, 3.72, 3.87, 5.79, 9.28, 4.59, 3.45, 2.04, 3.76, 3.58, 3.63, 4.62, 4.71, 7.72, 3.06, 3.86, 3.27, 2.06, 9.48, 2.52, 4.41, 8.76, 12.42, 4.03, 3.8];
+const VO_VERSION = '7';
+const VO_DUR = [3.43, 2.04, 4.16, 2.78, 1.86, 2.58, 2.17, 4.27, 3.48, 1.3, 1.66, 1.65, 3.75, 5.41, 5.41, 2.59, 6.54, 4.75, 6.21, 2.55, 0, 3.82, 4.31, 5.7, 2.25, 3.12, 9.1, 4.02, 3.6, 3.74, 1.34, 6.13, 2.67, 4.15, 8.13, 2.49, 1.99, 1.89, 4.55, 3.64, 6.65, 4.17, 3.97, 2.39, 5.22, 2.39, 2.31, 3.72, 3.87, 5.79, 9.28, 4.59, 3.45, 2.04, 3.76, 3.58, 3.63, 4.62, 4.71, 7.72, 3.06, 3.86, 3.27, 2.06, 9.48, 2.52, 4.41, 8.76, 12.42, 4.03, 3.8];
 // recap lines waiting for new recordings (0-based); remove an index once its VO_xx.m4a is replaced
 const VO_PENDING = new Set([20]); // VO_21 retired
 const VO = { ctx: null, gain: null, bufs: [], raw: [], pend: [], want: -1, on: false, src: null, idx: -1, lastT: 0, ok: false, song: null, songSrc: null };
@@ -805,7 +805,7 @@ function build(time = 0) {
     pileTop = fs2;
   });
 
-  scene('Switch Colors', 9.88, s => {
+  scene('Switch Colors', 15.5, s => {
     const K = 1.3;
     meterHide(s + K * .1); mood(s + K * .1, 'lime');
     const bs2 = C('BACKHAND_SLICE_2', L.cw, { back: 'ORANGE', down: true });
@@ -814,23 +814,25 @@ function build(time = 0) {
     put(bs2, s + K * .3, { x: px + 200, y: -350, rotation: -40 }, { x: px + dx, y: py + 10, rotation: 7 }, .6); flip(bs2, s + K * .35, .5);
     ring(s + K * .85, [px + dx, py], '#ffffff', .3, 2);
     T('SWITCH|COLORS?', s + K * .3, s + K * 1.8, { s: 'Forehand to Backhand, or back again.' });
-    const hA = HL(pileTop, [3, 2, 37, 23]), hB = HL(bs2, [3, 2, 37, 23]);
+    const hA = HL(pileTop, [5, 3, 33, 21]), hB = HL(bs2, [5, 3, 33, 21]);
     hlPop(hA, s + K * 1.9); hlPop(hB, s + K * 2.05);
     // badge sits above both cards, same pill style as the other callouts
     const eq = burst('Pace 2 = Pace 2', px, py - ch(L.cw) / 2 - (fmt === 'tall' ? 44 : 64), 'g', -4); popAt(eq, s + K * 2.1, -4);
-    T('MATCH THE|g:PACE!', s + K * 1.9, s + K * 7.1, { s: 'Return a groundstroke with the same pace in the other color, regardless of spin. Groundstrokes only!' });
+    T('MATCH THE|g:PACE!', s + K * 1.9, s + K * 11.6, { s: 'Return a groundstroke with the same pace in the other color, regardless of spin. Groundstrokes only!' });
     const m1 = C('FOREHAND_4', L.miniW), m2 = C('BACKHAND_4', L.miniW);
-    put(m1, s + K * 4.1, { x: L.mini[0][0], y: L.mini[0][1] + 80, rotation: 0, scale: .5, autoAlpha: 0 }, { y: L.mini[0][1], rotation: -5, scale: 1, autoAlpha: 1 }, .45, 'back.out(2)');
-    put(m2, s + K * 4.3, { x: L.mini[1][0], y: L.mini[1][1] + 80, rotation: 0, scale: .5, autoAlpha: 0 }, { y: L.mini[1][1], rotation: 5, scale: 1, autoAlpha: 1 }, .45, 'back.out(2)');
-    const eq2 = burst('=', (L.mini[0][0] + L.mini[1][0]) / 2, L.mini[0][1], 'g', -4); eq2.style.fontSize = '60px'; eq2.style.padding = '4px 22px 8px'; popAt(eq2, s + K * 4.5, -4);
-    const ok = stamp(m2, 'ok'); pop(ok, s + K * 4.7);
-    hide([hA, hB, eq, eq2], s + K * 7.0);
-    out([m1, m2], s + K * 7.0, 0, 60);
-    out(hand, s + K * 6.9, 0, 420); hide(inTag, s + K * 6.9);
-    out($$('.card', cardsL).filter(c => ![m1, m2, ...hand].includes(c) && c !== bs2 && c !== pileTop).concat([pileTop, bs2]), s + K * 7.0, L.W * .6, -60, 35);
+    put(m1, s + K * 4.6, { x: L.mini[0][0], y: L.mini[0][1] + 80, rotation: 0, scale: .5, autoAlpha: 0 }, { y: L.mini[0][1], rotation: -5, scale: 1, autoAlpha: 1 }, .45, 'back.out(2)');
+    put(m2, s + K * 4.8, { x: L.mini[1][0], y: L.mini[1][1] + 80, rotation: 0, scale: .5, autoAlpha: 0 }, { y: L.mini[1][1], rotation: 5, scale: 1, autoAlpha: 1 }, .45, 'back.out(2)');
+    const eq2 = burst('=', (L.mini[0][0] + L.mini[1][0]) / 2, L.mini[0][1], 'g', -4); eq2.style.fontSize = '60px'; eq2.style.padding = '4px 22px 8px'; popAt(eq2, s + K * 5.0, -4);
+    const ok = stamp(m2, 'ok'); pop(ok, s + K * 5.2);
+    // "Switch colors to throw off your opponent during a rally!": flag it as advice, not a rule
+    const tip = burst('Strategy tip', (L.mini[0][0] + L.mini[1][0]) / 2, L.mini[0][1] - L.miniW * 1.05, 'k', 0); popAt(tip, s + K * 9.1, 0); hide(tip, s + K * 11.6);
+    hide([hA, hB, eq, eq2], s + K * 11.6);
+    out([m1, m2], s + K * 11.6, 0, 60);
+    out(hand, s + K * 11.5, 0, 420); hide(inTag, s + K * 11.5);
+    out($$('.card', cardsL).filter(c => ![m1, m2, ...hand].includes(c) && c !== bs2 && c !== pileTop).concat([pileTop, bs2]), s + K * 11.6, L.W * .6, -60, 35);
     vo(s + K * .3, 'Want to switch from Forehand to Backhand?', 1.5);
-    vo(s + K * 1.9, 'Just <em>match the pace!</em>', 1.8);
-    vo(s + K * 3.8, 'Return a groundstroke at the same pace with the other color. Topspin or Slice, it works with any groundstroke!', 3.2);
+    vo(s + K * 1.9, 'Just <em>match the pace</em>… regardless of spin!', 2.4);
+    vo(s + K * 4.5, 'Topspin or Slice, you can always play a Groundstroke of <em>equal pace</em>, in either color! Switch colors to throw off your opponent during a rally!', 7.0);
   });
 
   /* ---------- 7 · NOPE ---------- */
