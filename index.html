@@ -166,7 +166,7 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
 
 .hero-visual{position:relative;height:min(640px,calc(100svh - 150px));min-height:380px}
 .court-floor{position:absolute;left:4%;right:4%;bottom:0;height:30%;opacity:.35;pointer-events:none}
-.hero-logo{position:absolute;left:0;right:0;margin:0 auto;top:-2%;width:min(104%,66svh,780px);z-index:3}
+.hero-logo{position:absolute;left:0;right:0;margin:0 auto;top:-6%;width:min(90%,60svh,720px);z-index:3}
 .logo-pulse{position:relative;perspective:1400px}
 .logo-spin,.logo3d{position:relative;transform-style:preserve-3d}
 .ll{display:block;width:100%;height:auto;backface-visibility:visible;-webkit-backface-visibility:visible;pointer-events:none;user-select:none}
@@ -176,6 +176,7 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
 .logo-shadow{position:absolute;left:18%;right:18%;bottom:-4%;height:9%;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.55),transparent);filter:blur(6px);z-index:-1}
 .hand{--cw:clamp(66px,min(9vw,16svh),140px);position:absolute;left:50%;bottom:2%;width:var(--cw);aspect-ratio:var(--card-ar);margin-left:calc(var(--cw) / -2);z-index:2}
 .hc{position:absolute;inset:0;transform-origin:50% 240%}
+@media (min-width:701px){.hc{transform-origin:50% 360%}}
 .hc-lift{width:100%;height:100%;transition:transform .35s var(--ease);perspective:900px}
 .hc:hover .hc-lift{transform:translateY(-14%)}
 .hc-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d}
@@ -195,7 +196,7 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
   .hero{padding:calc(env(safe-area-inset-top,0px) + 64px) 0 40px;align-items:flex-start}
   .hero-grid{grid-template-columns:1fr;gap:6px;text-align:center}
   .hero-visual{order:-1;height:calc(min(98vw,42svh) * .82 + clamp(50px,min(14vw,11svh),92px) * 1.55 + 46px);min-height:0}
-  .hero-logo{width:min(98vw,42svh)}
+  .hero-logo{top:-2%;width:min(98vw,42svh)}
   .hand{--cw:clamp(50px,min(14vw,11svh),92px);bottom:4px}
   .hero-sub{margin:14px auto 22px}
   .hero-ctas,.hero-meta{justify-content:center}
@@ -215,7 +216,7 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
   .hero-ctas{flex-wrap:nowrap}
   .hero-ctas .btn{height:46px;padding:0 1.2rem;font-size:.72rem}
   .hero-visual{height:calc(100svh - 104px);min-height:300px}
-  .hero-logo{width:min(104%,70svh,700px)}
+  .hero-logo{top:3%;width:min(96%,70svh,660px)}
   .hand{--cw:clamp(60px,min(8.5vw,15svh),120px);bottom:3%}
   .scroll-cue{display:none}
 }
@@ -1192,7 +1193,7 @@ function hero() {
   // fan layout (visible cards only)
   const fan = () => {
     const vis = cards.filter(c => getComputedStyle(c).display !== 'none');
-    const n = vis.length, spread = mobile() ? 9 : 10;
+    const n = vis.length, spread = mobile() ? 9 : 6.5;
     return vis.map((c, i) => ({ c, rot: (i - (n - 1) / 2) * spread, y: Math.abs(i - (n - 1) / 2) * 2 }));
   };
   const layoutFan = () => fan().forEach(({ c, rot, y }) => gsap.set(c, { rotation: rot, y, x: 0, opacity: 1, scale: 1 }));
