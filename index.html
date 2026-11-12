@@ -857,7 +857,7 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
     <div class="guide-copy">
       <div class="sec-idx"><b>05</b><i></i><span class="label">Rule Book</span></div>
       <h2 class="title display" data-split>Learn it in <span class="accent">minutes.</span></h2>
-      <p class="lede" data-reveal style="margin-top:18px">The pocket Rule Book that comes in the box. Part 1 gets you playing: groundstrokes, modifiers, the serve, the rally and scoring. Part 2 covers the power shots, and Part 3 is doubles.</p>
+      <p class="lede" data-reveal style="margin-top:18px">The pocket Rule Book that comes in the box. Learn to play gets you into your first match. Then come the Net, Tactical and Special cards, doubles, and coach's tips for smarter play.</p>
       <div data-reveal style="display:flex;gap:12px;flex-wrap:wrap;align-items:center"><button type="button" class="btn btn-primary" data-guide>Read the Rule Book <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button><a class="btn btn-line" href="assets/SLICE_Rulebook.pdf" download>Download PDF</a></div>
     </div>
     <div class="guide-fan" data-guide data-reveal role="button" tabindex="0" aria-label="Open the Rule Book">
@@ -961,7 +961,7 @@ h2.title{font-size:clamp(2rem,4.6vw,3.9rem);margin:.5rem 0 0}
 
 <div class="modal guide-modal" id="pocket-guide-modal" role="dialog" aria-modal="true" aria-label="Rule Book">
   <button class="modal-x" type="button" data-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-  <div class="label guide-count" id="page-counter">1 / 20</div>
+  <div class="label guide-count" id="page-counter">1 / 24</div>
   <div class="guide-view">
     <button class="circle-btn g-arrow g-prev" type="button" id="g-prev" aria-label="Previous page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
     <img id="guide-image" src="assets/rulebook/page_01.jpg" alt="Rule Book page">
@@ -1153,7 +1153,7 @@ $$('[data-video]').forEach(b => {
 });
 
 /* rule book viewer */
-const guidePages = Array.from({ length: 20 }, (_, i) => `assets/rulebook/page_${String(i + 1).padStart(2, '0')}.jpg`);
+const guidePages = Array.from({ length: 24 }, (_, i) => `assets/rulebook/page_${String(i + 1).padStart(2, '0')}.jpg`);
 let page = 0;
 try { page = Math.min(guidePages.length - 1, parseInt(localStorage.getItem('rulebookPage')) || 0); } catch (e) {}
 const gImg = $('#guide-image'), thumbs = $('#thumbs'), gm = $('#pocket-guide-modal');
