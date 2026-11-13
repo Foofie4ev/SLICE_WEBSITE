@@ -50,8 +50,10 @@ body.record #host,body.embed #host{bottom:0}
 .ci .bk{transform:rotateY(180deg)}
 .card .dim{position:absolute;inset:0;border-radius:7.2%/4.6%;background:rgba(6,8,5,.66);opacity:0;visibility:hidden}
 .card .glow{position:absolute;inset:-3.5%;border-radius:9%/6%;box-shadow:0 0 0 calc(2.4 * var(--u)) var(--gc,var(--lime)),0 0 calc(14 * var(--u)) calc(3 * var(--u)) var(--gc,rgba(198,244,50,.7));opacity:0;visibility:hidden}
-.card .hl{position:absolute;color:#fff;border:calc(1.8 * var(--u)) solid currentColor;border-radius:50%;box-shadow:0 0 0 calc(1.2 * var(--u)) rgba(0,0,0,.45),0 0 calc(7 * var(--u)) currentColor;opacity:0;visibility:hidden;animation:hlGlow 1.3s ease-in-out infinite}
-.card .hl::after{content:"";position:absolute;inset:calc(-1.8 * var(--u));border-radius:50%;border:calc(1 * var(--u)) solid currentColor;pointer-events:none;animation:hlRing 1.3s ease-out infinite;animation-delay:inherit}
+.card .hl{position:absolute;color:#fff;border:calc(1.8 * var(--u)) solid currentColor;border-radius:50%;box-shadow:0 0 0 calc(1.2 * var(--u)) rgba(0,0,0,.45),0 0 calc(7 * var(--u)) currentColor;opacity:0;visibility:hidden}
+.card .hl[data-live="1"]{animation:hlGlow 1.3s ease-in-out infinite}
+.card .hl::after{content:"";position:absolute;inset:calc(-1.8 * var(--u));border-radius:50%;border:calc(1 * var(--u)) solid currentColor;pointer-events:none;opacity:0}
+.card .hl[data-live="1"]::after{animation:hlRing 1.3s ease-out infinite;animation-delay:inherit}
 @keyframes hlGlow{0%,100%{box-shadow:0 0 0 calc(1.2 * var(--u)) rgba(0,0,0,.45),0 0 calc(5 * var(--u)) currentColor}50%{box-shadow:0 0 0 calc(1.2 * var(--u)) rgba(0,0,0,.45),0 0 calc(16 * var(--u)) calc(1.5 * var(--u)) currentColor}}
 @keyframes hlRing{0%{transform:scale(1);opacity:.85}100%{transform:scale(1.14);opacity:0}}
 .stamp{position:absolute;right:calc(-8 * var(--u));top:calc(-8 * var(--u));z-index:5;opacity:0;visibility:hidden}
@@ -382,7 +384,10 @@ function HL(c, [cx, cy, w, h, rot = 0], color) {
   b.style.animationDelay = (-(HL.n = (HL.n || 0) + 1) * .45 % 1.3) + 's';   // neighbours pulse out of step
   return b;
 }
-function hlPop(b, at) { tl.set(b, { autoAlpha: 1 }, at); tl.fromTo(b, { scale: 1.5 }, { scale: 1, duration: .4, ease: 'back.out(2)', immediateRender: false }, at); }
+function hlPop(b, at, still) {
+  // pulses and glows from `at` while it's being talked about; holds still from `still` on
+  tl.set(b, { attr: { 'data-live': '1' } }, at); if (still) tl.set(b, { attr: { 'data-live': '0' } }, still);
+  tl.set(b, { autoAlpha: 1 }, at); tl.fromTo(b, { scale: 1.5 }, { scale: 1, duration: .4, ease: 'back.out(2)', immediateRender: false }, at); }
 function burst(text, x, y, cls = 'g', rot = -5) { const b = el('burst ' + cls, text); gsap.set(b, { xPercent: -50, yPercent: -50, x, y, rotation: rot, autoAlpha: 0 }); return b; }
 function ring(at, [x, y], color = '#c6f432', s0 = .3, s1 = 5) {
   const r = el('ring'); r.style.borderColor = color; gsap.set(r, { x, y, autoAlpha: 0 });
@@ -714,7 +719,7 @@ function build(time = 0) {
     T('o:ORANGE_=|o:BACKHAND.', s + K * 3.05, s + K * 4.6);
     glow(B, s + K * 3.5, true, '#ff8a2a'); glow(B, s + K * 4.6, false);
     const spA = HL(A, [52.5, 37.6, 64, 17, -9], '#c6f432'), spB = HL(B, [49, 56.8, 62, 17, -9], '#ffd23f');
-    hlPop(spA, s + K * 4.8); hlPop(spB, s + K * 5.15); hide([spA, spB], s + K * 7.0);
+    hlPop(spA, s + K * 4.8, s + K * 6.0); hlPop(spB, s + K * 5.15); tl.set(spB, { attr: { 'data-live': '0' } }, s + K * 5.16); tl.set(spB, { attr: { 'data-live': '1' } }, s + K * 6.0); hide([spA, spB], s + K * 7.0);
     T('SPIN:|g:TOPSPIN|OR y:SLICE.', s + K * 4.7, s + K * 7.0);
     const paA = HL(A, [19, 14, 34, 0]), paB = HL(B, [18.2, 14.2, 34, 0]);
     hlPop(paA, s + K * 7.2); hlPop(paB, s + K * 7.35); hide([paA, paB], s + K * 10.4);
@@ -725,7 +730,7 @@ function build(time = 0) {
     meterHide(s + K * 13.2);
     T('NUMBERS|ARE g:PACE.', s + K * 7.1, s + K * 10.4, { s: 'The number is the speed, or pace, of your shot. The higher the number, the faster the pace.' });
     const arA = HL(A, [31.75, 17.25, 17, 21], '#c6f432'), arB = HL(B, [30.4, 20.2, 17, 21], '#ffd23f');
-    hlPop(arA, s + K * 10.6); hlPop(arB, s + K * 10.85);
+    hlPop(arA, s + K * 10.6, s + K * 12.0); hlPop(arB, s + K * 10.85); tl.set(arB, { attr: { 'data-live': '0' } }, s + K * 10.86); tl.set(arB, { attr: { 'data-live': '1' } }, s + K * 12.0);
     const bY = fmt === 'tall' ? ay + ch(L.pw) / 2 - 34 : ay - ch(L.pw) / 2 - 50;
     const bA = burst('↑ Pace up', ax, bY, 'g', -5), bB = burst('↓ Pace down', bx, bY, 'y', 4);
     [bA, bB].forEach(b => { b.style.fontSize = '38px'; b.style.padding = '12px 20px 10px'; });
@@ -790,7 +795,7 @@ function build(time = 0) {
     T('y:SLICE?|GO y:DOWN.', s + K * .2, s + K * 6.6, { s: 'Slice slows the rally down. Return it with the same color and equal or lower pace.' });
     const [b3, fs6, bs5, fs2] = hand;
     const sArr = HL(oSlice6, [30.4, 20.2, 17, 21], '#ffd23f'), sSpin = HL(oSlice6, [49, 56.8, 62, 17, -9], '#ffd23f');
-    hlPop(sArr, s + K * .35); hlPop(sSpin, s + K * .55); hide([sArr, sSpin], s + K * 5.5);
+    hlPop(sArr, s + K * .35, s + K * 3.3); hlPop(sSpin, s + K * .55, s + K * 3.3); hide([sArr, sSpin], s + K * 5.5);
     // "so return it with the same color, and a pace that's equal or LOWER": the legal cards rise
     dim(fs2, s + K * 3.4, false);
     [fs6, fs2].forEach((c, i) => { mv(c, s + K * 3.4 + i * .1, { y: '-=60' }, .45, 'back.out(2)'); glow(c, s + K * 3.4 + i * .1, true, '#c6f432'); });
@@ -798,14 +803,14 @@ function build(time = 0) {
     pop(okA, s + K * 4.9); pop(okB, s + K * 5.1);
     hide([okA, okB], s + K * 5.9); glow(fs2, s + K * 5.9, false); glow(fs6, s + K * 5.9, false); mv(fs6, s + K * 5.9, { y: '+=60' }, .4);
     play(fs2, s + K * 5.9, [px + 6, py + 6, 3], L.cw / L.hw); hide(inTag, s + K * 5.9);
-    const p2 = HL(fs2, [18.2, 14.2, 34, 0], '#ffffff'); hlPop(p2, s + K * 6.2); hide(p2, s + K * 8.6);   // circle the 2 as it's played
+    const p2 = HL(fs2, [18.2, 14.2, 34, 0], '#ffffff'); hlPop(p2, s + K * 6.2, s + K * 7.0); hide(p2, s + K * 8.6);   // circle the 2 as it's played
     hand = [b3, fs6, bs5];
     hand.forEach((c, i) => mv(c, s + K * 6.4, fan(3, i), .5));
     T('YOUR SHOT|SETS UP|g:THEIR_RETURN.', s + K * 7.0, s + K * 11.9, { s: 'Every shot sets the rules for the return: the color, the spin and the pace.' });
     meterSet(s + K * 7.2, 'Their return: vs y:Slice · pace 2', [1, 2], 'down');
     // "...the color, the spin, and the pace!": circle each on the card just played
-    const cCol = HL(fs2, [49.5, 46.9, 93, 18, -8.5], '#c6f432'), cSpin = HL(fs2, [49, 56.8, 62, 17, -9], '#ffd23f'), cPace = HL(fs2, [18.2, 14.2, 34, 0], '#ffffff');
-    hlPop(cCol, s + K * 9.6); hlPop(cSpin, s + K * 10.2); hlPop(cPace, s + K * 11.0); hide([cCol, cSpin, cPace], s + K * 11.9);
+    const cCol = HL(fs2, [49.5, 46.5, 110, 27, -9], '#c6f432'), cSpin = HL(fs2, [49, 56.8, 62, 17, -9], '#ffd23f'), cPace = HL(fs2, [18.2, 14.2, 34, 0], '#ffffff');
+    hlPop(cCol, s + K * 9.6, s + K * 10.2); hlPop(cSpin, s + K * 10.2, s + K * 11.0); hlPop(cPace, s + K * 11.0); hide([cCol, cSpin, cPace], s + K * 11.9);
     vo(s + K * .2, 'When your opponent plays a <em>Slice</em>, it slows the rally down!', 3.0);
     vo(s + K * 3.4, 'So return it with the same color, and a pace that’s <em>equal or lower!</em>', 3.4);
     vo(s + K * 7.0, 'Every shot sets the rules for the opponent’s return: the color, the spin, and the pace!', 4.6);
@@ -822,7 +827,7 @@ function build(time = 0) {
     ring(s + K * .85, [px + dx, py], '#ffffff', .3, 2);
     T('SWITCH|COLORS?', s + K * .3, s + K * 1.8, { s: 'Forehand to Backhand, or back again.' });
     const hA = HL(pileTop, [18.2, 14.2, 34, 0]), hB = HL(bs2, [18.2, 14.2, 34, 0]);
-    hlPop(hA, s + K * 1.9); hlPop(hB, s + K * 2.05);
+    hlPop(hA, s + K * 1.9, s + K * 4.4); hlPop(hB, s + K * 2.05, s + K * 4.4);
     // badge sits above both cards, same pill style as the other callouts
     const eq = burst('Pace 2 = Pace 2', px, py - ch(L.cw) / 2 - (fmt === 'tall' ? 44 : 64), 'g', -4); popAt(eq, s + K * 2.1, -4);
     T('MATCH THE|g:PACE!', s + K * 1.9, s + K * 11.6, { s: 'Return a groundstroke with the same pace in the other color, regardless of spin. Groundstrokes only!' });
