@@ -385,8 +385,8 @@ function HL(c, [cx, cy, w, h, rot = 0], color) {
   return b;
 }
 function hlPop(b, at, still) {
-  // pulses and glows from `at` while it's being talked about; holds still from `still` on
-  tl.set(b, { attr: { 'data-live': '1' } }, at); if (still) tl.set(b, { attr: { 'data-live': '0' } }, still);
+  // pulses and glows from `at` while it's being talked about, then fades away at `still`
+  tl.set(b, { attr: { 'data-live': '1' } }, at); if (still) { tl.set(b, { attr: { 'data-live': '0' } }, still); hide(b, still, .45); }
   tl.set(b, { autoAlpha: 1 }, at); tl.fromTo(b, { scale: 1.5 }, { scale: 1, duration: .4, ease: 'back.out(2)', immediateRender: false }, at); }
 function burst(text, x, y, cls = 'g', rot = -5) { const b = el('burst ' + cls, text); gsap.set(b, { xPercent: -50, yPercent: -50, x, y, rotation: rot, autoAlpha: 0 }); return b; }
 function ring(at, [x, y], color = '#c6f432', s0 = .3, s1 = 5) {
@@ -719,7 +719,7 @@ function build(time = 0) {
     T('o:ORANGE_=|o:BACKHAND.', s + K * 3.05, s + K * 4.6);
     glow(B, s + K * 3.5, true, '#ff8a2a'); glow(B, s + K * 4.6, false);
     const spA = HL(A, [52.5, 37.6, 64, 17, -9], '#c6f432'), spB = HL(B, [49, 56.8, 62, 17, -9], '#ffd23f');
-    hlPop(spA, s + K * 4.8, s + K * 6.0); hlPop(spB, s + K * 5.15); tl.set(spB, { attr: { 'data-live': '0' } }, s + K * 5.16); tl.set(spB, { attr: { 'data-live': '1' } }, s + K * 6.0); hide([spA, spB], s + K * 7.0);
+    hlPop(spA, s + K * 4.8, s + K * 6.0); hlPop(spB, s + K * 6.0); hide([spA, spB], s + K * 7.0);
     T('SPIN:|g:TOPSPIN|OR y:SLICE.', s + K * 4.7, s + K * 7.0);
     const paA = HL(A, [19, 14, 34, 0]), paB = HL(B, [18.2, 14.2, 34, 0]);
     hlPop(paA, s + K * 7.2); hlPop(paB, s + K * 7.35); hide([paA, paB], s + K * 10.4);
@@ -730,7 +730,7 @@ function build(time = 0) {
     meterHide(s + K * 13.2);
     T('NUMBERS|ARE g:PACE.', s + K * 7.1, s + K * 10.4, { s: 'The number is the speed, or pace, of your shot. The higher the number, the faster the pace.' });
     const arA = HL(A, [31.75, 17.25, 17, 21], '#c6f432'), arB = HL(B, [30.4, 20.2, 17, 21], '#ffd23f');
-    hlPop(arA, s + K * 10.6, s + K * 12.0); hlPop(arB, s + K * 10.85); tl.set(arB, { attr: { 'data-live': '0' } }, s + K * 10.86); tl.set(arB, { attr: { 'data-live': '1' } }, s + K * 12.0);
+    hlPop(arA, s + K * 10.6, s + K * 12.0); hlPop(arB, s + K * 12.0);
     const bY = fmt === 'tall' ? ay + ch(L.pw) / 2 - 34 : ay - ch(L.pw) / 2 - 50;
     const bA = burst('↑ Pace up', ax, bY, 'g', -5), bB = burst('↓ Pace down', bx, bY, 'y', 4);
     [bA, bB].forEach(b => { b.style.fontSize = '38px'; b.style.padding = '12px 20px 10px'; });
