@@ -50,7 +50,10 @@ body.record #host,body.embed #host{bottom:0}
 .ci .bk{transform:rotateY(180deg)}
 .card .dim{position:absolute;inset:0;border-radius:7.2%/4.6%;background:rgba(6,8,5,.66);opacity:0;visibility:hidden}
 .card .glow{position:absolute;inset:-3.5%;border-radius:9%/6%;box-shadow:0 0 0 calc(2.4 * var(--u)) var(--gc,var(--lime)),0 0 calc(14 * var(--u)) calc(3 * var(--u)) var(--gc,rgba(198,244,50,.7));opacity:0;visibility:hidden}
-.card .hl{position:absolute;border:calc(1.8 * var(--u)) solid #fff;border-radius:50%;box-shadow:0 0 0 calc(1.2 * var(--u)) rgba(0,0,0,.45),0 0 calc(8 * var(--u)) rgba(255,255,255,.75);opacity:0;visibility:hidden}
+.card .hl{position:absolute;color:#fff;border:calc(1.8 * var(--u)) solid currentColor;border-radius:50%;box-shadow:0 0 0 calc(1.2 * var(--u)) rgba(0,0,0,.45),0 0 calc(7 * var(--u)) currentColor;opacity:0;visibility:hidden;animation:hlGlow 1.3s ease-in-out infinite}
+.card .hl::after{content:"";position:absolute;inset:calc(-1.8 * var(--u));border-radius:50%;border:calc(1 * var(--u)) solid currentColor;pointer-events:none;animation:hlRing 1.3s ease-out infinite;animation-delay:inherit}
+@keyframes hlGlow{0%,100%{box-shadow:0 0 0 calc(1.2 * var(--u)) rgba(0,0,0,.45),0 0 calc(5 * var(--u)) currentColor}50%{box-shadow:0 0 0 calc(1.2 * var(--u)) rgba(0,0,0,.45),0 0 calc(16 * var(--u)) calc(1.5 * var(--u)) currentColor}}
+@keyframes hlRing{0%{transform:scale(1);opacity:.85}100%{transform:scale(1.14);opacity:0}}
 .stamp{position:absolute;right:calc(-8 * var(--u));top:calc(-8 * var(--u));z-index:5;opacity:0;visibility:hidden}
 .stamp i{width:calc(28 * var(--u));height:calc(28 * var(--u));border-radius:50%;display:grid;place-items:center;font:normal 900 calc(17 * var(--u))/1 var(--display);border:calc(1.8 * var(--u)) solid #0b0d0a;box-shadow:0 calc(2 * var(--u)) calc(6 * var(--u)) rgba(0,0,0,.5)}
 .stamp.ok i{background:var(--lime);color:#0b0d0a}
@@ -370,11 +373,14 @@ function stamp(c, kind, label) {
 }
 function pop(x, at, rot = -20) { tl.set(x, { autoAlpha: 1 }, at); tl.fromTo(x, { scale: 0, rotation: rot }, { scale: 1, rotation: 0, duration: .45, ease: 'back.out(3)', immediateRender: false }, at); }
 function popAt(x, at, rot) { tl.set(x, { autoAlpha: 1 }, at); tl.fromTo(x, { scale: 0 }, { scale: 1, rotation: rot, duration: .45, ease: 'back.out(2.6)', immediateRender: false }, at); }
-function HL(c, [l, t, w, h], color) {
-  // ovals: grow the box a little so the ellipse clears the corners of what it circles
-  const k = 1.12; l -= w * (k - 1) / 2; t -= h * (k - 1) / 2; w *= k; h *= k;
-  const b = el('hl', '', c); Object.assign(b.style, { left: l + '%', top: t + '%', width: w + '%', height: h + '%' });
-  if (color) b.style.borderColor = color; return b;
+function HL(c, [cx, cy, w, h, rot = 0], color) {
+  // oval centred on (cx, cy), w/h in % of the card, tilted to match what it circles; h = 0 makes a circle (pace numbers)
+  if (!h) h = w * 676 / 1048;
+  const b = el('hl', '', c); Object.assign(b.style, { left: (cx - w / 2) + '%', top: (cy - h / 2) + '%', width: w + '%', height: h + '%' });
+  gsap.set(b, { rotation: rot });
+  b.style.color = color || '#fff';
+  b.style.animationDelay = (-(HL.n = (HL.n || 0) + 1) * .45 % 1.3) + 's';   // neighbours pulse out of step
+  return b;
 }
 function hlPop(b, at) { tl.set(b, { autoAlpha: 1 }, at); tl.fromTo(b, { scale: 1.5 }, { scale: 1, duration: .4, ease: 'back.out(2)', immediateRender: false }, at); }
 function burst(text, x, y, cls = 'g', rot = -5) { const b = el('burst ' + cls, text); gsap.set(b, { xPercent: -50, yPercent: -50, x, y, rotation: rot, autoAlpha: 0 }); return b; }
@@ -707,10 +713,10 @@ function build(time = 0) {
     put(B, s + K * 3.0, { x: L.W + 300, y: by - 60, rotation: 30 }, { x: bx, y: by, rotation: 4 }, .6, 'power3.out'); flip(B, s + K * 3.05, .6);
     T('o:ORANGE_=|o:BACKHAND.', s + K * 3.05, s + K * 4.6);
     glow(B, s + K * 3.5, true, '#ff8a2a'); glow(B, s + K * 4.6, false);
-    const spA = HL(A, [27, 31, 50, 12], '#c6f432'), spB = HL(B, [24, 50, 52, 13], '#ffd23f');
+    const spA = HL(A, [52.5, 37.6, 64, 17, -9], '#c6f432'), spB = HL(B, [49, 56.8, 62, 17, -9], '#ffd23f');
     hlPop(spA, s + K * 4.8); hlPop(spB, s + K * 5.15); hide([spA, spB], s + K * 7.0);
     T('SPIN:|g:TOPSPIN|OR y:SLICE.', s + K * 4.7, s + K * 7.0);
-    const paA = HL(A, [4, 3, 22, 20]), paB = HL(B, [4, 3, 22, 20]);
+    const paA = HL(A, [19, 14, 34, 0]), paB = HL(B, [18.2, 14.2, 34, 0]);
     hlPop(paA, s + K * 7.2); hlPop(paB, s + K * 7.35); hide([paA, paB], s + K * 10.4);
     // pace scale fills slow → fast, then previews the two directions
     meterShow(s + K * 7.6); meterSet(s + K * 7.7, 'Pace: g:1 = slow · g:7 = rocket', [1, 2, 3, 4, 5, 6, 7], 'up');
@@ -718,7 +724,7 @@ function build(time = 0) {
     meterSet(s + K * 11.9, 'y:Slice: pace goes down', [1, 2, 3, 4, 5], 'down');
     meterHide(s + K * 13.2);
     T('NUMBERS|ARE g:PACE.', s + K * 7.1, s + K * 10.4, { s: 'The number is the speed, or pace, of your shot. The higher the number, the faster the pace.' });
-    const arA = HL(A, [24.5, 6, 12, 18], '#c6f432'), arB = HL(B, [26, 5, 12, 25], '#ffd23f');
+    const arA = HL(A, [31.75, 17.25, 17, 21], '#c6f432'), arB = HL(B, [30.4, 20.2, 17, 21], '#ffd23f');
     hlPop(arA, s + K * 10.6); hlPop(arB, s + K * 10.85);
     const bY = fmt === 'tall' ? ay + ch(L.pw) / 2 - 34 : ay - ch(L.pw) / 2 - 50;
     const bA = burst('↑ Pace up', ax, bY, 'g', -5), bB = burst('↓ Pace down', bx, bY, 'y', 4);
@@ -758,7 +764,7 @@ function build(time = 0) {
     meterShow(s + K * .2); meterSet(s + K * .25, 'Opponent’s shot: g:Topspin · pace 5', [5, 6, 7], 'up');
     T('g:TOPSPIN?|GO g:UP.', s + K * .3, s + K * 6.7, { k: 'Rule 2', s: 'Topspin speeds up the rally. Return it with the same color and equal or higher pace.' });
     const [f5, b3, fs6, bs5, fs2] = hand;
-    const tArr = HL(pileTop, [24.5, 6, 12, 18], '#c6f432'), tSpin = HL(pileTop, [27, 31, 50, 12], '#c6f432');
+    const tArr = HL(pileTop, [31.75, 17.25, 17, 21], '#c6f432'), tSpin = HL(pileTop, [52.5, 37.6, 64, 17, -9], '#c6f432');
     hlPop(tArr, s + K * .5); hlPop(tSpin, s + K * .7); hide([tArr, tSpin], s + K * 4.6);
     const no2 = stamp(fs2, 'no', 'Too low'), ok5 = stamp(f5, 'ok'), ok6 = stamp(fs6, 'ok');
     glow(fs2, s + K * 2.6, false); dim(fs2, s + K * 2.6); pop(no2, s + K * 2.6); mv(fs2, s + K * 2.6, { y: '+=60' }, .4);
@@ -783,7 +789,7 @@ function build(time = 0) {
     meterSet(s + K * .1, 'Opponent’s shot: y:Slice · pace 6', [1, 2, 3, 4, 5, 6], 'down');
     T('y:SLICE?|GO y:DOWN.', s + K * .2, s + K * 6.6, { s: 'Slice slows the rally down. Return it with the same color and equal or lower pace.' });
     const [b3, fs6, bs5, fs2] = hand;
-    const sArr = HL(oSlice6, [26, 5, 12, 25], '#ffd23f'), sSpin = HL(oSlice6, [22, 50, 52, 13], '#ffd23f');
+    const sArr = HL(oSlice6, [30.4, 20.2, 17, 21], '#ffd23f'), sSpin = HL(oSlice6, [49, 56.8, 62, 17, -9], '#ffd23f');
     hlPop(sArr, s + K * .35); hlPop(sSpin, s + K * .55); hide([sArr, sSpin], s + K * 5.5);
     // "so return it with the same color, and a pace that's equal or LOWER": the legal cards rise
     dim(fs2, s + K * 3.4, false);
@@ -792,13 +798,13 @@ function build(time = 0) {
     pop(okA, s + K * 4.9); pop(okB, s + K * 5.1);
     hide([okA, okB], s + K * 5.9); glow(fs2, s + K * 5.9, false); glow(fs6, s + K * 5.9, false); mv(fs6, s + K * 5.9, { y: '+=60' }, .4);
     play(fs2, s + K * 5.9, [px + 6, py + 6, 3], L.cw / L.hw); hide(inTag, s + K * 5.9);
-    const p2 = HL(fs2, [4, 3, 22, 20], '#ffd23f'); hlPop(p2, s + K * 6.2); hide(p2, s + K * 8.6);   // circle the 2 as it's played
+    const p2 = HL(fs2, [18.2, 14.2, 34, 0], '#ffffff'); hlPop(p2, s + K * 6.2); hide(p2, s + K * 8.6);   // circle the 2 as it's played
     hand = [b3, fs6, bs5];
     hand.forEach((c, i) => mv(c, s + K * 6.4, fan(3, i), .5));
     T('YOUR SHOT|SETS UP|g:THEIR_RETURN.', s + K * 7.0, s + K * 11.9, { s: 'Every shot sets the rules for the return: the color, the spin and the pace.' });
     meterSet(s + K * 7.2, 'Their return: vs y:Slice · pace 2', [1, 2], 'down');
     // "...the color, the spin, and the pace!": circle each on the card just played
-    const cCol = HL(fs2, [7, 37, 86, 16], '#c6f432'), cSpin = HL(fs2, [22, 50, 52, 13], '#ffd23f'), cPace = HL(fs2, [4, 3, 22, 20], '#ffd23f');
+    const cCol = HL(fs2, [49.5, 46.9, 93, 18, -8.5], '#c6f432'), cSpin = HL(fs2, [49, 56.8, 62, 17, -9], '#ffd23f'), cPace = HL(fs2, [18.2, 14.2, 34, 0], '#ffffff');
     hlPop(cCol, s + K * 9.6); hlPop(cSpin, s + K * 10.2); hlPop(cPace, s + K * 11.0); hide([cCol, cSpin, cPace], s + K * 11.9);
     vo(s + K * .2, 'When your opponent plays a <em>Slice</em>, it slows the rally down!', 3.0);
     vo(s + K * 3.4, 'So return it with the same color, and a pace that’s <em>equal or lower!</em>', 3.4);
@@ -815,7 +821,7 @@ function build(time = 0) {
     put(bs2, s + K * .3, { x: px + 200, y: -350, rotation: -40 }, { x: px + dx, y: py + 10, rotation: 7 }, .6); flip(bs2, s + K * .35, .5);
     ring(s + K * .85, [px + dx, py], '#ffffff', .3, 2);
     T('SWITCH|COLORS?', s + K * .3, s + K * 1.8, { s: 'Forehand to Backhand, or back again.' });
-    const hA = HL(pileTop, [4, 3, 22, 20]), hB = HL(bs2, [4, 3, 22, 20]);
+    const hA = HL(pileTop, [18.2, 14.2, 34, 0]), hB = HL(bs2, [18.2, 14.2, 34, 0]);
     hlPop(hA, s + K * 1.9); hlPop(hB, s + K * 2.05);
     // badge sits above both cards, same pill style as the other callouts
     const eq = burst('Pace 2 = Pace 2', px, py - ch(L.cw) / 2 - (fmt === 'tall' ? 44 : 64), 'g', -4); popAt(eq, s + K * 2.1, -4);
